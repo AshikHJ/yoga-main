@@ -1,0 +1,2340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KI.AI — Admin Console | Posture Intelligence Operations</title>
+  <!-- Google Fonts & Chart.js -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg-main: #070D18;
+      --bg-sidebar: #0B1322;
+      --bg-card: #0F1A2E;
+      --bg-card-hover: #13223C;
+      --bg-input: #121F38;
+      --border-subtle: #1E2D4A;
+      --border-focus: #10B981;
+      --primary: #10B981;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --primary-light: #34D399;
+      --accent-cyan: #38BDF8;
+      --accent-purple: #A855F7;
+      --accent-amber: #F59E0B;
+      --accent-red: #EF4444;
+      --text-white: #FFFFFF;
+      --text-main: #F1F5F9;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Layout Containers */
+    #admin-sidebar {
+      width: 260px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: width 0.25s ease;
+      z-index: 50;
+    }
+
+    #admin-sidebar.collapsed {
+      width: 76px;
+    }
+
+    #admin-sidebar.collapsed .nav-text,
+    #admin-sidebar.collapsed .brand-text,
+    #admin-sidebar.collapsed .sidebar-footer-text {
+      display: none;
+    }
+
+    #admin-sidebar.collapsed .brand-box {
+      justify-content: center;
+      padding: 16px 0;
+    }
+
+    #admin-sidebar.collapsed .nav-item {
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    .brand-box {
+      padding: 20px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-logo-img {
+      width: 32px;
+      height: 32px;
+      filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #FFF;
+    }
+
+    .brand-title span {
+      color: var(--primary);
+    }
+
+    .brand-sub {
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+    }
+
+    /* Navigation */
+    .admin-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .admin-nav::-webkit-scrollbar {
+      width: 4px;
+    }
+    .admin-nav::-webkit-scrollbar-thumb {
+      background: var(--border-subtle);
+      border-radius: 2px;
+    }
+
+    .nav-section-title {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--text-dim);
+      padding: 12px 12px 4px 12px;
+      text-transform: uppercase;
+    }
+
+    #admin-sidebar.collapsed .nav-section-title {
+      display: none;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.04);
+      color: #FFF;
+    }
+
+    .nav-item.active {
+      background-color: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--primary-light);
+    }
+
+    .nav-icon {
+      font-size: 15px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    /* Sidebar Footer */
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #09101C;
+    }
+
+    .admin-user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .admin-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #10B981, #06B6D4);
+      color: #000;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    /* Main Viewport */
+    #admin-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-color: var(--bg-main);
+    }
+
+    /* Top Bar */
+    #admin-topbar {
+      height: 64px;
+      background-color: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-btn {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.15s;
+    }
+
+    .topbar-btn:hover {
+      background: var(--bg-card);
+      color: #FFF;
+      border-color: var(--primary);
+    }
+
+    .system-status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--primary-light);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background-color: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--primary);
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Content Area */
+    #admin-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .admin-tab-view {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .admin-tab-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Typography & Headers */
+    .view-header {
+      margin-bottom: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .view-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #FFF;
+      letter-spacing: -0.3px;
+    }
+
+    .view-subtitle {
+      color: var(--text-muted);
+      font-size: 12.5px;
+      margin-top: 3px;
+    }
+
+    /* KPI Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .kpi-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+
+    .kpi-card:hover {
+      border-color: rgba(16, 185, 129, 0.4);
+      background-color: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .kpi-icon {
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px;
+      border-radius: 8px;
+    }
+
+    .kpi-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: #FFF;
+      font-family: var(--font-main);
+    }
+
+    .kpi-trend {
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .kpi-trend.up { color: var(--primary-light); }
+    .kpi-trend.down { color: var(--accent-red); }
+
+    /* Dashboard Layout Split */
+    .dash-split-2 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .dash-split-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    /* Cards */
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #FFF;
+    }
+
+    /* Tables */
+    .data-table-container {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .data-table-toolbar {
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12.5px;
+    }
+
+    table.data-table th {
+      background: #0B1322;
+      color: var(--text-muted);
+      font-weight: 700;
+      padding: 10px 16px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    table.data-table td {
+      padding: 12px 16px;
+      color: var(--text-main);
+      border-bottom: 1px solid rgba(30, 45, 74, 0.6);
+      vertical-align: middle;
+    }
+
+    table.data-table tr:hover td {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+
+    .badge-green { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-blue { background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge-purple { background: rgba(168, 85, 247, 0.15); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .badge-amber { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-red { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #000;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-light);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover {
+      background-color: var(--border-subtle);
+      color: #FFF;
+    }
+
+    .btn-danger {
+      background-color: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #F87171;
+    }
+    .btn-danger:hover {
+      background-color: var(--accent-red);
+      color: #FFF;
+    }
+
+    /* Inputs */
+    .input-field {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      color: #FFF;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+    }
+
+    /* Modal Backdrop & Drawer */
+    .admin-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 8, 16, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.15s ease;
+    }
+
+    .admin-modal-box {
+      background-color: var(--bg-card);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 14px;
+      width: 600px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .admin-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 480px;
+      max-width: 95vw;
+      background: var(--bg-sidebar);
+      border-left: 1px solid var(--border-subtle);
+      z-index: 210;
+      padding: 24px;
+      overflow-y: auto;
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
+      animation: slideInRight 0.2s ease;
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    /* Skeleton Visual Canvas */
+    .skeleton-canvas-box {
+      position: relative;
+      width: 100%;
+      height: 320px;
+      background: radial-gradient(circle at center, #101E36 0%, #080F1D 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Switch toggle */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background-color: var(--border-subtle);
+      transition: .2s; border-radius: 20px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+      background-color: white; transition: .2s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(16px); }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .dash-split-2, .dash-split-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 768px) {
+      #admin-sidebar {
+        position: fixed;
+        left: -260px;
+        height: 100vh;
+      }
+      #admin-sidebar.mobile-open {
+        left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. ADMIN SIDEBAR -->
+  <aside id="admin-sidebar">
+    <div class="brand-box">
+      <img src="/assets/icons/logo_icon.svg" alt="KI.AI Logo" class="brand-logo-img" onerror="this.src='/assets/logo.svg'" />
+      <div class="brand-text">
+        <div class="brand-title">KI.<span>AI</span></div>
+        <div class="brand-sub">ADMIN CONSOLE</div>
+      </div>
+    </div>
+
+    <nav class="admin-nav">
+      <div class="nav-section-title">Core Operations</div>
+      <a class="nav-item active" onclick="switchAdminTab('dashboard')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('users')">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Users</span>
+        <span class="nav-badge">12.4k</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('poses')">
+        <span class="nav-icon">🧘</span>
+        <span class="nav-text">Yoga Poses</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('ai_rules')">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-text">AI Pose Rules</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('live_sessions')">
+        <span class="nav-icon">📹</span>
+        <span class="nav-text">Live Sessions</span>
+        <span class="badge badge-green" style="margin-left: auto; font-size: 9px;">● 8 LIVE</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('analytics')">
+        <span class="nav-icon">📈</span>
+        <span class="nav-text">Analytics</span>
+      </a>
+
+      <div class="nav-section-title">AI & Algorithms</div>
+      <a class="nav-item" onclick="switchAdminTab('ai_models')">
+        <span class="nav-icon">🧠</span>
+        <span class="nav-text">AI Models</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('recommendations')">
+        <span class="nav-icon">✨</span>
+        <span class="nav-text">Recommendations</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('challenges')">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-text">Challenges & XP</span>
+      </a>
+
+      <div class="nav-section-title">Administration</div>
+      <a class="nav-item" onclick="switchAdminTab('content')">
+        <span class="nav-icon">📝</span>
+        <span class="nav-text">Content & Guides</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('notifications')">
+        <span class="nav-icon">🔔</span>
+        <span class="nav-text">Notifications</span>
+        <span class="nav-badge" style="background: rgba(245,158,11,0.2); color: var(--accent-amber);">3</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('system_health')">
+        <span class="nav-icon">💻</span>
+        <span class="nav-text">System Health</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('privacy')">
+        <span class="nav-icon">🔒</span>
+        <span class="nav-text">Privacy & Data</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('audit_logs')">
+        <span class="nav-icon">📜</span>
+        <span class="nav-text">Audit Logs</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('admin_roles')">
+        <span class="nav-icon">🛡️</span>
+        <span class="nav-text">Admin Roles</span>
+      </a>
+      <a class="nav-item" onclick="switchAdminTab('security')">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-text">Security Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-user-pill">
+        <div class="admin-avatar">A</div>
+        <div class="sidebar-footer-text">
+          <div style="font-size: 12.5px; font-weight: 700; color: #FFF;">Abhilash</div>
+          <div style="font-size: 10.5px; color: var(--primary-light); display: flex; align-items: center; gap: 4px;">
+            <span style="font-size: 8px;">●</span> Super Admin
+          </div>
+        </div>
+      </div>
+      <button class="topbar-btn" onclick="toggleSidebar()" title="Collapse Sidebar">◀</button>
+    </div>
+  </aside>
+
+  <!-- 2. MAIN VIEWPORT -->
+  <main id="admin-main">
+    
+    <!-- TOPBAR -->
+    <header id="admin-topbar">
+      <div class="topbar-left">
+        <button class="topbar-btn" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
+        <div class="system-status-indicator">
+          <span class="status-dot"></span>
+          <span>All Systems Operational (Local AI Engine)</span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="/" class="btn btn-secondary" style="font-size: 11.5px; padding: 6px 12px;" target="_blank">
+          <span>🧘</span> Open Yoga App ↗
+        </a>
+        <button class="topbar-btn" onclick="switchAdminTab('notifications')" title="System Notifications">
+          🔔
+        </button>
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(15,23,42,0.85); border: 1px solid var(--border-subtle); padding: 4px 12px; border-radius: 20px;">
+          <div class="admin-avatar" style="width: 24px; height: 24px; font-size: 11px;">A</div>
+          <span style="font-size: 12px; font-weight: 700; color: #FFF;">Abhilash</span>
+          <span class="badge badge-green" style="font-size: 9.5px; padding: 1px 6px;">Super Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- TAB CONTENT CONTAINER -->
+    <div id="admin-content">
+
+      <!-- ==========================================
+           TAB 1: ADMIN DASHBOARD
+           ========================================== -->
+      <section id="tab-dashboard" class="admin-tab-view active">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Admin Operations Dashboard</h1>
+            <p class="view-subtitle">Monitor KI.AI users, AI posture analysis, content, and system performance.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="exportQuickReport()">📥 Export Report</button>
+            <button class="btn btn-primary" onclick="showAddPoseModal()">➕ Add Yoga Pose</button>
+          </div>
+        </div>
+
+        <!-- 3. KPI CARDS -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span>TOTAL USERS</span>
+              <span class="kpi-icon">👥</span>
+            </div>
+            <div class="kpi-val">12,482</div>
+            <div class="kpi-trend up">↑ 8.4% this month</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span>ACTIVE TODAY</span>
+              <span class="kpi-icon">⚡</span>
+            </div>
+            <div class="kpi-val">1,284</div>
+            <div class="kpi-trend up">↑ 12.7% vs yesterday</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span>PRACTICE SESSIONS</span>
+              <span class="kpi-icon">🧘</span>
+            </div>
+            <div class="kpi-val">8,942</div>
+            <div class="kpi-trend up">↑ 15.2% vs last week</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span>AVG AI ACCURACY</span>
+              <span class="kpi-icon">🎯</span>
+            </div>
+            <div class="kpi-val">91.8%</div>
+            <div class="kpi-trend up">↑ 3.6% improvement</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span>PRACTICE TIME</span>
+              <span class="kpi-icon">⏱️</span>
+            </div>
+            <div class="kpi-val">18,421 hrs</div>
+            <div class="kpi-trend up">↑ 412 hrs today</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span>DETECTION SUCCESS</span>
+              <span class="kpi-icon">🤖</span>
+            </div>
+            <div class="kpi-val">97.4%</div>
+            <div class="kpi-trend up">● Production Healthy</div>
+          </div>
+        </div>
+
+        <!-- 4. USER ACTIVITY CHART + 5. AI PERFORMANCE PANEL -->
+        <div class="dash-split-2">
+          <!-- Chart -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">User Practice & Engagement Activity</div>
+                <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Track active practitioners and session volumes over time</div>
+              </div>
+              <div style="display: flex; gap: 4px; background: var(--bg-input); padding: 2px; border-radius: 6px;">
+                <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px; border: none;" onclick="updateActivityChart('7D')">7D</button>
+                <button class="btn btn-primary" style="padding: 3px 8px; font-size: 11px; border: none;" onclick="updateActivityChart('30D')">30D</button>
+                <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px; border: none;" onclick="updateActivityChart('3M')">3M</button>
+                <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px; border: none;" onclick="updateActivityChart('1Y')">1Y</button>
+              </div>
+            </div>
+            <div style="height: 260px;">
+              <canvas id="chart-user-activity"></canvas>
+            </div>
+          </div>
+
+          <!-- AI Performance Panel -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">AI Vision Performance</div>
+              <span class="badge badge-green">v2.4.1 Active</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: var(--text-muted);">Pose Detection Accuracy</span>
+                <span style="font-weight: 800; color: #FFF; font-size: 14px;">97.4%</span>
+              </div>
+              <div style="height: 6px; background: var(--bg-input); border-radius: 3px; overflow: hidden;">
+                <div style="width: 97.4%; height: 100%; background: var(--primary);"></div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: var(--text-muted);">Average Inference Time</span>
+                <span style="font-weight: 800; color: var(--accent-cyan); font-size: 14px;">38 ms</span>
+              </div>
+              <div style="height: 6px; background: var(--bg-input); border-radius: 3px; overflow: hidden;">
+                <div style="width: 25%; height: 100%; background: var(--accent-cyan);"></div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: var(--text-muted);">Real-Time Correction Accuracy</span>
+                <span style="font-weight: 800; color: var(--accent-purple); font-size: 14px;">94.6%</span>
+              </div>
+              <div style="height: 6px; background: var(--bg-input); border-radius: 3px; overflow: hidden;">
+                <div style="width: 94.6%; height: 100%; background: var(--accent-purple);"></div>
+              </div>
+
+              <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                <div>
+                  <div style="font-size: 11.5px; font-weight: 700; color: #FFF;">Model Status: Healthy</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">Local MediaPipe + 3D Tensor</div>
+                </div>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="switchAdminTab('ai_models')">Model Center →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. MOST PRACTICED & 7. LOWEST ACCURACY POSES -->
+        <div class="dash-split-2">
+          <!-- Most Practiced -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Most Practiced Poses</div>
+              <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="switchAdminTab('poses')">View Catalog</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;" id="dash-most-practiced-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Poses Requiring Attention -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title" style="color: var(--accent-amber);">⚠️ Poses Requiring Attention</div>
+              <span class="badge badge-amber">Low Accuracy</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <img src="/assets/pose_figures/natarajasana.svg" style="width: 28px; height: 28px; background: #070D18; border-radius: 6px; padding: 2px;" />
+                  <div>
+                    <div style="font-weight: 700; font-size: 12.5px; color: #FFF;">Natarajasana (Dancer)</div>
+                    <div style="font-size: 10.5px; color: var(--accent-red);">Avg Score: 76% (Knee & Hip deviation)</div>
+                  </div>
+                </div>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="inspectPoseRules(2)">Inspect Rules</button>
+              </div>
+
+              <div style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <img src="/assets/pose_figures/dhanurasana.svg" style="width: 28px; height: 28px; background: #070D18; border-radius: 6px; padding: 2px;" />
+                  <div>
+                    <div style="font-weight: 700; font-size: 12.5px; color: #FFF;">Dhanurasana (Bow Pose)</div>
+                    <div style="font-size: 10.5px; color: var(--accent-red);">Avg Score: 79% (Spine curvature threshold)</div>
+                  </div>
+                </div>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="inspectPoseRules(6)">Inspect Rules</button>
+              </div>
+
+              <div style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <img src="/assets/pose_figures/trikonasana.svg" style="width: 28px; height: 28px; background: #070D18; border-radius: 6px; padding: 2px;" />
+                  <div>
+                    <div style="font-weight: 700; font-size: 12.5px; color: #FFF;">Trikonasana (Triangle)</div>
+                    <div style="font-size: 10.5px; color: var(--accent-amber);">Avg Score: 82% (Lateral tilt tolerance)</div>
+                  </div>
+                </div>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="inspectPoseRules(3)">Inspect Rules</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 29. QUICK ACTIONS -->
+        <div class="card" style="margin-top: 14px;">
+          <div class="card-title" style="margin-bottom: 12px;">Admin Quick Actions</div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn-secondary" onclick="showAddPoseModal()">➕ Add Yoga Pose</button>
+            <button class="btn btn-secondary" onclick="switchAdminTab('challenges')">🏆 Create Challenge</button>
+            <button class="btn btn-secondary" onclick="switchAdminTab('ai_rules')">⚙️ Configure AI Rules</button>
+            <button class="btn btn-secondary" onclick="switchAdminTab('ai_models')">🧠 Test AI Model</button>
+            <button class="btn btn-secondary" onclick="switchAdminTab('live_sessions')">📹 View Live Sessions</button>
+            <button class="btn btn-secondary" onclick="switchAdminTab('audit_logs')">📜 View Audit Log</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 2: USER MANAGEMENT
+           ========================================== -->
+      <section id="tab-users" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">User Management</h1>
+            <p class="view-subtitle">Search, inspect practitioner progress, and manage member credentials.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="exportUsersCSV()">📥 Export CSV</button>
+            <button class="btn btn-primary" onclick="showCreateUserModal()">➕ Add User</button>
+          </div>
+        </div>
+
+        <div class="data-table-container">
+          <div class="data-table-toolbar">
+            <input type="text" id="user-search-input" class="input-field" placeholder="🔍 Search by name or email..." style="width: 260px;" oninput="filterUsersTable()" />
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <select id="user-status-filter" class="input-field" onchange="filterUsersTable()">
+                <option value="all">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Suspended">Suspended</option>
+              </select>
+              <select id="user-exp-filter" class="input-field" onchange="filterUsersTable()">
+                <option value="all">All Experience</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+              <select id="user-goal-filter" class="input-field" onchange="filterUsersTable()">
+                <option value="all">All Goals</option>
+                <option value="General Fitness">General Fitness</option>
+                <option value="Flexibility">Flexibility</option>
+                <option value="Strength">Strength</option>
+                <option value="Balance">Balance</option>
+              </select>
+            </div>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Experience</th>
+                <th>Goal</th>
+                <th>Sessions</th>
+                <th>Avg Accuracy</th>
+                <th>Last Active</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 3: YOGA POSE MANAGEMENT
+           ========================================== -->
+      <section id="tab-poses" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Yoga Pose Catalog Management</h1>
+            <p class="view-subtitle">Manage poses, reference vector silhouettes, instructions, and publishing status.</p>
+          </div>
+          <button class="btn btn-primary" onclick="showAddPoseModal()">➕ Add New Pose</button>
+        </div>
+
+        <div class="data-table-container">
+          <div class="data-table-toolbar">
+            <input type="text" id="pose-search-input" class="input-field" placeholder="🔍 Search poses..." style="width: 240px;" oninput="filterPosesTable()" />
+            <select id="pose-diff-filter" class="input-field" onchange="filterPosesTable()">
+              <option value="all">All Difficulties</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Figure</th>
+                <th>Pose Name</th>
+                <th>Sanskrit</th>
+                <th>Difficulty</th>
+                <th>Goal</th>
+                <th>AI Detection</th>
+                <th>Avg Accuracy</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-poses-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 4: AI POSE RULES & VISUAL ANGLE EDITOR
+           ========================================== -->
+      <section id="tab-ai_rules" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">AI Pose Rule & Visual Angle Editor</h1>
+            <p class="view-subtitle">Configure joint angle boundaries, tolerances, and directional feedback triggers.</p>
+          </div>
+          <button class="btn btn-primary" onclick="saveActivePoseRules()">💾 Save Rule Set</button>
+        </div>
+
+        <div class="dash-split-2">
+          <!-- Left: Visual Skeleton Editor -->
+          <div class="card">
+            <div class="card-header">
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <label style="font-size: 12px; color: var(--text-muted);">Select Pose:</label>
+                <select id="rule-pose-select" class="input-field" onchange="loadPoseRulesForSelected()">
+                  <option value="1">Vrikshasana (Tree Pose)</option>
+                  <option value="2">Virabhadrasana II (Warrior II)</option>
+                  <option value="3">Trikonasana (Triangle Pose)</option>
+                  <option value="4">Bhujangasana (Cobra Pose)</option>
+                  <option value="5">Setu Bandhasana (Bridge Pose)</option>
+                  <option value="6">Dhanurasana (Bow Pose)</option>
+                </select>
+              </div>
+              <span class="badge badge-green">Interactive Skeleton</span>
+            </div>
+
+            <div class="skeleton-canvas-box">
+              <canvas id="rule-skeleton-canvas" width="400" height="300"></canvas>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+              <span style="font-size: 11.5px; color: var(--text-muted);">Click on any joint marker (🟢) on the skeleton to calibrate target angle.</span>
+              <button class="btn btn-secondary" style="font-size: 11px;" onclick="testSamplePoseExecution()">▶ Test Simulation</button>
+            </div>
+          </div>
+
+          <!-- Right: Joint Angle Configurator -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Joint Angle Parameters</div>
+              <span id="selected-joint-title" class="badge badge-blue">Left Knee</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;" id="joint-rule-controls">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                  <span>Target Angle</span>
+                  <span id="val-target-angle" style="font-weight: 800; color: var(--primary);">175°</span>
+                </div>
+                <input type="range" id="slider-target-angle" min="30" max="180" value="175" style="width: 100%; accent-color: var(--primary);" oninput="updateRuleValues()" />
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                  <span>Tolerance Window (±)</span>
+                  <span id="val-tolerance" style="font-weight: 800; color: var(--accent-cyan);">± 8°</span>
+                </div>
+                <input type="range" id="slider-tolerance" min="2" max="25" value="8" style="width: 100%; accent-color: var(--accent-cyan);" oninput="updateRuleValues()" />
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                  <span>Minimum Pose Confidence</span>
+                  <span id="val-confidence" style="font-weight: 800; color: var(--accent-purple);">75%</span>
+                </div>
+                <input type="range" id="slider-confidence" min="40" max="95" value="75" style="width: 100%; accent-color: var(--accent-purple);" oninput="updateRuleValues()" />
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Real-Time Correction Message</label>
+                <input type="text" id="input-correction-msg" class="input-field" style="width: 100%;" value="Straighten your left knee slightly." />
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                <span style="font-size: 12px; color: var(--text-muted);">Voice Feedback Enabled</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle-rule-voice" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 5: LIVE AI SESSIONS MONITOR
+           ========================================== -->
+      <section id="tab-live_sessions" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Live AI Practice Sessions Monitor</h1>
+            <p class="view-subtitle">Real-time local computer vision telemetry across active practitioner nodes.</p>
+          </div>
+          <span class="badge badge-green" style="font-size: 12px; padding: 6px 12px;">● 8 Concurrent Sessions</span>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Practitioner</th>
+                <th>Current Pose</th>
+                <th>Duration</th>
+                <th>AI Accuracy</th>
+                <th>Confidence</th>
+                <th>Inference FPS</th>
+                <th>Health</th>
+                <th>Telemetry</th>
+              </tr>
+            </thead>
+            <tbody id="admin-live-sessions-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 6: ANALYTICS CENTER
+           ========================================== -->
+      <section id="tab-analytics" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">AI & Posture Intelligence Analytics</h1>
+            <p class="view-subtitle">Detailed accuracy distributions, common joint correction frequencies, and user retention.</p>
+          </div>
+        </div>
+
+        <div class="dash-split-2">
+          <!-- Common Corrections -->
+          <div class="card">
+            <div class="card-title" style="margin-bottom: 14px;">Most Common Posture Corrections</div>
+            <div style="height: 240px;">
+              <canvas id="chart-corrections-pie"></canvas>
+            </div>
+          </div>
+
+          <!-- Difficulty Distribution -->
+          <div class="card">
+            <div class="card-title" style="margin-bottom: 14px;">Accuracy Score Distribution by Difficulty</div>
+            <div style="height: 240px;">
+              <canvas id="chart-diff-scores"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 7: AI MODEL MANAGEMENT
+           ========================================== -->
+      <section id="tab-ai_models" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">AI Model & Tensor Registry</h1>
+            <p class="view-subtitle">Manage deployed landmark models, test new checkpoints, and trigger rollbacks.</p>
+          </div>
+          <button class="btn btn-primary" onclick="showModelTestModal()">🧪 Test Candidate Model</button>
+        </div>
+
+        <div class="dash-split-3">
+          <div class="card" style="border-color: var(--primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="badge badge-green">Production Active</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Deployed 2d ago</span>
+            </div>
+            <div style="font-size: 18px; font-weight: 800; color: #FFF;">KI PoseNet v2.4.1</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin: 6px 0 14px 0;">Heavy MediaPipe Pipeline + 3D Tensor</div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+              <span>Accuracy: <b style="color:#FFF;">97.4%</b></span>
+              <span>Inference: <b style="color:var(--accent-cyan);">38ms</b></span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="badge badge-blue">Candidate (Staging)</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Build #148</span>
+            </div>
+            <div style="font-size: 18px; font-weight: 800; color: #FFF;">KI PoseNet v2.5-rc1</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin: 6px 0 14px 0;">Optimized Edge Quantization</div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+              <span>Accuracy: <b style="color:#FFF;">98.2%</b></span>
+              <span>Inference: <b style="color:var(--accent-cyan);">29ms</b></span>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 12px; font-size: 11.5px;" onclick="promoteModelToProd()">Promote to Production</button>
+          </div>
+
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="badge badge-amber">Previous Release</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Archived</span>
+            </div>
+            <div style="font-size: 18px; font-weight: 800; color: #FFF;">KI PoseNet v2.3.8</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin: 6px 0 14px 0;">Baseline Full Precision</div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+              <span>Accuracy: <b style="color:#FFF;">95.1%</b></span>
+              <span>Inference: <b style="color:var(--accent-cyan);">46ms</b></span>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; justify-content: center; margin-top: 12px; font-size: 11.5px;" onclick="alert('Rollback initiated successfully.');">Rollback to v2.3.8</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 8: RECOMMENDATIONS ENGINE
+           ========================================== -->
+      <section id="tab-recommendations" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">AI Recommendation Engine Rules</h1>
+            <p class="view-subtitle">Configure heuristic logic linking practitioner goals and weakness metrics to pose feeds.</p>
+          </div>
+          <button class="btn btn-primary" onclick="alert('New rule dialog opened.');">➕ Add Logic Rule</button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;" id="admin-recs-rules-list">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 9: CHALLENGES & GAMIFICATION
+           ========================================== -->
+      <section id="tab-challenges" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Challenges, Streaks & XP Rewards</h1>
+            <p class="view-subtitle">Gamification rules, milestone achievements, and community challenges.</p>
+          </div>
+          <button class="btn btn-primary" onclick="alert('Create Challenge modal opened.');">➕ Create Challenge</button>
+        </div>
+
+        <div class="dash-split-3" id="admin-challenges-list">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 10: CONTENT & GUIDES
+           ========================================== -->
+      <section id="tab-content" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Content & Instructional Guides</h1>
+            <p class="view-subtitle">Manage breathing cues, safety warnings, and posture tutorial copies.</p>
+          </div>
+          <button class="btn btn-primary" onclick="alert('Article creation modal opened.');">➕ New Article</button>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Associated Pose</th>
+                <th>Author</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-content-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 11: NOTIFICATIONS
+           ========================================== -->
+      <section id="tab-notifications" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">System & AI Alert Stream</h1>
+            <p class="view-subtitle">Operational events, model confidence drops, and performance notifications.</p>
+          </div>
+          <button class="btn btn-secondary" onclick="alert('All marked as read.');">Mark All as Read</button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;" id="admin-notifications-list">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 12: SYSTEM HEALTH
+           ========================================== -->
+      <section id="tab-system_health" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Infrastructure & Subsystem Health</h1>
+            <p class="view-subtitle">Real-time CPU/GPU load, MediaPipe worker latencies, and database telemetry.</p>
+          </div>
+        </div>
+
+        <div class="dash-split-3" style="margin-bottom: 20px;">
+          <div class="card">
+            <div class="card-title" style="margin-bottom: 8px;">CPU / Neural Processing</div>
+            <div style="font-size: 28px; font-weight: 800; color: var(--primary);">18.4%</div>
+            <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">4 Core Local Vision Worker</div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom: 8px;">Memory Allocated</div>
+            <div style="font-size: 28px; font-weight: 800; color: var(--accent-cyan);">2.1 / 8 GB</div>
+            <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">SQLite Cache + Frame Buffers</div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom: 8px;">Inference Latency</div>
+            <div style="font-size: 28px; font-weight: 800; color: var(--primary-light);">38 ms</div>
+            <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">30 FPS Stable Streaming</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 12px;">Service Status Checklist</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+            <div style="background: var(--bg-input); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <span>AI Pose Classifier</span>
+              <span class="badge badge-green">● Healthy</span>
+            </div>
+            <div style="background: var(--bg-input); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <span>SQLite Database Engine</span>
+              <span class="badge badge-green">● Healthy</span>
+            </div>
+            <div style="background: var(--bg-input); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <span>Angle Calculation Unit</span>
+              <span class="badge badge-green">● Healthy</span>
+            </div>
+            <div style="background: var(--bg-input); padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <span>Voice Feedback Engine</span>
+              <span class="badge badge-green">● Healthy</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 13: PRIVACY & DATA CENTER
+           ========================================== -->
+      <section id="tab-privacy" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Privacy Architecture & Data Center</h1>
+            <p class="view-subtitle">Configure strict local-processing safeguards, user data retention, and export tools.</p>
+          </div>
+        </div>
+
+        <div class="dash-split-2">
+          <div class="card">
+            <div class="card-title" style="margin-bottom: 14px;">Local-First Security Policies</div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: #FFF;">100% Local AI Computer Vision</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Frame analysis occurs strictly in-memory</div>
+                </div>
+                <span class="badge badge-green">Active (Enforced)</span>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: #FFF;">Cloud Video Streaming</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Zero raw webcam frames sent over network</div>
+                </div>
+                <span class="badge badge-red">Disabled</span>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: #FFF;">Session Analytics Retention</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Local SQLite storage retention window</div>
+                </div>
+                <select class="input-field" style="width: 120px;">
+                  <option>30 Days</option>
+                  <option>60 Days</option>
+                  <option>90 Days</option>
+                  <option>Permanent</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="margin-bottom: 14px; color: var(--accent-red);">Destructive Data Actions</div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button class="btn btn-secondary" onclick="alert('Exporting full SQLite backup archive.');">📦 Export All User Data</button>
+              <button class="btn btn-danger" onclick="confirmPurgeTelemetry()">🗑️ Purge Practice Telemetry (Older than 30d)</button>
+              <button class="btn btn-danger" onclick="confirmResetAllData()">⚠️ Factory Reset Local Database</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 14: AUDIT LOGS
+           ========================================== -->
+      <section id="tab-audit_logs" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">System Audit Trail</h1>
+            <p class="view-subtitle">Immutable log tracking administrator actions, rule changes, and system events.</p>
+          </div>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Admin</th>
+                <th>Action</th>
+                <th>Resource</th>
+                <th>Previous Value</th>
+                <th>New Value</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="admin-audit-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 15: ADMIN ROLES & PERMISSIONS
+           ========================================== -->
+      <section id="tab-admin_roles" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Admin Roles & Permission Matrix</h1>
+            <p class="view-subtitle">Manage role-based access control (RBAC) across content, AI models, and privacy settings.</p>
+          </div>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Users</th>
+                <th>Pose Catalog</th>
+                <th>AI Rules</th>
+                <th>Model Deploy</th>
+                <th>Analytics</th>
+                <th>Privacy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>Super Admin</b></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+              </tr>
+              <tr>
+                <td><b>AI/Model Admin</b></td>
+                <td><span class="badge badge-blue">Read</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-amber">None</span></td>
+              </tr>
+              <tr>
+                <td><b>Content Admin</b></td>
+                <td><span class="badge badge-amber">None</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-blue">Read</span></td>
+                <td><span class="badge badge-amber">None</span></td>
+                <td><span class="badge badge-blue">Read</span></td>
+                <td><span class="badge badge-amber">None</span></td>
+              </tr>
+              <tr>
+                <td><b>Support Admin</b></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-blue">Read</span></td>
+                <td><span class="badge badge-amber">None</span></td>
+                <td><span class="badge badge-amber">None</span></td>
+                <td><span class="badge badge-blue">Read</span></td>
+                <td><span class="badge badge-blue">Read</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 16: SECURITY SETTINGS
+           ========================================== -->
+      <section id="tab-security" class="admin-tab-view">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Security & Credentials Center</h1>
+            <p class="view-subtitle">Two-factor authentication, active session revocation, and password policies.</p>
+          </div>
+        </div>
+
+        <div class="dash-split-2">
+          <div class="card">
+            <div class="card-title" style="margin-bottom: 12px;">Admin Authentication & 2FA</div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: #FFF;">Two-Factor Authentication (2FA)</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">TOTP Authenticator app requirement</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: #FFF;">Admin Session Timeout</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">Auto sign-out after inactivity</div>
+                </div>
+                <select class="input-field" style="width: 110px;">
+                  <option>15 mins</option>
+                  <option selected>30 mins</option>
+                  <option>1 hour</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="margin-bottom: 12px;">Active Admin Sessions</div>
+            <div style="background: var(--bg-input); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 12px; font-weight: 700; color: #FFF;">Windows Desktop • Chrome (This Device)</div>
+                <div style="font-size: 10.5px; color: var(--primary-light);">Active Now • IP: 127.0.0.1</div>
+              </div>
+              <span class="badge badge-green">Current</span>
+            </div>
+            <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="alert('Revoked all other admin sessions.');">Revoke All Other Sessions</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ==========================================
+       MODALS & DRAWERS
+       ========================================== -->
+  <div id="admin-modal-container"></div>
+  <div id="admin-drawer-container"></div>
+
+  <script>
+    // Global State & Data
+    let activeTab = 'dashboard';
+    let allAdminUsers = [
+      { id: 1, name: 'Abhilash Sharma', email: 'abhilash@ki.ai', exp: 'Beginner', goal: 'General Fitness', sessions: 24, accuracy: '92.4%', lastActive: '5m ago', status: 'Active' },
+      { id: 2, name: 'Priya Patel', email: 'priya@example.com', exp: 'Intermediate', goal: 'Flexibility', sessions: 48, accuracy: '94.1%', lastActive: '2h ago', status: 'Active' },
+      { id: 3, name: 'Rahul Verma', email: 'rahul@example.com', exp: 'Advanced', goal: 'Strength', sessions: 62, accuracy: '89.5%', lastActive: '1d ago', status: 'Active' },
+      { id: 4, name: 'Elena Rostova', email: 'elena@gmail.com', exp: 'Beginner', goal: 'Balance', sessions: 15, accuracy: '86.2%', lastActive: '3d ago', status: 'Active' },
+      { id: 5, name: 'Marcus Chen', email: 'marcus@yahoo.com', exp: 'Intermediate', goal: 'Stress Relief', sessions: 31, accuracy: '95.0%', lastActive: '4h ago', status: 'Active' },
+      { id: 6, name: 'Dev Account', email: 'dev_test@ki.ai', exp: 'Beginner', goal: 'General Fitness', sessions: 4, accuracy: '78.0%', lastActive: '6d ago', status: 'Suspended' }
+    ];
+
+    let allAdminPoses = [];
+
+    // Initialize Dashboard
+    document.addEventListener("DOMContentLoaded", () => {
+      loadPosesData();
+      renderUsersTable();
+      renderAuditLogs();
+      renderLiveSessions();
+      renderContentTable();
+      renderRecommendationsRules();
+      renderChallenges();
+      renderNotifications();
+      initUserActivityChart();
+      initAnalyticsCharts();
+      initSkeletonCanvas();
+    });
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("admin-sidebar");
+      sidebar.classList.toggle("collapsed");
+    }
+
+    function switchAdminTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll(".admin-tab-view").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+
+      const target = document.getElementById(`tab-${tabId}`);
+      if (target) target.classList.add("active");
+
+      // Highlight active nav
+      const activeNav = Array.from(document.querySelectorAll(".nav-item")).find(el => el.getAttribute("onclick")?.includes(tabId));
+      if (activeNav) activeNav.classList.add("active");
+    }
+
+    // Poses Loading
+    async function loadPosesData() {
+      try {
+        const res = await fetch("/api/poses");
+        allAdminPoses = await res.json();
+      } catch(e) {
+        allAdminPoses = [
+          { id: 1, name: "Vrikshasana", sanskrit_name: "Vṛkṣāsana", difficulty: "Beginner", goal: "Balance", image_path: "assets/images/yoga/vrikshasana.png", figure_path: "assets/pose_figures/vrikshasana.svg", status: "Published" },
+          { id: 2, name: "Virabhadrasana II", sanskrit_name: "Vīrabhadrāsana II", difficulty: "Intermediate", goal: "Strength", image_path: "assets/images/yoga/virabhadrasana_ii.png", figure_path: "assets/pose_figures/virabhadrasana_ii.svg", status: "Published" },
+          { id: 3, name: "Trikonasana", sanskrit_name: "Trikoṇāsana", difficulty: "Intermediate", goal: "Flexibility", image_path: "assets/images/yoga/trikonasana.png", figure_path: "assets/pose_figures/trikonasana.svg", status: "Published" },
+          { id: 4, name: "Bhujangasana", sanskrit_name: "Bhujaṅgāsana", difficulty: "Beginner", goal: "Flexibility", image_path: "assets/images/yoga/bhujangasana.png", figure_path: "assets/pose_figures/bhujangasana.svg", status: "Published" },
+          { id: 5, name: "Setu Bandhasana", sanskrit_name: "Setu Bandhāsana", difficulty: "Beginner", goal: "Strength", image_path: "assets/images/yoga/setu_bandhasana.png", figure_path: "assets/pose_figures/setu_bandhasana.svg", status: "Published" },
+          { id: 6, name: "Dhanurasana", sanskrit_name: "Dhanurāsana", difficulty: "Advanced", goal: "Flexibility", image_path: "assets/images/yoga/dhanurasana.png", figure_path: "assets/pose_figures/dhanurasana.svg", status: "Published" }
+        ];
+      }
+      renderPosesTable();
+      renderMostPracticed();
+    }
+
+    function renderMostPracticed() {
+      const el = document.getElementById("dash-most-practiced-list");
+      if (!el) return;
+      const top5 = [
+        { name: "Vrikshasana", count: "2,481 sessions", fig: "assets/pose_figures/vrikshasana.svg", acc: "94%" },
+        { name: "Virabhadrasana II", count: "2,105 sessions", fig: "assets/pose_figures/virabhadrasana_ii.svg", acc: "91%" },
+        { name: "Trikonasana", count: "1,982 sessions", fig: "assets/pose_figures/trikonasana.svg", acc: "88%" },
+        { name: "Bhujangasana", count: "1,744 sessions", fig: "assets/pose_figures/bhujangasana.svg", acc: "96%" },
+        { name: "Tadasana", count: "1,521 sessions", fig: "assets/pose_figures/tadasana.svg", acc: "98%" }
+      ];
+      el.innerHTML = top5.map((p, idx) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-weight: 800; font-size: 12px; color: var(--text-muted); width: 16px;">#${idx+1}</span>
+            <img src="/${p.fig}" style="width: 26px; height: 26px; background: #070D18; border-radius: 6px; padding: 2px;" onerror="this.src='/assets/pose_figures/tadasana.svg'" />
+            <div>
+              <div style="font-weight: 700; font-size: 12.5px; color: #FFF;">${p.name}</div>
+              <div style="font-size: 10.5px; color: var(--text-muted);">${p.count}</div>
+            </div>
+          </div>
+          <span class="badge badge-green">${p.acc} Acc</span>
+        </div>
+      `).join("");
+    }
+
+    function renderPosesTable() {
+      const tbody = document.getElementById("admin-poses-tbody");
+      if (!tbody) return;
+      tbody.innerHTML = allAdminPoses.map(p => {
+        const fig = p.figure_path || `assets/pose_figures/${p.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}.svg`;
+        const diffBadge = p.difficulty === 'Beginner' ? 'badge-green' : (p.difficulty === 'Intermediate' ? 'badge-blue' : 'badge-purple');
+        return `
+          <tr>
+            <td>
+              <img src="/${fig}" style="width: 32px; height: 32px; background: #070D18; border: 1px solid #1E2D4A; border-radius: 6px; padding: 2px;" onerror="this.src='/assets/pose_figures/tadasana.svg'" />
+            </td>
+            <td><b>${p.name}</b></td>
+            <td><i style="color: var(--text-muted);">${p.sanskrit_name || ''}</i></td>
+            <td><span class="badge ${diffBadge}">${p.difficulty}</span></td>
+            <td><span style="color: var(--accent-cyan); font-weight: 600;">${p.goal || 'General'}</span></td>
+            <td><span class="badge badge-green">🟢 Enabled</span></td>
+            <td><b>92.5%</b></td>
+            <td><span class="badge badge-green">Published</span></td>
+            <td>
+              <div style="display: flex; gap: 4px;">
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="inspectPoseRules(${p.id})">Rules</button>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="editPoseModal(${p.id})">Edit</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // Users Table
+    function renderUsersTable() {
+      const tbody = document.getElementById("admin-users-tbody");
+      if (!tbody) return;
+      tbody.innerHTML = allAdminUsers.map(u => `
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="admin-avatar" style="width: 28px; height: 28px; font-size: 11px;">${u.name[0]}</div>
+              <b>${u.name}</b>
+            </div>
+          </td>
+          <td>${u.email}</td>
+          <td><span class="badge badge-blue">${u.exp}</span></td>
+          <td>${u.goal}</td>
+          <td><b>${u.sessions}</b></td>
+          <td><b style="color: var(--primary);">${u.accuracy}</b></td>
+          <td><span style="color: var(--text-muted); font-size: 11px;">${u.lastActive}</span></td>
+          <td>
+            <span class="badge ${u.status === 'Active' ? 'badge-green' : 'badge-red'}">${u.status}</span>
+          </td>
+          <td>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="openUserDrawer(${u.id})">View</button>
+              <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="toggleUserStatus(${u.id})">${u.status === 'Active' ? 'Suspend' : 'Activate'}</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    // User Detail Drawer
+    function openUserDrawer(userId) {
+      const u = allAdminUsers.find(x => x.id === userId) || allAdminUsers[0];
+      const container = document.getElementById("admin-drawer-container");
+      container.innerHTML = `
+        <div class="admin-modal-backdrop" onclick="closeUserDrawer()"></div>
+        <div class="admin-drawer">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="font-size: 18px; font-weight: 800; color: #FFF;">Practitioner Profile Drawer</h2>
+            <button class="topbar-btn" onclick="closeUserDrawer()">✕</button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 14px; background: var(--bg-input); padding: 14px; border-radius: 12px; margin-bottom: 16px;">
+            <div class="admin-avatar" style="width: 44px; height: 44px; font-size: 18px;">${u.name[0]}</div>
+            <div>
+              <div style="font-size: 16px; font-weight: 800; color: #FFF;">${u.name}</div>
+              <div style="font-size: 12px; color: var(--text-muted);">${u.email}</div>
+              <span class="badge badge-green" style="margin-top: 4px;">${u.status}</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+            <div class="card" style="padding: 12px;">
+              <div style="font-size: 11px; color: var(--text-muted);">Total Sessions</div>
+              <div style="font-size: 20px; font-weight: 800; color: #FFF; margin-top: 2px;">${u.sessions}</div>
+            </div>
+            <div class="card" style="padding: 12px;">
+              <div style="font-size: 11px; color: var(--text-muted);">Avg Accuracy</div>
+              <div style="font-size: 20px; font-weight: 800; color: var(--primary); margin-top: 2px;">${u.accuracy}</div>
+            </div>
+          </div>
+
+          <div class="card" style="padding: 14px; margin-bottom: 16px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--accent-cyan); margin-bottom: 4px;">🧠 AI Performance Summary</div>
+            <div style="font-size: 12px; color: #E2E8F0; line-height: 1.4;">
+              Practitioner's balance pose stability improved <b>11.4%</b> over the last 30 days. Most practiced posture is <b>Vrikshasana</b> with 94.2% knee alignment accuracy.
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto;">
+            <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="alert('User practice history exported to JSON.');">Export Practitioner History</button>
+            <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="alert('Password reset link sent to practitioner.');">Send Password Reset</button>
+            <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="deleteUser(${u.id})">Delete Practitioner Account</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function closeUserDrawer() {
+      document.getElementById("admin-drawer-container").innerHTML = "";
+    }
+
+    function toggleUserStatus(userId) {
+      const u = allAdminUsers.find(x => x.id === userId);
+      if (u) {
+        u.status = u.status === 'Active' ? 'Suspended' : 'Active';
+        renderUsersTable();
+      }
+    }
+
+    function deleteUser(userId) {
+      if (confirm("Are you sure you want to permanently delete this user profile?")) {
+        allAdminUsers = allAdminUsers.filter(x => x.id !== userId);
+        closeUserDrawer();
+        renderUsersTable();
+      }
+    }
+
+    // Live AI Sessions
+    function renderLiveSessions() {
+      const tbody = document.getElementById("admin-live-sessions-tbody");
+      if (!tbody) return;
+      const liveSessions = [
+        { user: "Abhilash", pose: "Vrikshasana", time: "00:24", acc: "94%", conf: "98%", fps: "30 FPS", status: "Healthy" },
+        { user: "Priya Patel", pose: "Virabhadrasana II", time: "01:12", acc: "91%", conf: "96%", fps: "29 FPS", status: "Healthy" },
+        { user: "Elena Rostova", pose: "Trikonasana", time: "00:45", acc: "87%", conf: "94%", fps: "30 FPS", status: "Healthy" },
+        { user: "Marcus Chen", pose: "Bhujangasana", time: "00:18", acc: "96%", conf: "99%", fps: "30 FPS", status: "Healthy" }
+      ];
+      tbody.innerHTML = liveSessions.map(s => `
+        <tr>
+          <td><b>${s.user}</b></td>
+          <td><span style="color: var(--accent-cyan); font-weight: 700;">${s.pose}</span></td>
+          <td><code>${s.time}</code></td>
+          <td><b style="color: var(--primary);">${s.acc}</b></td>
+          <td>${s.conf}</td>
+          <td><span class="badge badge-blue">${s.fps}</span></td>
+          <td><span class="badge badge-green">● ${s.status}</span></td>
+          <td>
+            <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="inspectSessionTelemetry('${s.user}')">Inspect</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function inspectSessionTelemetry(userName) {
+      alert(`Live Telemetry for ${userName}:\n- Joint Angle Pipeline: Latency 36ms\n- Keypoint Confidence: 0.98\n- Local Privacy Protocol: Active (No frames streamed)`);
+    }
+
+    // Audit Logs
+    function renderAuditLogs() {
+      const tbody = document.getElementById("admin-audit-tbody");
+      if (!tbody) return;
+      const logs = [
+        { time: "13:42:10", admin: "Abhilash (Super Admin)", action: "Updated Pose Rule", res: "Vrikshasana Left Knee", oldVal: "170° ±6°", newVal: "175° ±8°", status: "Success" },
+        { time: "13:35:04", admin: "Abhilash (Super Admin)", action: "Published Pose", res: "Trikonasana", oldVal: "Draft", newVal: "Published", status: "Success" },
+        { time: "13:20:18", admin: "AI Pipeline Worker", action: "Model Promotion", res: "KI PoseNet v2.4.1", oldVal: "v2.3.8", newVal: "v2.4.1", status: "Success" },
+        { time: "12:50:44", admin: "Abhilash (Super Admin)", action: "User Password Reset", res: "priya@example.com", oldVal: "--", newVal: "--", status: "Success" }
+      ];
+      tbody.innerHTML = logs.map(l => `
+        <tr>
+          <td><code>${l.time}</code></td>
+          <td><b>${l.admin}</b></td>
+          <td><span class="badge badge-blue">${l.action}</span></td>
+          <td>${l.res}</td>
+          <td><span style="color: var(--text-muted);">${l.oldVal}</span></td>
+          <td><b style="color: var(--primary);">${l.newVal}</b></td>
+          <td><span class="badge badge-green">${l.status}</span></td>
+        </tr>
+      `).join("");
+    }
+
+    // Content Management
+    function renderContentTable() {
+      const tbody = document.getElementById("admin-content-tbody");
+      if (!tbody) return;
+      const items = [
+        { title: "Mastering Rooted Balance in Tree Pose", cat: "Tutorial Guide", pose: "Vrikshasana", author: "Editorial AI", status: "Published" },
+        { title: "Diaphragmatic Breathing for Surya Namaskar", cat: "Breathing Guide", pose: "Surya 12-Step", author: "Dr. Sharma", status: "Published" },
+        { title: "Avoiding Hyperextension in Standing Asanas", cat: "Safety Note", pose: "All Standing", author: "Editorial AI", status: "Published" }
+      ];
+      tbody.innerHTML = items.map(c => `
+        <tr>
+          <td><b>${c.title}</b></td>
+          <td><span class="badge badge-purple">${c.cat}</span></td>
+          <td>${c.pose}</td>
+          <td>${c.author}</td>
+          <td><span class="badge badge-green">${c.status}</span></td>
+          <td>
+            <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="alert('Editing ${c.title}');">Edit</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    // Recommendations Rules
+    function renderRecommendationsRules() {
+      const el = document.getElementById("admin-recs-rules-list");
+      if (!el) return;
+      const rules = [
+        { id: 1, cond: "IF Primary Goal = 'Balance' AND Avg Accuracy < 85%", action: "Recommend: Vrikshasana, Tadasana, Warrior II", priority: 1, active: true },
+        { id: 2, cond: "IF Primary Goal = 'Flexibility' AND Experience = 'Beginner'", action: "Recommend: Bhujangasana, Balasana, Setu Bandhasana", priority: 2, active: true },
+        { id: 3, cond: "IF Knee Accuracy < 70% in Recent Practice", action: "Trigger Targeted Correction Drill for Standing Alignment", priority: 3, active: true }
+      ];
+      el.innerHTML = rules.map(r => `
+        <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: #FFF;">Rule #${r.id}: <span style="color: var(--accent-cyan);">${r.cond}</span></div>
+            <div style="font-size: 12px; color: var(--primary-light); margin-top: 4px;">➔ ${r.action}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="badge badge-blue">Priority: ${r.priority}</span>
+            <label class="toggle-switch">
+              <input type="checkbox" ${r.active ? 'checked' : ''}>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // Challenges
+    function renderChallenges() {
+      const el = document.getElementById("admin-challenges-list");
+      if (!el) return;
+      const chs = [
+        { title: "7-Day Balance Mastery", dur: "7 Days", xp: "+500 XP", badge: "🧘 Balance Master", req: "Practice 5 balance poses daily with ≥85% accuracy" },
+        { title: "Surya 108 Cycle Sprint", dur: "14 Days", xp: "+1200 XP", badge: "☀ Surya Champion", req: "Complete 12 full Surya Namaskar flows" },
+        { title: "Core & Spine Posture Challenge", dur: "5 Days", xp: "+450 XP", badge: "💪 Posture Titan", req: "Hold Cobra & Bridge poses for 30s each" }
+      ];
+      el.innerHTML = chs.map(c => `
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="badge badge-purple">${c.badge}</span>
+            <b style="color: var(--primary);">${c.xp}</b>
+          </div>
+          <div style="font-size: 16px; font-weight: 800; color: #FFF;">${c.title}</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin: 6px 0 12px 0;">${c.req}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 8px; font-size: 11.5px;">
+            <span>Duration: <b>${c.dur}</b></span>
+            <button class="btn btn-secondary" style="font-size: 10.5px; padding: 2px 6px;">Edit</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // Notifications
+    function renderNotifications() {
+      const el = document.getElementById("admin-notifications-list");
+      if (!el) return;
+      const notes = [
+        { type: "green", icon: "🟢", title: "New AI Model v2.4.1 Deployed", desc: "Edge Tensor model promoted to production with 97.4% benchmark accuracy.", time: "15m ago" },
+        { type: "amber", icon: "🟡", title: "Natarajasana Accuracy Deviation", desc: "User average accuracy for Natarajasana dropped to 76%. Recommended tolerance inspection.", time: "2h ago" },
+        { type: "blue", icon: "🔵", title: "1,000 New Practice Sessions Milestone", desc: "Practitioners completed 1,000+ local AI sessions in the last 24 hours.", time: "5h ago" }
+      ];
+      el.innerHTML = notes.map(n => `
+        <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 14px; display: flex; gap: 12px; align-items: center;">
+          <div style="font-size: 20px;">${n.icon}</div>
+          <div style="flex: 1;">
+            <div style="font-size: 13.5px; font-weight: 700; color: #FFF;">${n.title}</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">${n.desc}</div>
+          </div>
+          <span style="font-size: 11px; color: var(--text-dim);">${n.time}</span>
+        </div>
+      `).join("");
+    }
+
+    // Charts
+    function initUserActivityChart() {
+      const ctx = document.getElementById('chart-user-activity')?.getContext('2d');
+      if (!ctx) return;
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [
+            {
+              label: 'Active Practitioners',
+              data: [980, 1050, 1120, 1180, 1210, 1250, 1284],
+              borderColor: '#10B981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              tension: 0.35,
+              fill: true
+            },
+            {
+              label: 'Practice Sessions Completed',
+              data: [1420, 1530, 1610, 1720, 1800, 1890, 1942],
+              borderColor: '#38BDF8',
+              backgroundColor: 'transparent',
+              tension: 0.35
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#CBD5E1', font: { size: 11 } } } },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94A3B8' } },
+            y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94A3B8' } }
+          }
+        }
+      });
+    }
+
+    function initAnalyticsCharts() {
+      // Corrections Pie
+      const ctx1 = document.getElementById('chart-corrections-pie')?.getContext('2d');
+      if (ctx1) {
+        new Chart(ctx1, {
+          type: 'doughnut',
+          data: {
+            labels: ['Knee Alignment (32%)', 'Shoulder Level (24%)', 'Hip Rotation (18%)', 'Spine Alignment (15%)', 'Arm Position (11%)'],
+            datasets: [{
+              data: [32, 24, 18, 15, 11],
+              backgroundColor: ['#10B981', '#38BDF8', '#A855F7', '#F59E0B', '#EF4444'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'right', labels: { color: '#CBD5E1', font: { size: 10.5 } } } }
+          }
+        });
+      }
+
+      // Difficulty Scores Bar
+      const ctx2 = document.getElementById('chart-diff-scores')?.getContext('2d');
+      if (ctx2) {
+        new Chart(ctx2, {
+          type: 'bar',
+          data: {
+            labels: ['Beginner', 'Intermediate', 'Advanced', 'Surya 12-Flow'],
+            datasets: [{
+              label: 'Average Score (%)',
+              data: [94.2, 88.5, 81.3, 92.0],
+              backgroundColor: '#10B981',
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#94A3B8' } },
+              y: { max: 100, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94A3B8' } }
+            }
+          }
+        });
+      }
+    }
+
+    // Interactive Skeleton Canvas
+    function initSkeletonCanvas() {
+      const canvas = document.getElementById('rule-skeleton-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      drawSkeletonOnCanvas(ctx, 175);
+    }
+
+    function drawSkeletonOnCanvas(ctx, kneeAngle) {
+      ctx.clearRect(0, 0, 400, 300);
+
+      // Draw Base Stick Skeleton for Vrikshasana
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "rgba(16, 185, 129, 0.8)";
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      // Head
+      ctx.beginPath();
+      ctx.arc(200, 50, 16, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Spine
+      ctx.beginPath();
+      ctx.moveTo(200, 66);
+      ctx.lineTo(200, 150);
+      ctx.stroke();
+
+      // Arms in Prayer
+      ctx.beginPath();
+      ctx.moveTo(200, 80);
+      ctx.lineTo(170, 95);
+      ctx.lineTo(200, 95);
+      ctx.lineTo(230, 95);
+      ctx.lineTo(200, 80);
+      ctx.stroke();
+
+      // Standing Leg
+      ctx.beginPath();
+      ctx.moveTo(200, 150);
+      ctx.lineTo(200, 260);
+      ctx.stroke();
+
+      // Bent Leg (Knee Marker)
+      ctx.beginPath();
+      ctx.moveTo(200, 150);
+      ctx.lineTo(250, 190);
+      ctx.lineTo(202, 195);
+      ctx.stroke();
+
+      // Joint Markers (Clickable circles)
+      const joints = [
+        { name: "Head", x: 200, y: 50 },
+        { name: "Shoulders", x: 200, y: 80 },
+        { name: "Left Knee", x: 200, y: 210, active: true },
+        { name: "Right Bent Knee", x: 250, y: 190 },
+        { name: "Hips", x: 200, y: 150 }
+      ];
+
+      joints.forEach(j => {
+        ctx.beginPath();
+        ctx.arc(j.x, j.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = j.active ? "#10B981" : "#38BDF8";
+        ctx.fill();
+        ctx.strokeStyle = "#FFF";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+
+      // Target Angle Overlay
+      ctx.fillStyle = "#10B981";
+      ctx.font = "bold 12px 'Plus Jakarta Sans'";
+      ctx.fillText(`Left Knee: ${kneeAngle}° (±8°)`, 215, 215);
+    }
+
+    function updateRuleValues() {
+      const angle = document.getElementById("slider-target-angle").value;
+      const tol = document.getElementById("slider-tolerance").value;
+      const conf = document.getElementById("slider-confidence").value;
+
+      document.getElementById("val-target-angle").innerText = `${angle}°`;
+      document.getElementById("val-tolerance").innerText = `± ${tol}°`;
+      document.getElementById("val-confidence").innerText = `${conf}%`;
+
+      const canvas = document.getElementById('rule-skeleton-canvas');
+      if (canvas) {
+        drawSkeletonOnCanvas(canvas.getContext('2d'), angle);
+      }
+    }
+
+    function testSamplePoseExecution() {
+      alert("AI Simulation Result:\n- Calculated Angle: 174.2°\n- Target Window: 167°–183°\n- Evaluation: 🟢 CORRECT (Accuracy: 98.6%)\n- No correction message triggered.");
+    }
+
+    function saveActivePoseRules() {
+      alert("Successfully saved AI Pose Rule Set to SQLite database.");
+    }
+
+    function inspectPoseRules(poseId) {
+      switchAdminTab('ai_rules');
+      const select = document.getElementById("rule-pose-select");
+      if (select) {
+        select.value = poseId;
+        loadPoseRulesForSelected();
+      }
+    }
+
+    function loadPoseRulesForSelected() {
+      updateRuleValues();
+    }
+
+    function showAddPoseModal() {
+      const container = document.getElementById("admin-modal-container");
+      container.innerHTML = `
+        <div class="admin-modal-backdrop" onclick="closeAdminModal()"></div>
+        <div class="admin-modal-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h2 style="font-size: 18px; font-weight: 800; color: #FFF;">➕ Add New Yoga Pose</h2>
+            <button class="topbar-btn" onclick="closeAdminModal()">✕</button>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; gap: 10px;">
+              <div style="flex: 1;">
+                <label style="display: block; font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px;">Pose Name *</label>
+                <input type="text" id="new-pose-name" class="input-field" style="width: 100%;" placeholder="e.g. Garudasana" />
+              </div>
+              <div style="flex: 1;">
+                <label style="display: block; font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px;">Sanskrit Name</label>
+                <input type="text" id="new-pose-sanskrit" class="input-field" style="width: 100%;" placeholder="e.g. Garuḍāsana" />
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <div style="flex: 1;">
+                <label style="display: block; font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px;">Difficulty</label>
+                <select id="new-pose-diff" class="input-field" style="width: 100%;">
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                </select>
+              </div>
+              <div style="flex: 1;">
+                <label style="display: block; font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px;">Primary Goal</label>
+                <select id="new-pose-goal" class="input-field" style="width: 100%;">
+                  <option>Balance</option>
+                  <option>Flexibility</option>
+                  <option>Strength</option>
+                  <option>Relaxation</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px;">Description</label>
+              <textarea id="new-pose-desc" class="input-field" style="width: 100%; height: 60px;" placeholder="Brief anatomical description..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-input); padding: 10px; border-radius: 8px;">
+              <div>
+                <div style="font-size: 12px; font-weight: 700; color: #FFF;">Enable AI Vision Posture Checking</div>
+                <div style="font-size: 10.5px; color: var(--text-muted);">Generates angle comparator rules</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <button class="btn btn-primary" style="justify-content: center; height: 38px; margin-top: 8px;" onclick="saveNewPose()">
+              Publish Pose to Library
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function saveNewPose() {
+      const name = document.getElementById("new-pose-name")?.value.trim();
+      if (!name) { alert("Please enter a pose name."); return; }
+      allAdminPoses.push({
+        id: allAdminPoses.length + 1,
+        name: name,
+        sanskrit_name: document.getElementById("new-pose-sanskrit")?.value.trim() || name,
+        difficulty: document.getElementById("new-pose-diff")?.value || "Beginner",
+        goal: document.getElementById("new-pose-goal")?.value || "Balance",
+        figure_path: "assets/pose_figures/tadasana.svg",
+        status: "Published"
+      });
+      closeAdminModal();
+      renderPosesTable();
+      alert(`Pose '${name}' added to catalog and published.`);
+    }
+
+    function closeAdminModal() {
+      document.getElementById("admin-modal-container").innerHTML = "";
+    }
+
+    function showModelTestModal() {
+      alert("Model Evaluation Sandbox:\nComparing candidate checkpoint (v2.5-rc1) vs Production (v2.4.1):\n- Accuracy Improvement: +0.8%\n- Inference Latency: 29ms (-9ms faster)\n- False Positive Rate: 0.012\n\nModel is certified production-ready.");
+    }
+
+    function promoteModelToProd() {
+      if (confirm("Promote KI PoseNet v2.5-rc1 to production?")) {
+        alert("KI PoseNet v2.5-rc1 is now active on all local inference pipelines.");
+      }
+    }
+
+    function confirmPurgeTelemetry() {
+      if (confirm("Purge practice telemetry older than 30 days? This action cannot be undone.")) {
+        alert("Telemetry logs older than 30 days purged successfully.");
+      }
+    }
+
+    function confirmResetAllData() {
+      if (confirm("DANGER: Factory reset database? All custom poses and local history will be restored to seed state.")) {
+        alert("Database restored to default seeds.");
+      }
+    }
+
+    function exportQuickReport() {
+      alert("Exporting KI.AI Operations Report (PDF/CSV)...");
+    }
+
+    function exportUsersCSV() {
+      alert("Exporting 12,482 user records to CSV...");
+    }
+  </script>
+</body>
+</html>

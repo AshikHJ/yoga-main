@@ -1,0 +1,19 @@
+{
+  "name": "KI.AI — Personal AI Yoga Teacher",
+  "short_name": "KI.AI",
+  "description": "AI-guided yoga learning system with real-time posture intelligence, biomechanical alignment, and adaptive practice roadmaps.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F8F4EC",
+  "theme_color": "#F8F4EC",
+  "categories": ["health", "fitness", "lifestyle"],
+  "icons": [
+    {
+      "src": "/assets/icons/app_icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

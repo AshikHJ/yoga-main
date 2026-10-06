@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="22" cy="58" r="5.5" fill="#10B981" />
+  <!-- Chest down, hips arched up, knees on ground -->
+  <path d="M 26 62 Q 44 68 56 46 Q 66 44 72 70" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+  <!-- Bent arms supporting chest -->
+  <line x1="32" y1="62" x2="30" y2="74" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+  <!-- Knees and toes touching floor -->
+  <circle cx="72" cy="70" r="3" fill="#34D399" />
+  <line x1="72" y1="70" x2="88" y2="72" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+  <line x1="12" y1="76" x2="94" y2="76" stroke="#334155" stroke-width="2" stroke-dasharray="2 2" />
+</svg>

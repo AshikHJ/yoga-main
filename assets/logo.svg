@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 140" width="480" height="140">
+  <defs>
+    <!-- Gradient for yoga figure and 'AI' text -->
+    <linearGradient id="kiAiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="50%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Yoga Meditating Figure Icon -->
+  <g transform="translate(10, 8)" filter="url(#subtleGlow)">
+    <!-- Head -->
+    <circle cx="60" cy="38" r="16" fill="none" stroke="url(#kiAiGrad)" stroke-width="4.5" />
+    <!-- Torso and Arms in Prayer -->
+    <!-- Torso silhouette outline -->
+    <path d="M 60 54 C 48 54 38 68 34 84 L 46 84 C 46 76 50 68 60 68 C 70 68 74 76 74 84 L 86 84 C 82 68 72 54 60 54 Z" fill="none" stroke="url(#kiAiGrad)" stroke-width="4" stroke-linejoin="round" />
+    <!-- Prayer Arms (Anjali Mudra) -->
+    <path d="M 40 76 L 54 74 L 54 58 C 54 56 60 56 60 58 L 60 74 L 66 74 L 80 76" fill="none" stroke="url(#kiAiGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 57 56 L 63 56 L 63 70 L 57 70 Z" fill="url(#kiAiGrad)" />
+    <!-- Crossed Lotus Legs Base -->
+    <path d="M 20 102 C 34 92 56 94 60 98 C 64 94 86 92 100 102 C 104 108 92 116 76 112 C 64 110 60 104 60 104 C 60 104 56 110 44 112 C 28 116 16 108 20 102 Z" fill="none" stroke="url(#kiAiGrad)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <!-- Typography -->
+  <!-- 'KI.' in White -->
+  <text x="175" y="86" font-family="'Segoe UI', 'Inter', -apple-system, sans-serif" font-weight="900" font-size="70" fill="#FFFFFF" letter-spacing="-1">KI.</text>
+  <!-- 'AI' in Green/Teal Gradient -->
+  <text x="286" y="86" font-family="'Segoe UI', 'Inter', -apple-system, sans-serif" font-weight="900" font-size="70" fill="url(#kiAiGrad)" letter-spacing="-1">AI</text>
+  <!-- Tagline: POSTURE INTELLIGENCE -->
+  <text x="178" y="116" font-family="'Segoe UI', 'Inter', -apple-system, sans-serif" font-weight="700" font-size="14.5" fill="#94A3B8" letter-spacing="4">POSTURE INTELLIGENCE</text>
+</svg>

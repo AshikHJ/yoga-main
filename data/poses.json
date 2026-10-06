@@ -1,0 +1,898 @@
+[
+  {
+    "id": 1,
+    "name": "Tadasana",
+    "sanskrit_name": "T\u0101\u1e0d\u0101sana (Mountain Pose)",
+    "category": "Standing",
+    "difficulty": "Beginner",
+    "goal": "Balance",
+    "description": "Tadasana, or Mountain Pose, is the foundational posture for all standing yoga poses. It improves posture, strengthens thighs, knees, and ankles, and firms the abdomen and buttocks.",
+    "benefits": [
+      "Improves posture and body awareness",
+      "Strengthens thighs, knees, and ankles",
+      "Firms abdomen and buttocks",
+      "Reduces flat feet symptoms",
+      "Develops core stability and balance"
+    ],
+    "instructions": [
+      "Stand with the bases of your big toes touching, heels slightly apart.",
+      "Engage your quadriceps and lift your kneecaps gently.",
+      "Lengthen your spine and draw your shoulder blades back and down.",
+      "Let your arms hang naturally by your sides with palms facing forward.",
+      "Gaze softly straight ahead and breathe evenly."
+    ],
+    "precautions": "If you experience dizziness or have low blood pressure, stand with feet hip-width apart.",
+    "image_path": "assets/images/yoga/tadasana.png",
+    "hold_duration": 20,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "left_knee",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 15.0,
+        "feedback_message": "Straighten your left leg gently without hyperextending"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 15.0,
+        "feedback_message": "Straighten your right leg gently without hyperextending"
+      },
+      {
+        "joint_name": "left_hip",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 15.0,
+        "feedback_message": "Align your hips vertically over your ankles"
+      },
+      {
+        "joint_name": "right_hip",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 15.0,
+        "feedback_message": "Align your hips vertically over your ankles"
+      },
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 10.0,
+        "feedback_message": "Relax your left arm down along your torso"
+      },
+      {
+        "joint_name": "right_elbow",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 10.0,
+        "feedback_message": "Relax your right arm down along your torso"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 90.0,
+        "min_angle": 82.0,
+        "max_angle": 98.0,
+        "tolerance": 8.0,
+        "weight": 20.0,
+        "feedback_message": "Stand tall with your spine vertically aligned"
+      }
+    ],
+    "figure_path": "assets/pose_figures/tadasana.svg",
+    "pose_figure": "assets/pose_figures/tadasana.svg"
+  },
+  {
+    "id": 2,
+    "name": "Virabhadrasana II",
+    "sanskrit_name": "V\u012brabhadr\u0101sana II (Warrior II)",
+    "category": "Strength",
+    "difficulty": "Beginner",
+    "goal": "Strength",
+    "description": "Warrior II is a powerful standing posture that builds strength in the legs, opens the hips and chest, and develops endurance and concentration.",
+    "benefits": [
+      "Strengthens and stretches legs and ankles",
+      "Stretches groins, chest, lungs, and shoulders",
+      "Stimulates abdominal organs",
+      "Increases stamina and physical stamina",
+      "Relieves backaches in second trimester of pregnancy"
+    ],
+    "instructions": [
+      "Stand with feet 3.5 to 4 feet apart.",
+      "Turn your left foot out 90 degrees and back right foot slightly in.",
+      "Bend your left knee directly over your left ankle until thigh is parallel to mat.",
+      "Extend both arms parallel to the floor, actively reaching outward.",
+      "Turn your head to look over the fingertips of your front left hand."
+    ],
+    "precautions": "Those with neck issues should not turn head; gaze straight ahead. Keep front knee tracking over ankle.",
+    "image_path": "assets/images/yoga/virabhadrasana_ii.png",
+    "hold_duration": 25,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "left_knee",
+        "target_angle": 90.0,
+        "min_angle": 75.0,
+        "max_angle": 115.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Bend your front left knee deeper toward 90 degrees"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 20.0,
+        "feedback_message": "Keep your back right leg strong and fully straight"
+      },
+      {
+        "joint_name": "left_shoulder",
+        "target_angle": 90.0,
+        "min_angle": 75.0,
+        "max_angle": 105.0,
+        "tolerance": 15.0,
+        "weight": 15.0,
+        "feedback_message": "Raise your front left arm parallel to the floor"
+      },
+      {
+        "joint_name": "right_shoulder",
+        "target_angle": 90.0,
+        "min_angle": 75.0,
+        "max_angle": 105.0,
+        "tolerance": 15.0,
+        "weight": 15.0,
+        "feedback_message": "Extend your back right arm parallel to the floor"
+      },
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 10.0,
+        "feedback_message": "Straighten your left arm through the fingertips"
+      },
+      {
+        "joint_name": "right_elbow",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 10.0,
+        "feedback_message": "Straighten your right arm through the fingertips"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 90.0,
+        "min_angle": 78.0,
+        "max_angle": 102.0,
+        "tolerance": 12.0,
+        "weight": 15.0,
+        "feedback_message": "Keep your torso centered vertically between hips, do not lean forward"
+      }
+    ],
+    "figure_path": "assets/pose_figures/virabhadrasana_ii.svg",
+    "pose_figure": "assets/pose_figures/virabhadrasana_ii.svg"
+  },
+  {
+    "id": 3,
+    "name": "Vrikshasana",
+    "sanskrit_name": "V\u1e5bk\u1e63\u0101sana (Tree Pose)",
+    "category": "Balance",
+    "difficulty": "Beginner",
+    "goal": "Balance",
+    "description": "Vrikshasana replicates the graceful, rooted stance of a tree. It develops neurological balance, strengthens the legs, and calms the mind.",
+    "benefits": [
+      "Strengthens thighs, calves, ankles, and spine",
+      "Stretches groins and inner thighs",
+      "Improves sense of balance and proprioception",
+      "Relieves sciatica and reduces flat feet",
+      "Enhances concentration and mental focus"
+    ],
+    "instructions": [
+      "Shift weight onto your right foot, grounding all four corners.",
+      "Bend your left knee and place the sole of left foot against your inner right calf or thigh (never on the knee).",
+      "Press foot and inner thigh into each other with equal pressure.",
+      "Bring palms together at chest center in Anjali Mudra or raise overhead.",
+      "Fix gaze on an unmoving point (Drishti) at eye level."
+    ],
+    "precautions": "Avoid placing the foot directly on the knee joint. Use a wall for balance support if needed.",
+    "image_path": "assets/images/yoga/vrikshasana.png",
+    "hold_duration": 20,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "right_knee",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Keep your standing right leg straight and firm"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 50.0,
+        "min_angle": 25.0,
+        "max_angle": 80.0,
+        "tolerance": 20.0,
+        "weight": 25.0,
+        "feedback_message": "Open your bent left knee outward to the side"
+      },
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 55.0,
+        "min_angle": 25.0,
+        "max_angle": 85.0,
+        "tolerance": 20.0,
+        "weight": 15.0,
+        "feedback_message": "Bring palms together in prayer position at chest height"
+      },
+      {
+        "joint_name": "right_elbow",
+        "target_angle": 55.0,
+        "min_angle": 25.0,
+        "max_angle": 85.0,
+        "tolerance": 20.0,
+        "weight": 15.0,
+        "feedback_message": "Bring palms together in prayer position at chest height"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 90.0,
+        "min_angle": 80.0,
+        "max_angle": 100.0,
+        "tolerance": 10.0,
+        "weight": 20.0,
+        "feedback_message": "Keep your spine tall and maintain upright balance"
+      }
+    ],
+    "figure_path": "assets/pose_figures/vrikshasana.svg",
+    "pose_figure": "assets/pose_figures/vrikshasana.svg"
+  },
+  {
+    "id": 4,
+    "name": "Trikonasana",
+    "sanskrit_name": "Utthita Triko\u1e47\u0101sana (Extended Triangle)",
+    "category": "Flexibility",
+    "difficulty": "Beginner",
+    "goal": "Flexibility",
+    "description": "Triangle Pose provides a deep stretch to the hamstrings, groins, and hips while expanding the chest and lengthening the spine.",
+    "benefits": [
+      "Stretches and strengthens thighs, knees, and ankles",
+      "Stretches hips, groins, hamstrings, and calves",
+      "Opens chest and shoulders",
+      "Stimulates abdominal organs",
+      "Helps relieve stress and improve digestion"
+    ],
+    "instructions": [
+      "Stand with feet 3.5 feet apart, turn right foot out 90 degrees.",
+      "Inhale, extend arms horizontally to the sides.",
+      "Exhale, reach right hand over right leg, bending from the hip joint.",
+      "Rest right hand on shin, ankle, or floor; extend left arm straight toward sky.",
+      "Keep both sides of the torso equally long."
+    ],
+    "precautions": "Do not lock the front knee. If you have neck pain, look straight ahead instead of up at the top hand.",
+    "image_path": "assets/images/yoga/trikonasana.png",
+    "hold_duration": 20,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "right_knee",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 20.0,
+        "feedback_message": "Keep your lead right leg straight without locking the knee"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 20.0,
+        "feedback_message": "Keep your back left leg grounded and straight"
+      },
+      {
+        "joint_name": "right_shoulder",
+        "target_angle": 90.0,
+        "min_angle": 70.0,
+        "max_angle": 110.0,
+        "tolerance": 20.0,
+        "weight": 20.0,
+        "feedback_message": "Reach your lower arm straight down toward your shin"
+      },
+      {
+        "joint_name": "left_shoulder",
+        "target_angle": 90.0,
+        "min_angle": 70.0,
+        "max_angle": 110.0,
+        "tolerance": 20.0,
+        "weight": 20.0,
+        "feedback_message": "Extend your top arm straight upward in line with shoulders"
+      },
+      {
+        "joint_name": "right_elbow",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 10.0,
+        "feedback_message": "Straighten both arms fully"
+      },
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 10.0,
+        "feedback_message": "Straighten both arms fully"
+      }
+    ],
+    "figure_path": "assets/pose_figures/trikonasana.svg",
+    "pose_figure": "assets/pose_figures/trikonasana.svg"
+  },
+  {
+    "id": 5,
+    "name": "Utkatasana",
+    "sanskrit_name": "Utka\u1e6d\u0101sana (Chair Pose)",
+    "category": "Strength",
+    "difficulty": "Beginner",
+    "goal": "Strength",
+    "description": "Chair Pose strengthens the thighs, calves, and spine while opening the chest and shoulders. It is a dynamic, energizing posture.",
+    "benefits": [
+      "Strengthens ankles, calves, thighs, and spine",
+      "Stretches shoulders and chest",
+      "Stimulates abdominal organs, diaphragm, and heart",
+      "Builds mental discipline and lower body stamina"
+    ],
+    "instructions": [
+      "Stand in Tadasana with feet together or hip-width apart.",
+      "Inhale and raise arms perpendicular to the floor past your ears.",
+      "Exhale and bend knees as if sitting back into an imaginary chair.",
+      "Keep thighs as parallel to the floor as possible.",
+      "Draw lower back long and keep chest lifted."
+    ],
+    "precautions": "Avoid if suffering from recent knee or low back injuries. Keep knees behind toe tips.",
+    "image_path": "assets/images/yoga/utkatasana.png",
+    "hold_duration": 20,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "left_knee",
+        "target_angle": 95.0,
+        "min_angle": 75.0,
+        "max_angle": 120.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Sink hips lower and bend knees toward 90 degrees"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 95.0,
+        "min_angle": 75.0,
+        "max_angle": 120.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Sink hips lower and bend knees toward 90 degrees"
+      },
+      {
+        "joint_name": "left_hip",
+        "target_angle": 95.0,
+        "min_angle": 75.0,
+        "max_angle": 120.0,
+        "tolerance": 15.0,
+        "weight": 20.0,
+        "feedback_message": "Hinge hips backward as if sitting in a low chair"
+      },
+      {
+        "joint_name": "right_hip",
+        "target_angle": 95.0,
+        "min_angle": 75.0,
+        "max_angle": 120.0,
+        "tolerance": 15.0,
+        "weight": 20.0,
+        "feedback_message": "Hinge hips backward as if sitting in a low chair"
+      },
+      {
+        "joint_name": "left_shoulder",
+        "target_angle": 165.0,
+        "min_angle": 140.0,
+        "max_angle": 180.0,
+        "tolerance": 20.0,
+        "weight": 10.0,
+        "feedback_message": "Reach arms straight up alongside your ears"
+      }
+    ],
+    "figure_path": "assets/pose_figures/utkatasana.svg",
+    "pose_figure": "assets/pose_figures/utkatasana.svg"
+  },
+  {
+    "id": 6,
+    "name": "Bhujangasana",
+    "sanskrit_name": "Bhuja\u1e45g\u0101sana (Cobra Pose)",
+    "category": "Flexibility",
+    "difficulty": "Beginner",
+    "goal": "Flexibility",
+    "description": "Cobra Pose is a gentle backbend that opens the chest, strengthens the spine, and invigorates the nervous system.",
+    "benefits": [
+      "Strengthens the spine and back muscles",
+      "Stretches chest, lungs, shoulders, and abdomen",
+      "Firms the buttocks and stimulates digestive organs",
+      "Helps relieve stress and fatigue",
+      "Improves spinal flexibility"
+    ],
+    "instructions": [
+      "Lie prone on the mat with tops of feet flat on floor.",
+      "Place palms on the mat under your shoulders, elbows hugged close to ribs.",
+      "Inhale, press tops of feet into mat, and gently lift chest off the ground.",
+      "Keep shoulders relaxed away from ears and broad across collarbones.",
+      "Hold and breathe smoothly."
+    ],
+    "precautions": "Avoid during pregnancy or if suffering from carpal tunnel syndrome or severe back issues.",
+    "image_path": "assets/images/yoga/bhujangasana.png",
+    "hold_duration": 15,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "left_hip",
+        "target_angle": 145.0,
+        "min_angle": 120.0,
+        "max_angle": 170.0,
+        "tolerance": 20.0,
+        "weight": 35.0,
+        "feedback_message": "Lift your chest off the mat using your upper back muscles"
+      },
+      {
+        "joint_name": "right_hip",
+        "target_angle": 145.0,
+        "min_angle": 120.0,
+        "max_angle": 170.0,
+        "tolerance": 20.0,
+        "weight": 35.0,
+        "feedback_message": "Lift your chest off the mat using your upper back muscles"
+      },
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 145.0,
+        "min_angle": 115.0,
+        "max_angle": 175.0,
+        "tolerance": 25.0,
+        "weight": 15.0,
+        "feedback_message": "Keep elbows slightly bent and tucked close to ribs"
+      },
+      {
+        "joint_name": "right_elbow",
+        "target_angle": 145.0,
+        "min_angle": 115.0,
+        "max_angle": 175.0,
+        "tolerance": 25.0,
+        "weight": 15.0,
+        "feedback_message": "Keep elbows slightly bent and tucked close to ribs"
+      }
+    ],
+    "figure_path": "assets/pose_figures/bhujangasana.svg",
+    "pose_figure": "assets/pose_figures/bhujangasana.svg"
+  },
+  {
+    "id": 7,
+    "name": "Balasana",
+    "sanskrit_name": "B\u0101l\u0101sana (Child's Pose)",
+    "category": "Relaxation",
+    "difficulty": "Beginner",
+    "goal": "Relaxation",
+    "description": "Child's Pose is a restful resting posture that gently stretches the hips, thighs, and ankles while calming the central nervous system.",
+    "benefits": [
+      "Gently stretches hips, thighs, and ankles",
+      "Calms the brain and helps relieve stress and fatigue",
+      "Relieves back and neck pain when supported",
+      "Normalizes breathing rate and lowers heart rate"
+    ],
+    "instructions": [
+      "Kneel on the floor with big toes touching, knees wide apart.",
+      "Sit hips back onto heels, exhale, and lay torso down between thighs.",
+      "Extend arms straight forward on the mat or alongside torso.",
+      "Rest your forehead gently on the mat.",
+      "Breathe deeply into the back of your lungs."
+    ],
+    "precautions": "If suffering from knee injuries or diarrhea, place a folded blanket between calves and thighs.",
+    "image_path": "assets/images/yoga/balasana.png",
+    "hold_duration": 30,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "left_knee",
+        "target_angle": 40.0,
+        "min_angle": 20.0,
+        "max_angle": 65.0,
+        "tolerance": 20.0,
+        "weight": 30.0,
+        "feedback_message": "Fold hips completely back onto your heels"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 40.0,
+        "min_angle": 20.0,
+        "max_angle": 65.0,
+        "tolerance": 20.0,
+        "weight": 30.0,
+        "feedback_message": "Fold hips completely back onto your heels"
+      },
+      {
+        "joint_name": "left_hip",
+        "target_angle": 40.0,
+        "min_angle": 20.0,
+        "max_angle": 65.0,
+        "tolerance": 20.0,
+        "weight": 20.0,
+        "feedback_message": "Rest your belly comfortably between thighs"
+      },
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 170.0,
+        "min_angle": 145.0,
+        "max_angle": 180.0,
+        "tolerance": 20.0,
+        "weight": 10.0,
+        "feedback_message": "Extend arms forward comfortably on the mat"
+      },
+      {
+        "joint_name": "right_elbow",
+        "target_angle": 170.0,
+        "min_angle": 145.0,
+        "max_angle": 180.0,
+        "tolerance": 20.0,
+        "weight": 10.0,
+        "feedback_message": "Extend arms forward comfortably on the mat"
+      }
+    ],
+    "figure_path": "assets/pose_figures/balasana.svg",
+    "pose_figure": "assets/pose_figures/balasana.svg"
+  },
+  {
+    "id": 8,
+    "name": "Adho Mukha Svanasana",
+    "sanskrit_name": "Adho Mukha \u015av\u0101n\u0101sana (Downward-Facing Dog)",
+    "category": "Strength",
+    "difficulty": "Beginner",
+    "goal": "General Fitness",
+    "description": "One of the most widely recognized yoga poses, Downward-Facing Dog rejuvenates the entire body, strengthening the upper body while stretching the hamstrings and calves.",
+    "benefits": [
+      "Strengthens arms, shoulders, and legs",
+      "Stretches shoulders, hamstrings, calves, and arches",
+      "Energizes the body and stimulates blood flow",
+      "Calms the brain and helps relieve mild depression"
+    ],
+    "instructions": [
+      "Start on all fours with wrists under shoulders and knees under hips.",
+      "Tuck toes, exhale, and lift knees away from floor.",
+      "Push sit bones toward sky, lengthening spine into an inverted V shape.",
+      "Press firmly through palms and draw heels toward the mat.",
+      "Keep head between upper arms without letting it dangle excessively."
+    ],
+    "precautions": "Avoid with high blood pressure or late-term pregnancy. Bend knees if hamstrings are tight.",
+    "image_path": "assets/images/yoga/adho_mukha_svanasana.png",
+    "hold_duration": 25,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "left_hip",
+        "target_angle": 75.0,
+        "min_angle": 55.0,
+        "max_angle": 95.0,
+        "tolerance": 15.0,
+        "weight": 30.0,
+        "feedback_message": "Lift sit bones high to form an inverted V shape"
+      },
+      {
+        "joint_name": "right_hip",
+        "target_angle": 75.0,
+        "min_angle": 55.0,
+        "max_angle": 95.0,
+        "tolerance": 15.0,
+        "weight": 30.0,
+        "feedback_message": "Lift sit bones high to form an inverted V shape"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 175.0,
+        "min_angle": 155.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 20.0,
+        "feedback_message": "Straighten legs gently without forcing heels down"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 175.0,
+        "min_angle": 155.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 20.0,
+        "feedback_message": "Straighten legs gently without forcing heels down"
+      }
+    ],
+    "figure_path": "assets/pose_figures/adho_mukha_svanasana.svg",
+    "pose_figure": "assets/pose_figures/adho_mukha_svanasana.svg"
+  },
+  {
+    "id": 9,
+    "name": "Setu Bandhasana",
+    "sanskrit_name": "Setu Bandh\u0101sana (Bridge Pose)",
+    "category": "Flexibility",
+    "difficulty": "Intermediate",
+    "goal": "Strength",
+    "description": "Bridge Pose opens the chest, heart, and shoulders while strengthening the spine, glutes, and hamstrings.",
+    "benefits": [
+      "Stretches the chest, neck, and spine",
+      "Calms the brain and helps alleviate stress",
+      "Stimulates abdominal organs, lungs, and thyroid",
+      "Rejuvenates tired legs and improves digestion"
+    ],
+    "instructions": [
+      "Lie supine on the floor, bend knees, and set feet flat on floor hip-distance apart.",
+      "Exhale and press feet and arms firmly into floor.",
+      "Lift hips toward sky until thighs are about parallel to floor.",
+      "Clasp hands under pelvis and extend through arms.",
+      "Keep thighs and inner feet parallel."
+    ],
+    "precautions": "Avoid turning head while in the pose to protect the cervical spine. Avoid with neck injuries.",
+    "image_path": "assets/images/yoga/setu_bandhasana.png",
+    "hold_duration": 20,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "left_knee",
+        "target_angle": 90.0,
+        "min_angle": 75.0,
+        "max_angle": 115.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Keep knees stacked directly above ankles"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 90.0,
+        "min_angle": 75.0,
+        "max_angle": 115.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Keep knees stacked directly above ankles"
+      },
+      {
+        "joint_name": "left_hip",
+        "target_angle": 165.0,
+        "min_angle": 140.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Press through feet to lift hips high toward the ceiling"
+      },
+      {
+        "joint_name": "right_hip",
+        "target_angle": 165.0,
+        "min_angle": 140.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Press through feet to lift hips high toward the ceiling"
+      }
+    ],
+    "figure_path": "assets/pose_figures/setu_bandhasana.svg",
+    "pose_figure": "assets/pose_figures/setu_bandhasana.svg"
+  },
+  {
+    "id": 10,
+    "name": "Dhanurasana",
+    "sanskrit_name": "Dhanur\u0101sana (Bow Pose)",
+    "category": "Flexibility",
+    "difficulty": "Intermediate",
+    "goal": "Flexibility",
+    "description": "Bow Pose is an energizing backbend where the body arches like an archer's bow, stretching the entire front body and toning the back.",
+    "benefits": [
+      "Stretches the entire front of the body, ankles, thighs, and groins",
+      "Strengthens back muscles and improves posture",
+      "Stimulates abdominal organs and neck glands",
+      "Relieves mild backache and fatigue"
+    ],
+    "instructions": [
+      "Lie on your belly with hands alongside torso, palms up.",
+      "Exhale, bend knees, and bring heels as close as possible to buttocks.",
+      "Reach back with hands and clasp your ankles.",
+      "Inhale, strongly lift heels up and away from buttocks while lifting chest.",
+      "Keep gaze forward and breathe evenly into your belly."
+    ],
+    "precautions": "Avoid if suffering from high or low blood pressure, hernia, or recent abdominal surgery.",
+    "image_path": "assets/images/yoga/dhanurasana.png",
+    "hold_duration": 15,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "left_knee",
+        "target_angle": 85.0,
+        "min_angle": 60.0,
+        "max_angle": 110.0,
+        "tolerance": 20.0,
+        "weight": 25.0,
+        "feedback_message": "Bend knees and kick feet upward into hands"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 85.0,
+        "min_angle": 60.0,
+        "max_angle": 110.0,
+        "tolerance": 20.0,
+        "weight": 25.0,
+        "feedback_message": "Bend knees and kick feet upward into hands"
+      },
+      {
+        "joint_name": "left_shoulder",
+        "target_angle": 70.0,
+        "min_angle": 45.0,
+        "max_angle": 95.0,
+        "tolerance": 20.0,
+        "weight": 25.0,
+        "feedback_message": "Reach back, hold ankles, and lift chest up"
+      },
+      {
+        "joint_name": "right_shoulder",
+        "target_angle": 70.0,
+        "min_angle": 45.0,
+        "max_angle": 95.0,
+        "tolerance": 20.0,
+        "weight": 25.0,
+        "feedback_message": "Reach back, hold ankles, and lift chest up"
+      }
+    ],
+    "figure_path": "assets/pose_figures/dhanurasana.svg",
+    "pose_figure": "assets/pose_figures/dhanurasana.svg"
+  },
+  {
+    "id": 11,
+    "name": "Natarajasana",
+    "sanskrit_name": "Na\u1e6dar\u0101j\u0101sana (Dancer Pose)",
+    "category": "Balance",
+    "difficulty": "Advanced",
+    "goal": "Balance",
+    "description": "Dedicated to Lord Shiva as the cosmic dancer, this pose combines balance, backbending, and hip opening with poise and grace.",
+    "benefits": [
+      "Stretches shoulders, chest, thighs, groins, and abdomen",
+      "Strengthens legs and ankles",
+      "Develops graceful balance, core stability, and focus",
+      "Increases spinal mobility"
+    ],
+    "instructions": [
+      "Stand in Tadasana, shift weight onto right foot.",
+      "Bend left knee, reaching left hand back to grasp inner left ankle.",
+      "Inhale, extend right arm straight up toward ceiling.",
+      "Exhale, kick left foot up and back, hinging slightly forward from hip.",
+      "Keep chest open and fix gaze on a steady point ahead."
+    ],
+    "precautions": "Keep standing knee unlocked. Avoid if you have acute low back pain or balance disorders.",
+    "image_path": "assets/images/yoga/natarajasana.png",
+    "hold_duration": 20,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "right_knee",
+        "target_angle": 175.0,
+        "min_angle": 160.0,
+        "max_angle": 180.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Keep standing right leg strong and steady"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 75.0,
+        "min_angle": 50.0,
+        "max_angle": 105.0,
+        "tolerance": 20.0,
+        "weight": 25.0,
+        "feedback_message": "Kick lifted left foot back and high into your hand"
+      },
+      {
+        "joint_name": "right_shoulder",
+        "target_angle": 165.0,
+        "min_angle": 140.0,
+        "max_angle": 180.0,
+        "tolerance": 20.0,
+        "weight": 25.0,
+        "feedback_message": "Extend forward arm forward at eye level"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 65.0,
+        "min_angle": 45.0,
+        "max_angle": 85.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Hinge slightly forward while opening chest"
+      }
+    ],
+    "figure_path": "assets/pose_figures/natarajasana.svg",
+    "pose_figure": "assets/pose_figures/natarajasana.svg"
+  },
+  {
+    "id": 12,
+    "name": "Sukhasana",
+    "sanskrit_name": "Sukh\u0101sana (Easy Pose)",
+    "category": "Sitting",
+    "difficulty": "Beginner",
+    "goal": "Relaxation",
+    "description": "Sukhasana is a comfortable seated posture for meditation and pranayama that promotes grounded posture and mental calm.",
+    "benefits": [
+      "Calms the brain and relieves mental tiredness",
+      "Strengthens the back and lengthens the spine",
+      "Stretches the knees and ankles",
+      "Encourages steady diaphragmatic breathing"
+    ],
+    "instructions": [
+      "Sit on the floor or cushion, crossing shins with feet under opposite knees.",
+      "Rest hands on knees with palms up (Gyan Mudra) or palms down.",
+      "Elongate spine upward from tailbone through crown of head.",
+      "Draw shoulders back and down, softening facial muscles.",
+      "Close eyes and focus on the natural rhythm of your breath."
+    ],
+    "precautions": "Sit on a folded blanket or yoga block if hips are tight or knees are higher than hips.",
+    "image_path": "assets/images/yoga/sukhasana.png",
+    "hold_duration": 30,
+    "is_custom": 0,
+    "rules": [
+      {
+        "joint_name": "left_knee",
+        "target_angle": 45.0,
+        "min_angle": 25.0,
+        "max_angle": 75.0,
+        "tolerance": 25.0,
+        "weight": 20.0,
+        "feedback_message": "Cross legs comfortably on the mat"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 45.0,
+        "min_angle": 25.0,
+        "max_angle": 75.0,
+        "tolerance": 25.0,
+        "weight": 20.0,
+        "feedback_message": "Cross legs comfortably on the mat"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 90.0,
+        "min_angle": 82.0,
+        "max_angle": 98.0,
+        "tolerance": 8.0,
+        "weight": 35.0,
+        "feedback_message": "Sit tall with your spine elongated and shoulders relaxed"
+      },
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 150.0,
+        "min_angle": 120.0,
+        "max_angle": 175.0,
+        "tolerance": 25.0,
+        "weight": 25.0,
+        "feedback_message": "Rest hands gently on knees"
+      }
+    ],
+    "figure_path": "assets/pose_figures/sukhasana.svg",
+    "pose_figure": "assets/pose_figures/sukhasana.svg"
+  }
+]

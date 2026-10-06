@@ -1,0 +1,2771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>KI.AI — Personal AI Yoga Teacher | Posture Intelligence</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="theme-color" content="#F8F4EC">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="KI.AI watches your movement, corrects your alignment, and adapts your yoga practice in real-time.">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/assets/icons/app_icon.png">
+
+  <!-- Google Fonts: Editorial Serif (Playfair Display) + Modern Body (Plus Jakarta Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- MediaPipe Pose for client-side webcam tracking -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  <!-- Razorpay Checkout SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    /* ============================================================
+       PART 3 — WARM EDITORIAL WELLNESS DESIGN SYSTEM
+       ============================================================ */
+    :root {
+      --ivory: #F8F4EC;
+      --cream: #F1E7D7;
+      --warm-white: #FFFDF8;
+      --sand: #E7D8C2;
+      --espresso: #4A3425;
+      --charcoal: #302A26;
+      --terracotta: #C98267;
+      --terracotta-light: #DDA08A;
+      --terracotta-soft: rgba(201, 130, 103, 0.12);
+      --sage: #A8B19B;
+      --sage-muted: #8F9A80;
+      --sage-soft: rgba(168, 177, 155, 0.2);
+      
+      --border: rgba(74, 52, 37, 0.14);
+      --border-subtle: rgba(74, 52, 37, 0.08);
+      --border-accent: rgba(201, 130, 103, 0.35);
+
+      --bg-main: var(--ivory);
+      --bg-surface: var(--warm-white);
+      --bg-card: var(--warm-white);
+      --bg-card-elevated: var(--cream);
+      
+      --text-main: var(--charcoal);
+      --text-heading: var(--espresso);
+      --text-muted: #7A6F66;
+      --text-dim: #9C8E82;
+
+      --primary: var(--espresso);
+      --primary-light: var(--terracotta);
+      --primary-soft: var(--terracotta-soft);
+
+      --status-success: #3D6A52;
+      --status-warning: #B86728;
+      --status-error: #B03A2E;
+      --status-info: #4A6B82;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-pill: 9999px;
+
+      --shadow-sm: 0 2px 8px rgba(74, 52, 37, 0.04);
+      --shadow-md: 0 8px 24px rgba(74, 52, 37, 0.06);
+      --shadow-lg: 0 16px 40px rgba(74, 52, 37, 0.09);
+      
+      --transition-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Editorial Display Typography */
+    h1, h2, h3, .font-serif, .editorial-heading {
+      font-family: 'Playfair Display', Georgia, serif;
+      color: var(--text-heading);
+      letter-spacing: -0.015em;
+      font-weight: 600;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(74, 52, 37, 0.2); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(74, 52, 37, 0.35); }
+
+    /* ============================================================
+       HEADER & NAVIGATION
+       ============================================================ */
+    header#editorial-navbar {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: rgba(248, 244, 236, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .nav-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      background: var(--espresso);
+      color: var(--ivory);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 19px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--espresso);
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: var(--terracotta);
+      text-transform: uppercase;
+    }
+
+    /* Desktop Navigation Links */
+    .desktop-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .desktop-nav-links button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 4px;
+      position: relative;
+      transition: color 0.2s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .desktop-nav-links button:hover,
+    .desktop-nav-links button.active {
+      color: var(--espresso);
+    }
+
+    .desktop-nav-links button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--terracotta);
+      border-radius: 2px;
+    }
+
+    /* Right Action Bar */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .user-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--cream);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--espresso);
+      border: 1px solid var(--border);
+    }
+
+    .badge-pro {
+      background: var(--terracotta);
+      color: #FFF;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-free {
+      background: var(--sage);
+      color: var(--charcoal);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Mobile Hamburger Button */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 18px;
+      color: var(--espresso);
+      cursor: pointer;
+    }
+
+    /* Mobile Drawer */
+    #mobile-drawer {
+      display: none;
+      background: var(--warm-white);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #mobile-drawer.open {
+      display: flex;
+    }
+
+    #mobile-drawer button {
+      background: none;
+      border: none;
+      text-align: left;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--espresso);
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+    }
+
+    /* ============================================================
+       BUTTONS & MICRO-INTERACTIONS
+       ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s var(--transition-smooth);
+      text-decoration: none;
+      border: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 44px; /* Accessible touch target */
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--espresso);
+      color: var(--ivory);
+      box-shadow: 0 4px 14px rgba(74, 52, 37, 0.15);
+    }
+
+    .btn-primary:hover {
+      background: #39281C;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(74, 52, 37, 0.22);
+    }
+
+    .btn-primary .arrow {
+      transition: transform 0.2s ease;
+    }
+
+    .btn-primary:hover .arrow {
+      transform: translateX(4px);
+    }
+
+    .btn-secondary {
+      background: var(--cream);
+      color: var(--espresso);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--sand);
+      transform: translateY(-1px);
+    }
+
+    .btn-terracotta {
+      background: var(--terracotta);
+      color: #FFF;
+      box-shadow: 0 4px 14px rgba(201, 130, 103, 0.25);
+    }
+
+    .btn-terracotta:hover {
+      background: #B87358;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: rgba(176, 58, 46, 0.12);
+      border: 1px solid var(--status-error);
+      color: var(--status-error);
+    }
+
+    .btn-danger:hover {
+      background: var(--status-error);
+      color: #FFF;
+    }
+
+    /* ============================================================
+       LAYOUT & CARDS
+       ============================================================ */
+    main#main-container {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+      animation: fadeIn 0.4s var(--transition-smooth) forwards;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card-elevated {
+      background: var(--bg-card-elevated);
+    }
+
+    /* ============================================================
+       PART 5 — ANIMATION SYSTEM
+       ============================================================ */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Staggered Hero Sequence */
+    .hero-eyebrow {
+      animation: fadeInUp 0.7s var(--transition-smooth) 0ms both;
+    }
+    .hero-title-1 {
+      animation: fadeInUp 0.7s var(--transition-smooth) 150ms both;
+    }
+    .hero-title-2 {
+      animation: fadeInUp 0.7s var(--transition-smooth) 300ms both;
+    }
+    .hero-desc {
+      animation: fadeInUp 0.7s var(--transition-smooth) 450ms both;
+    }
+    .hero-cta {
+      animation: fadeInUp 0.7s var(--transition-smooth) 600ms both;
+    }
+
+    /* AI Coach Subtle Breathing Indicator (3.5s cycle) */
+    @keyframes aiBreath {
+      0% { transform: scale(1.0); }
+      50% { transform: scale(1.045); }
+      100% { transform: scale(1.0); }
+    }
+
+    .ai-breath-indicator {
+      animation: aiBreath 3.5s ease-in-out infinite;
+    }
+
+    /* Camera Indicator Soft Pulse (Only when active) */
+    @keyframes cameraPulse {
+      0% { box-shadow: 0 0 0 0 rgba(61, 106, 82, 0.4); }
+      70% { box-shadow: 0 0 0 7px rgba(61, 106, 82, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(61, 106, 82, 0); }
+    }
+
+    .camera-active-pulse {
+      animation: cameraPulse 2s infinite;
+    }
+
+    /* AI Speaking Wave Bars */
+    .audio-wave-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      height: 14px;
+    }
+
+    .wave-bar {
+      width: 2.5px;
+      height: 100%;
+      background: var(--terracotta);
+      border-radius: 2px;
+      animation: wave 1.2s ease-in-out infinite;
+    }
+
+    .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+
+    @keyframes wave {
+      0%, 100% { height: 4px; }
+      50% { height: 14px; }
+    }
+
+    /* Reduced Motion Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* ============================================================
+       PART 4 — HERO & HOME VIEW
+       ============================================================ */
+    .hero-editorial-section {
+      padding: 48px 0 36px;
+      max-width: 960px;
+    }
+
+    .hero-eyebrow {
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      color: var(--terracotta);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: inline-block;
+    }
+
+    .hero-headline {
+      font-size: clamp(38px, 6vw, 68px);
+      line-height: 1.08;
+      color: var(--espresso);
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .hero-desc {
+      font-size: clamp(16px, 2vw, 19px);
+      color: var(--text-muted);
+      max-width: 620px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Today's Practice Hero Card */
+    .today-practice-card {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      margin: 40px 0 32px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .today-meta-tags {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin: 12px 0 20px;
+      flex-wrap: wrap;
+    }
+
+    .today-rationale {
+      font-size: 14px;
+      color: var(--espresso);
+      background: var(--warm-white);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      border-left: 3px solid var(--terracotta);
+      margin-bottom: 24px;
+      max-width: 640px;
+      line-height: 1.5;
+    }
+
+    /* Value Pillars Grid */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 36px;
+    }
+
+    .pillar-card {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+    }
+
+    .pillar-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .pillar-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--espresso);
+      margin-bottom: 6px;
+    }
+
+    .pillar-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       PART 6, 17 — CAMERA & PRACTICE STUDIO
+       ============================================================ */
+    .practice-viewport-layout {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .camera-viewport-card {
+      position: relative;
+      background: #1A1614;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+    }
+
+    video#webcam-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* Natural mirror view */
+    }
+
+    canvas#skeleton-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: scaleX(-1);
+      pointer-events: none;
+    }
+
+    .camera-placeholder-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #25201C;
+      color: var(--sand);
+      text-align: center;
+      padding: 24px;
+      z-index: 10;
+    }
+
+    /* Privacy Badges on Camera */
+    .camera-status-pill {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(48, 42, 38, 0.88);
+      backdrop-filter: blur(8px);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ivory);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 20;
+    }
+
+    .posture-eval-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 12.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      z-index: 20;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .badge-correct {
+      background: rgba(61, 106, 82, 0.92);
+      color: #FFF;
+    }
+
+    .badge-adjust {
+      background: rgba(184, 103, 40, 0.92);
+      color: #FFF;
+    }
+
+    /* Transition Overlay */
+    #transition-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(48, 42, 38, 0.94);
+      backdrop-filter: blur(12px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--ivory);
+      z-index: 50;
+      text-align: center;
+      padding: 24px;
+    }
+
+    /* Practice Right HUD */
+    .practice-hud-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .score-circle-card {
+      text-align: center;
+      padding: 24px;
+    }
+
+    .score-display-number {
+      font-size: 58px;
+      font-weight: 800;
+      color: var(--espresso);
+      font-family: 'Playfair Display', serif;
+      line-height: 1.1;
+      margin: 4px 0;
+      transition: color 0.3s ease;
+    }
+
+    .valid-hold-card {
+      padding: 20px;
+    }
+
+    .hold-progress-track {
+      height: 8px;
+      background: var(--sand);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 12px 0 8px;
+    }
+
+    .hold-progress-fill {
+      height: 100%;
+      background: var(--terracotta);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* ============================================================
+       PART 12 — SUBSCRIPTION & PRICING UI
+       ============================================================ */
+    .pricing-header {
+      text-align: center;
+      max-width: 680px;
+      margin: 20px auto 48px;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 32px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .pricing-card.featured {
+      background: var(--cream);
+      border: 2px solid var(--terracotta);
+      box-shadow: var(--shadow-md);
+    }
+
+    .plan-badge {
+      position: absolute;
+      top: -12px;
+      right: 28px;
+      background: var(--terracotta);
+      color: #FFF;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      text-transform: uppercase;
+    }
+
+    .plan-price {
+      font-size: 44px;
+      font-weight: 800;
+      font-family: 'Playfair Display', serif;
+      color: var(--espresso);
+      margin: 16px 0 8px;
+      line-height: 1;
+    }
+
+    .plan-features {
+      list-style: none;
+      margin: 24px 0 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      font-size: 14px;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--charcoal);
+    }
+
+    .plan-features li .check {
+      color: var(--status-success);
+      font-weight: 800;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(48, 42, 38, 0.65);
+      backdrop-filter: blur(8px);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      max-width: 520px;
+      width: 100%;
+      padding: 36px;
+      box-shadow: var(--shadow-lg);
+      animation: fadeInUp 0.3s var(--transition-smooth) both;
+    }
+
+    /* ============================================================
+       PART 14, 15 — MOBILE RESPONSIVE ADAPTATIONS
+       ============================================================ */
+    @media (max-width: 900px) {
+      .practice-viewport-layout {
+        grid-template-columns: 1fr;
+      }
+      .today-practice-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .desktop-nav-links {
+        display: none;
+      }
+      .mobile-menu-btn {
+        display: block;
+      }
+      main#main-container {
+        padding: 20px 16px 48px;
+      }
+      .hero-editorial-section {
+        padding: 24px 0;
+      }
+      .card {
+        padding: 20px;
+      }
+      .hero-cta-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn {
+        width: 100%;
+      }
+      .camera-viewport-card {
+        aspect-ratio: 3/4; /* Mobile portrait aspect ratio */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       EDITORIAL STICKY NAVBAR
+       ============================================================ -->
+  <header id="editorial-navbar">
+    <div class="nav-container">
+      <div class="brand-group" onclick="switchView('home')">
+        <div class="brand-mark">KI</div>
+        <div class="brand-text">
+          <span class="brand-title">KI.AI</span>
+          <span class="brand-subtitle">Personal AI Yoga Teacher</span>
+        </div>
+      </div>
+
+      <!-- Desktop Links -->
+      <nav class="desktop-nav-links">
+        <button id="nav-btn-home" class="active" onclick="switchView('home')">Home</button>
+        <button id="nav-btn-practice" onclick="openPracticeIntro()">Practice</button>
+        <button id="nav-btn-programs" onclick="switchView('programs')">Programs</button>
+        <button id="nav-btn-progress" onclick="switchView('progress')">Progress</button>
+        <button id="nav-btn-library" onclick="switchView('library')">Library</button>
+        <button id="nav-btn-pricing" onclick="switchView('pricing')">Pricing</button>
+      </nav>
+
+      <!-- Right Actions -->
+      <div class="nav-actions">
+        <div class="user-status-pill">
+          <span id="nav-user-name">Ashik</span>
+          <span id="nav-plan-badge" class="badge-free">FREE</span>
+        </div>
+        <button class="btn btn-secondary" style="padding: 8px 14px; min-height: 38px; font-size: 13px;" onclick="openPreferencesModal()" title="Preferences">
+          ⚙ Preferences
+        </button>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle Navigation">
+          ☰
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-drawer">
+      <button onclick="switchView('home'); toggleMobileMenu();">Home</button>
+      <button onclick="openPracticeIntro(); toggleMobileMenu();">Practice Studio</button>
+      <button onclick="switchView('programs'); toggleMobileMenu();">Programs</button>
+      <button onclick="switchView('progress'); toggleMobileMenu();">Progress</button>
+      <button onclick="switchView('library'); toggleMobileMenu();">Pose Library</button>
+      <button onclick="switchView('pricing'); toggleMobileMenu();">Subscription & Pro</button>
+      <button onclick="openPreferencesModal(); toggleMobileMenu();">Practice Preferences</button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MAIN CONTENT CONTAINER
+       ============================================================ -->
+  <main id="main-container">
+
+    <!-- 1. EDITORIAL HOME VIEW -->
+    <section id="view-home" class="view-section active">
+      <div class="hero-editorial-section">
+        <div class="hero-eyebrow">YOUR PERSONAL AI YOGA TEACHER</div>
+        <h1 class="hero-headline">
+          <span class="hero-title-1" style="display:block;">Move Better.</span>
+          <span class="hero-title-2" style="display:block; color: var(--terracotta);">Practice Smarter.</span>
+        </h1>
+        <p class="hero-desc">
+          An intelligent yoga companion that observes your joint alignment in real-time, speaks corrective adjustments, and adapts your daily practice.
+        </p>
+        <div class="hero-cta-group hero-cta">
+          <button class="btn btn-primary" onclick="openPracticeIntro()">
+            START TODAY'S PRACTICE <span class="arrow">→</span>
+          </button>
+          <button class="btn btn-secondary" onclick="switchView('programs')">
+            EXPLORE PROGRAMS
+          </button>
+        </div>
+      </div>
+
+      <!-- TODAY'S PRACTICE HERO CARD -->
+      <div class="today-practice-card">
+        <div>
+          <div style="font-size: 12px; font-weight: 800; letter-spacing: 1.5px; color: var(--terracotta); text-transform: uppercase;">
+            RECOMMENDED FOR YOU
+          </div>
+          <h2 style="font-size: 32px; color: var(--espresso); margin: 6px 0;" id="home-today-title">
+            Foundation Alignment & Balance
+          </h2>
+          <div class="today-meta-tags" id="home-today-meta">
+            <span>⏱ 20 Minutes</span>
+            <span>•</span>
+            <span id="home-program-name">Beginner Level</span>
+            <span>•</span>
+            <span>Full Body Awareness</span>
+          </div>
+
+          <div class="today-rationale" id="home-today-desc">
+            Tailored for your General Fitness goal. Builds pelvic stability and mindful breathing fundamentals.
+          </div>
+
+          <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="openPracticeIntro()">
+              BEGIN TODAY'S PRACTICE <span class="arrow">→</span>
+            </button>
+            <button class="btn btn-secondary" onclick="openPreferencesModal()">
+              Adjust Focus
+            </button>
+          </div>
+        </div>
+
+        <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px;">
+          <div class="ai-breath-indicator" style="width: 88px; height: 88px; border-radius: 50%; background: var(--sage-soft); border: 2px solid var(--sage); display: flex; align-items: center; justify-content: center; font-size: 38px;">
+            🧘‍♀️
+          </div>
+          <div style="font-size: 11.5px; font-weight: 700; color: var(--espresso); margin-top: 10px;">AI READY</div>
+        </div>
+      </div>
+
+      <!-- EDITORIAL VALUE PILLARS -->
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-icon">📐</div>
+          <div class="pillar-title">Real-Time Alignment</div>
+          <div class="pillar-desc">Sub-degree 33-landmark biomechanical verification directly in your browser.</div>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-icon">🗣️</div>
+          <div class="pillar-title">Dynamic Voice Coach</div>
+          <div class="pillar-desc">Debounced verbal cues that guide your hold and automatically progress exercises.</div>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-icon">🔒</div>
+          <div class="pillar-title">100% Edge Privacy</div>
+          <div class="pillar-desc">Raw camera frames are processed on-device and are never uploaded or recorded.</div>
+        </div>
+      </div>
+
+      <!-- KARATE UPCOMING BANNER -->
+      <div class="card" style="margin-top: 36px; background: var(--cream); border-left: 4px solid var(--status-warning); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="font-size: 32px;">🥋</div>
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--status-warning); letter-spacing: 1px;">UPCOMING PROGRAM</div>
+            <div style="font-size: 17px; font-weight: 700; color: var(--espresso);">Karate AI Master — Stance & Kata Precision</div>
+            <div style="font-size: 13px; color: var(--text-muted);">Learn martial arts kata with real-time stance scoring.</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="showKarateModal()">Preview Karate AI</button>
+      </div>
+    </section>
+
+    <!-- 2. SESSION INTRO ROADMAP VIEW -->
+    <section id="view-session-intro" class="view-section">
+      <div class="card" style="max-width: 780px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--terracotta);">SESSION ROADMAP</div>
+            <h1 style="font-size: 32px; color: var(--espresso); margin-top: 4px;" id="intro-session-title">Today's Sequence</h1>
+            <div style="font-size: 14px; color: var(--text-muted);" id="intro-session-sub">Focus: Balance & Alignment</div>
+          </div>
+          <button class="btn btn-secondary" onclick="switchView('home')" style="min-height: 38px; padding: 6px 14px;">✕ Exit</button>
+        </div>
+
+        <p style="color: var(--text-muted); font-size: 14.5px; margin-bottom: 28px;" id="intro-session-overview">
+          KI.AI will guide you step-by-step through each posture. Timers advance only when posture alignment is verified.
+        </p>
+
+        <div id="intro-roadmap-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+        <div style="margin-top: 32px; display: flex; gap: 16px; flex-wrap: wrap;">
+          <button class="btn btn-secondary" style="flex: 1;" onclick="switchView('home')">BACK</button>
+          <button class="btn btn-primary" style="flex: 2;" onclick="promptCameraPermissionAndStart()">
+            START PRACTICE SESSION <span class="arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. LIVE AI CAMERA PRACTICE VIEWPORT -->
+    <section id="view-practice" class="view-section">
+      <!-- Practice Studio Header Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <span style="font-size: 13px; font-weight: 800; color: var(--terracotta);" id="hud-step-num">01/08</span>
+          <h2 style="font-size: 24px; font-weight: 700; color: var(--espresso);" id="hud-pose-title">TADASANA (MOUNTAIN POSE)</h2>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="font-size: 13px; color: var(--text-muted);" id="hud-next-upcoming">Next: Vrikshasana</span>
+          <button id="btn-hud-stop-camera" class="btn btn-danger" style="padding: 6px 14px; font-size: 12px; min-height: 36px;" onclick="CameraManager.stopCamera()" title="Stop camera immediately">
+            🔇 Stop Camera
+          </button>
+          <button id="btn-hud-stop-voice" class="btn btn-secondary" style="padding: 6px 14px; font-size: 12px; min-height: 36px;" onclick="window.VoiceManager.stop()" title="Stop speech">
+            🔇 Stop Voice
+          </button>
+          <button class="btn btn-secondary" style="padding: 6px 14px; font-size: 12px; min-height: 36px;" onclick="skipCurrentExercise()">
+            Skip Pose ⏭
+          </button>
+          <button class="btn btn-secondary" style="padding: 6px 14px; font-size: 12px; min-height: 36px;" onclick="completeFullSession()">
+            End Practice ⏹
+          </button>
+        </div>
+      </div>
+
+      <!-- Practice Grid -->
+      <div class="practice-viewport-layout">
+        <!-- Center / Left: Camera Box -->
+        <div class="camera-viewport-card" id="camera-card">
+          <video id="webcam-video" autoplay playsinline muted></video>
+          <canvas id="skeleton-canvas"></canvas>
+
+          <!-- Pre-Camera / Stopped Placeholder Overlay -->
+          <div id="camera-placeholder" class="camera-placeholder-overlay" style="display: none;">
+            <div style="font-size: 42px; margin-bottom: 12px;">📷</div>
+            <div style="font-size: 18px; font-weight: 700; color: var(--ivory); margin-bottom: 6px;">Camera Inactive</div>
+            <p style="font-size: 13px; color: var(--sand); max-width: 320px; margin-bottom: 20px;">
+              Camera is paused or stopped for your privacy.
+            </p>
+            <button class="btn btn-primary" onclick="CameraManager.startCamera()">
+              Resume Camera
+            </button>
+          </div>
+
+          <!-- Camera Privacy Status Indicator -->
+          <div class="camera-status-pill">
+            <span id="hud-camera-dot" style="font-size: 10px;">●</span>
+            <span id="hud-camera-status-label">Camera active</span>
+          </div>
+
+          <!-- Alignment Right / Wrong Badge -->
+          <div id="hud-right-wrong-badge" class="posture-eval-badge badge-correct">
+            ✓ RIGHT POSTURE
+          </div>
+
+          <!-- Transition Countdown Overlay -->
+          <div id="transition-overlay">
+            <div style="color: var(--terracotta); font-size: 13px; font-weight: 800; letter-spacing: 2px;">OUTSTANDING HOLD!</div>
+            <div style="font-size: 54px; font-weight: 900; margin: 8px 0;" id="trans-score-display">Score: 92%</div>
+            <div style="font-size: 15px; color: var(--sand); margin-bottom: 20px;" id="trans-feedback-text">Excellent knee alignment!</div>
+            <div style="font-size: 14px;">Next: <b id="trans-next-name" style="color: var(--terracotta);">Vrikshasana</b></div>
+            <div style="font-size: 72px; font-weight: 900; color: var(--terracotta); margin-top: 12px;" id="trans-countdown-num">3</div>
+          </div>
+        </div>
+
+        <!-- Right: AI Coach HUD -->
+        <div class="practice-hud-panel">
+          <!-- Score Card -->
+          <div class="card score-circle-card">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase;">
+              POSTURE ACCURACY
+            </div>
+            <div class="score-display-number" id="hud-score">--%</div>
+            <div id="hud-status-badge" style="display: inline-block; padding: 4px 14px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; background: var(--sage-soft); color: var(--status-success);">
+              Detecting Pose
+            </div>
+          </div>
+
+          <!-- Hold Timer Card -->
+          <div class="card valid-hold-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">VALID HOLD TIMER</span>
+              <span style="font-size: 18px; font-weight: 800; color: var(--espresso);" id="hud-hold-display">00:00 / 00:20</span>
+            </div>
+            <div class="hold-progress-track">
+              <div id="hud-hold-progress-bar" class="hold-progress-fill"></div>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted);" id="hud-hold-status">Timer advances only when posture &ge; 78%</div>
+          </div>
+
+          <!-- Verbal AI Coach Feedback -->
+          <div class="card" style="border-left: 4px solid var(--terracotta);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <div style="font-size: 11px; font-weight: 800; color: var(--terracotta); letter-spacing: 1px;">AI COACH FEEDBACK</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <div id="audio-wave-box" class="audio-wave-container" style="display: none;">
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                </div>
+                <span id="hud-voice-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 12px; background: var(--cream); color: var(--espresso); font-weight: 700; border: 1px solid var(--border);">IDLE</span>
+                <button id="hud-card-mute-btn" onclick="window.VoiceManager.toggleMute()" title="Mute/Unmute coach speech" style="background: none; border: 1px solid var(--border); color: var(--espresso); font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px; cursor: pointer;">🔈 MUTE</button>
+              </div>
+            </div>
+            <div id="hud-feedback" style="font-size: 14.5px; color: var(--charcoal); line-height: 1.5;">
+              Step into camera view to begin alignment check.
+            </div>
+          </div>
+
+          <!-- Breathing Cue -->
+          <div class="card" style="padding: 18px;">
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted);">BREATHING GUIDANCE</div>
+            <div id="hud-breathing" style="font-size: 14px; font-weight: 600; color: var(--espresso); margin-top: 4px;">
+              💨 Inhale deeply through nose, expand ribcage
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. SESSION COMPLETION SCREEN -->
+    <section id="view-session-complete" class="view-section">
+      <div class="card" style="max-width: 680px; margin: 0 auto; text-align: center; padding: 48px 36px;">
+        <div style="font-size: 52px; margin-bottom: 12px;">🎉</div>
+        <h1 style="font-size: 36px; color: var(--espresso);">Session Complete</h1>
+        <p style="color: var(--text-muted); font-size: 15px; margin-top: 4px;">
+          Outstanding dedication. Your body awareness and stability improved today.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 32px 0;">
+          <div class="card card-elevated" style="padding: 16px;">
+            <div style="font-size: 11px; color: var(--text-muted);">DURATION</div>
+            <div style="font-size: 24px; font-weight: 800; color: var(--espresso);" id="summary-duration">20 min</div>
+          </div>
+          <div class="card card-elevated" style="padding: 16px;">
+            <div style="font-size: 11px; color: var(--text-muted);">AVG ACCURACY</div>
+            <div style="font-size: 24px; font-weight: 800; color: var(--status-success);" id="summary-accuracy">91%</div>
+          </div>
+          <div class="card card-elevated" style="padding: 16px;">
+            <div style="font-size: 11px; color: var(--text-muted);">BEST POSE</div>
+            <div style="font-size: 16px; font-weight: 800; color: var(--espresso);" id="summary-best-pose">Vrikshasana</div>
+          </div>
+        </div>
+
+        <div class="card" style="background: var(--cream); text-align: left; margin-bottom: 32px; border-left: 4px solid var(--terracotta);">
+          <div style="font-size: 11px; font-weight: 800; color: var(--terracotta);">AI TEACHER INSIGHT</div>
+          <div style="font-size: 14px; color: var(--espresso); margin-top: 4px;" id="summary-ai-insight">
+            "Your knee stability and hold consistency were exemplary today. Progress towards Intermediate level is on track."
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 14px;">
+          <button class="btn btn-secondary" style="flex: 1;" onclick="switchView('progress')">VIEW PROGRESS</button>
+          <button class="btn btn-primary" style="flex: 1;" onclick="switchView('home')">DONE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. PROGRAMS VIEW -->
+    <section id="view-programs" class="view-section">
+      <div style="margin-bottom: 36px; max-width: 680px;">
+        <h1 style="font-size: 34px; color: var(--espresso);">Progressive Learning Programs</h1>
+        <p style="color: var(--text-muted); font-size: 15px; margin-top: 6px;">
+          Structured pathways that adapt difficulty safely as your posture improves.
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <!-- Level 1: Foundation -->
+        <div class="card" style="border-left: 5px solid var(--sage);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <span style="font-size: 11px; font-weight: 800; color: var(--sage); letter-spacing: 1px;">LEVEL 1 — BEGINNER</span>
+              <h2 style="font-size: 26px; color: var(--espresso); margin: 4px 0;">Foundation</h2>
+              <div style="font-size: 14px; color: var(--text-muted); font-style: italic;">Build your body awareness and learn the fundamentals.</div>
+              <p style="font-size: 14px; color: var(--charcoal); margin: 12px 0; max-width: 680px; line-height: 1.6;">
+                Teaches Tadasana, diaphragmatic breathing, Vrikshasana balance, gentle spinal stretches, and beginner Surya Namaskar.
+              </p>
+              <div style="font-size: 12.5px; color: var(--status-success); font-weight: 600;">✓ Unlocked • Recommended for your profile</div>
+            </div>
+            <button class="btn btn-primary" onclick="startProgramSession('Beginner')">Start Foundation</button>
+          </div>
+        </div>
+
+        <!-- Level 2: Progress -->
+        <div class="card" style="border-left: 5px solid var(--status-warning);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <span style="font-size: 11px; font-weight: 800; color: var(--status-warning); letter-spacing: 1px;">LEVEL 2 — INTERMEDIATE</span>
+              <h2 style="font-size: 26px; color: var(--espresso); margin: 4px 0;">Progress</h2>
+              <div style="font-size: 14px; color: var(--text-muted); font-style: italic;">Build strength, flexibility, balance and control.</div>
+              <p style="font-size: 14px; color: var(--charcoal); margin: 12px 0; max-width: 680px; line-height: 1.6;">
+                Dynamic warrior sequences, Trikonasana, full Surya Namaskar, Adho Mukha Svanasana, and core stabilization routines.
+              </p>
+              <div style="font-size: 12.5px; color: var(--text-muted);">Unlocked for Pro &amp; Foundation graduates</div>
+            </div>
+            <button class="btn btn-secondary" onclick="startProgramSession('Intermediate')">Start Progress</button>
+          </div>
+        </div>
+
+        <!-- Level 3: Mastery -->
+        <div class="card" style="border-left: 5px solid var(--terracotta);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <span style="font-size: 11px; font-weight: 800; color: var(--terracotta); letter-spacing: 1px;">LEVEL 3 — ADVANCED</span>
+              <h2 style="font-size: 26px; color: var(--espresso); margin: 4px 0;">Mastery</h2>
+              <div style="font-size: 14px; color: var(--text-muted); font-style: italic;">Precision alignment, breath retention and deep holds.</div>
+              <p style="font-size: 14px; color: var(--charcoal); margin: 12px 0; max-width: 680px; line-height: 1.6;">
+                Natarajasana (Dancer), advanced backbends, and continuous flow transitions with real-time micro-angle analysis.
+              </p>
+              <div style="font-size: 12.5px; color: var(--terracotta); font-weight: 600;">👑 Included with KI.AI Pro</div>
+            </div>
+            <button class="btn btn-terracotta" onclick="startProgramSession('Advanced')">Start Mastery</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. PROGRESS VIEW -->
+    <section id="view-progress" class="view-section">
+      <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 34px; color: var(--espresso);">Wellness Progress &amp; Biometrics</h1>
+        <p style="color: var(--text-muted); font-size: 15px; margin-top: 4px;">Longitudinal joint accuracy, streak metrics, and hold durations.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px;">
+        <div class="card">
+          <h3 style="font-size: 18px; color: var(--espresso); margin-bottom: 16px;">Daily Accuracy Trend (%)</h3>
+          <canvas id="chart-progress" style="max-height: 260px;"></canvas>
+        </div>
+        <div class="card">
+          <h3 style="font-size: 18px; color: var(--espresso); margin-bottom: 16px;">Pose Proficiency Scores</h3>
+          <canvas id="chart-poses" style="max-height: 260px;"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. POSE LIBRARY VIEW -->
+    <section id="view-library" class="view-section">
+      <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h1 style="font-size: 34px; color: var(--espresso);">Pose Library &amp; Biomechanics</h1>
+          <p style="color: var(--text-muted); font-size: 15px; margin-top: 4px;">Target joint angles, alignment rules, and benefits.</p>
+        </div>
+        <input type="text" placeholder="Search poses..." oninput="filterLibrary(this.value)" style="background: var(--warm-white); border: 1px solid var(--border); padding: 10px 16px; border-radius: var(--radius-pill); font-size: 14px; width: 240px; color: var(--espresso);">
+      </div>
+
+      <div id="library-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;"></div>
+    </section>
+
+    <!-- 8. REAL PRICING & SUBSCRIPTION VIEW -->
+    <section id="view-pricing" class="view-section">
+      <div class="pricing-header">
+        <h1 style="font-size: 40px; color: var(--espresso);">Choose the practice that fits you.</h1>
+        <p style="color: var(--text-muted); font-size: 16px; margin-top: 8px;">
+          Honest, transparent pricing for individualized real-time posture coaching.
+        </p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Free Plan -->
+        <div class="pricing-card">
+          <div style="font-size: 12px; font-weight: 800; color: var(--sage); letter-spacing: 1px;">STARTER</div>
+          <h3 style="font-size: 26px; color: var(--espresso); margin-top: 4px;">Free</h3>
+          <div class="plan-price">₹0</div>
+          <div style="font-size: 13px; color: var(--text-muted);">Forever free practice tier</div>
+
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Level 1 (Foundation) sessions</li>
+            <li><span class="check">✓</span> Real-time posture score &amp; skeleton</li>
+            <li><span class="check">✓</span> Valid hold timer progression</li>
+            <li><span class="check">✓</span> 7-day progress history</li>
+            <li style="color: var(--text-dim);">✕ Conversational AI Coach drawer</li>
+            <li style="color: var(--text-dim);">✕ Level 2 &amp; 3 Programs</li>
+          </ul>
+
+          <div style="margin-top: auto;">
+            <button class="btn btn-secondary" style="width: 100%;" disabled>Current Plan</button>
+          </div>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="pricing-card featured">
+          <span class="plan-badge">RECOMMENDED</span>
+          <div style="font-size: 12px; font-weight: 800; color: var(--terracotta); letter-spacing: 1px;">ALL ACCESS</div>
+          <h3 style="font-size: 26px; color: var(--espresso); margin-top: 4px;">KI.AI Pro</h3>
+          <div class="plan-price">₹799 <span style="font-size: 16px; font-weight: 500; color: var(--text-muted);">/ month</span></div>
+          <div style="font-size: 13px; color: var(--text-muted);">Cancel anytime with 1-click</div>
+
+          <ul class="plan-features">
+            <li><span class="check">✓</span> All 3 Programs (Foundation, Progress, Mastery)</li>
+            <li><span class="check">✓</span> Full Conversational AI Yoga Teacher</li>
+            <li><span class="check">✓</span> Biomechanical score explanations ("Why is my score low?")</li>
+            <li><span class="check">✓</span> Unlimited adaptive daily session planning</li>
+            <li><span class="check">✓</span> Joint angle biometrics &amp; lifetime progress</li>
+            <li><span class="check">✓</span> Early beta access to Karate AI Master</li>
+          </ul>
+
+          <div style="margin-top: auto;">
+            <button id="btn-upgrade-pro" class="btn btn-primary" style="width: 100%;" onclick="PaymentManager.startSubscriptionFlow('PRO_MONTHLY')">
+              UPGRADE TO PRO <span class="arrow">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. PREFERENCES VIEW -->
+    <section id="view-preferences" class="view-section">
+      <div class="card" style="max-width: 640px; margin: 0 auto; padding: 36px;">
+        <h1 style="font-size: 30px; color: var(--espresso); margin-bottom: 6px;">Practice Preferences</h1>
+        <p style="color: var(--text-muted); font-size: 14.5px; margin-bottom: 28px;">Customize your goals, practice duration, and audio coaching settings.</p>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 700; color: var(--espresso); margin-bottom: 6px;">Primary Goal</label>
+            <select id="pref-goal" style="width: 100%; background: var(--warm-white); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-sm); font-size: 14px; color: var(--espresso);">
+              <option value="General Fitness">General Fitness &amp; Well-being</option>
+              <option value="Flexibility">Deep Flexibility &amp; Mobility</option>
+              <option value="Stress Relief">Stress Relief &amp; Calming Breath</option>
+              <option value="Strength">Core &amp; Balance Strength</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 700; color: var(--espresso); margin-bottom: 6px;">Experience Level</label>
+            <select id="pref-level" style="width: 100%; background: var(--warm-white); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-sm); font-size: 14px; color: var(--espresso);">
+              <option value="Beginner">Beginner (Foundation)</option>
+              <option value="Intermediate">Intermediate (Progress)</option>
+              <option value="Advanced">Advanced (Mastery)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 700; color: var(--espresso); margin-bottom: 6px;">Session Duration</label>
+            <select id="pref-duration" style="width: 100%; background: var(--warm-white); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-sm); font-size: 14px; color: var(--espresso);">
+              <option value="10">10 Minutes (Express practice)</option>
+              <option value="15">15 Minutes (Standard balance)</option>
+              <option value="20">20 Minutes (Complete flow)</option>
+              <option value="30">30 Minutes (Deep restorative)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 700; color: var(--espresso); margin-bottom: 6px;">Physical Focus Area</label>
+            <select id="pref-focus" style="width: 100%; background: var(--warm-white); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-sm); font-size: 14px; color: var(--espresso);">
+              <option value="Full Body">Full Body Harmony</option>
+              <option value="Hips & Hamstrings">Hips &amp; Hamstring Release</option>
+              <option value="Spine & Back">Spine &amp; Posture Realignment</option>
+              <option value="Core Stability">Core &amp; Pelvic Balance</option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0;">
+            <div>
+              <div style="font-size: 14px; font-weight: 700; color: var(--espresso);">Spoken AI Voice Coaching</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Real-time speech cues during holds</div>
+            </div>
+            <input type="checkbox" id="pref-voice" checked style="width: 22px; height: 22px; accent-color: var(--espresso);">
+          </div>
+
+          <div style="display: flex; gap: 14px; margin-top: 14px;">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="switchView('home')">Cancel</button>
+            <button class="btn btn-primary" style="flex: 1;" onclick="savePreferences()">Save Preferences</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       CAMERA PRIVACY PERMISSION MODAL
+       ============================================================ -->
+  <div id="modal-camera-privacy" class="modal-backdrop">
+    <div class="modal-content">
+      <div style="font-size: 38px; margin-bottom: 12px;">🔒</div>
+      <h2 style="font-size: 26px; color: var(--espresso); margin-bottom: 8px;">Camera Privacy Guarantee</h2>
+      <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
+        KI.AI uses your camera for real-time skeletal posture intelligence.
+      </p>
+      <div style="background: var(--cream); border-left: 3px solid var(--status-success); padding: 14px; border-radius: var(--radius-sm); font-size: 13.5px; color: var(--charcoal); margin-bottom: 24px; line-height: 1.5;">
+        ✓ Raw video is processed entirely inside your browser.<br>
+        ✓ No frames or video streams are ever recorded, saved, or uploaded to any server.<br>
+        ✓ Camera shuts down immediately when you stop or leave practice.
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button class="btn btn-secondary" style="flex: 1;" onclick="closeCameraPrivacyModal()">Cancel</button>
+        <button class="btn btn-primary" style="flex: 2;" onclick="confirmStartPracticeCamera()">
+          Grant Access &amp; Begin Practice
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       RAZORPAY TEST/DEMO PAYMENT SIMULATOR MODAL
+       ============================================================ -->
+  <div id="modal-payment-checkout" class="modal-backdrop">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <div style="font-size: 11px; font-weight: 800; color: var(--terracotta); letter-spacing: 1px;">RAZORPAY SECURE CHECKOUT</div>
+          <h3 style="font-size: 24px; color: var(--espresso); margin-top: 2px;">Complete Pro Subscription</h3>
+        </div>
+        <button onclick="PaymentManager.closeCheckoutModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+
+      <div class="card card-elevated" style="margin-bottom: 20px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; font-size: 14px;">
+          <span style="color: var(--text-muted);">Plan:</span>
+          <b id="checkout-plan-name" style="color: var(--espresso);">KI.AI Pro Monthly</b>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 18px; margin-top: 8px;">
+          <span style="color: var(--text-muted);">Amount Due:</span>
+          <b id="checkout-amount" style="color: var(--terracotta);">₹799.00</b>
+        </div>
+      </div>
+
+      <div style="background: var(--cream); padding: 12px; border-radius: var(--radius-sm); font-size: 12.5px; color: var(--charcoal); margin-bottom: 20px; border-left: 3px solid var(--terracotta);">
+        🛡️ <b>Server-Side HMAC-SHA256 Verification</b><br>
+        Payment will be verified server-side against Razorpay before granting Pro access.
+      </div>
+
+      <div id="payment-status-message" style="display: none; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+      <div style="display: flex; gap: 12px;">
+        <button class="btn btn-secondary" style="flex: 1;" onclick="PaymentManager.closeCheckoutModal()">Cancel</button>
+        <button id="btn-submit-payment" class="btn btn-primary" style="flex: 2;" onclick="PaymentManager.simulateTestPaymentSuccess()">
+          Pay ₹799 (Verify Signature)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       KARATE PREVIEW MODAL
+       ============================================================ -->
+  <div id="karate-modal" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 560px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-size: 12px; font-weight: 800; color: var(--status-warning);">UPCOMING SYSTEM EXPANSION</span>
+        <button onclick="document.getElementById('karate-modal').style.display='none'" style="background:none; border:none; font-size:18px; cursor:pointer;">✕</button>
+      </div>
+      <h2 style="font-size: 28px; color: var(--espresso); margin-bottom: 8px;">Karate AI Master</h2>
+      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
+        Transforming martial arts training with posture detection for Zenkutsu Dachi (front stance), Kiba Dachi (horse stance), and kick/punch mechanics.
+      </p>
+      <div style="display: flex; gap: 10px;">
+        <input type="email" placeholder="Enter email for beta access..." style="flex: 1; border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-sm); font-size: 14px;">
+        <button class="btn btn-primary" onclick="alert('You are on the priority beta waitlist!'); document.getElementById('karate-modal').style.display='none';">Join Beta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       JAVASCRIPT ARCHITECTURE
+       ============================================================ -->
+  <script>
+    // ==========================================
+    // 1. APPLICATION STATE & USER MODEL
+    // ==========================================
+    let currentUser = { id: 1, name: "Ashik", email: "ashik@ki.ai", goal: "General Fitness", level: "Beginner", is_pro: false };
+    let userPreferences = { goal: "General Fitness", level: "Beginner", duration_minutes: 20, focus_area: "Full Body", voice_enabled: 1 };
+    let currentSessionPlan = null;
+    let currentStepIndex = 0;
+    let validHoldCount = 0;
+    let holdTimerInterval = null;
+    let currentPoseScore = 0;
+    let displayedPoseScore = 0;
+    let recognition = null;
+    let isListening = false;
+    let allPoses = [];
+
+    // ==========================================
+    // 2. CENTRALIZED CAMERA MANAGER (P0 PRIVACY)
+    // ==========================================
+    const CameraState = {
+      IDLE: 'IDLE',
+      REQUESTING_PERMISSION: 'REQUESTING_PERMISSION',
+      ACTIVE: 'ACTIVE',
+      PAUSED: 'PAUSED',
+      STOPPING: 'STOPPING',
+      STOPPED: 'STOPPED'
+    };
+
+    const CameraManager = {
+      state: CameraState.IDLE,
+      stream: null,
+      videoElement: null,
+      canvasElement: null,
+      canvasCtx: null,
+      poseInstance: null,
+      animFrameId: null,
+      isProcessingFrame: false,
+
+      init() {
+        this.videoElement = document.getElementById("webcam-video");
+        this.canvasElement = document.getElementById("skeleton-canvas");
+        if (this.canvasElement) {
+          this.canvasCtx = this.canvasElement.getContext("2d");
+        }
+      },
+
+      isCameraActive() {
+        return this.state === CameraState.ACTIVE && this.stream !== null;
+      },
+
+      getCameraState() {
+        return this.state;
+      },
+
+      async startCamera() {
+        if (this.isCameraActive()) return;
+
+        this.init();
+        this.state = CameraState.REQUESTING_PERMISSION;
+        this.updateUI();
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 640 },
+              height: { ideal: 480 },
+              facingMode: "user"
+            },
+            audio: false
+          });
+
+          this.stream = stream;
+          if (this.videoElement) {
+            this.videoElement.srcObject = stream;
+            await this.videoElement.play();
+          }
+
+          if (!this.poseInstance) {
+            this.poseInstance = new Pose({
+              locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+            });
+            this.poseInstance.setOptions({
+              modelComplexity: 1,
+              smoothLandmarks: true,
+              minDetectionConfidence: 0.65
+            });
+
+            this.poseInstance.onResults((results) => {
+              if (this.canvasElement && this.canvasCtx && this.videoElement) {
+                this.canvasElement.width = this.videoElement.videoWidth || 640;
+                this.canvasElement.height = this.videoElement.videoHeight || 480;
+                this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
+
+                if (results.poseLandmarks) {
+                  drawSkeleton(this.canvasCtx, results.poseLandmarks, this.canvasElement.width, this.canvasElement.height);
+                  sendLandmarksToBackend(results.poseLandmarks);
+                }
+              }
+            });
+          }
+
+          this.state = CameraState.ACTIVE;
+          this.updateUI();
+
+          const loop = async () => {
+            if (this.state === CameraState.ACTIVE && this.videoElement && !this.videoElement.paused && !this.videoElement.ended) {
+              if (!this.isProcessingFrame) {
+                this.isProcessingFrame = true;
+                try {
+                  await this.poseInstance.send({ image: this.videoElement });
+                } catch (e) {}
+                this.isProcessingFrame = false;
+              }
+              this.animFrameId = requestAnimationFrame(loop);
+            }
+          };
+          this.animFrameId = requestAnimationFrame(loop);
+
+        } catch (err) {
+          console.error("Camera access error:", err);
+          this.state = CameraState.STOPPED;
+          this.updateUI();
+          alert("Camera permission was denied or camera is unavailable. Posture tracking requires camera access.");
+        }
+      },
+
+      stopCamera() {
+        this.state = CameraState.STOPPING;
+
+        if (this.animFrameId) {
+          cancelAnimationFrame(this.animFrameId);
+          this.animFrameId = null;
+        }
+
+        if (this.stream) {
+          this.stream.getTracks().forEach((track) => {
+            track.stop();
+          });
+          this.stream = null;
+        }
+
+        if (this.videoElement) {
+          this.videoElement.srcObject = null;
+        }
+
+        if (this.canvasCtx && this.canvasElement) {
+          this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
+        }
+
+        this.isProcessingFrame = false;
+        this.state = CameraState.STOPPED;
+        this.updateUI();
+      },
+
+      pauseCamera() {
+        if (this.state === CameraState.ACTIVE) {
+          this.stopCamera();
+          this.state = CameraState.PAUSED;
+          this.updateUI();
+        }
+      },
+
+      resumeCamera() {
+        if (this.state === CameraState.PAUSED || this.state === CameraState.STOPPED) {
+          this.startCamera();
+        }
+      },
+
+      updateUI() {
+        const dot = document.getElementById("hud-camera-dot");
+        const label = document.getElementById("hud-camera-status-label");
+        const placeholder = document.getElementById("camera-placeholder");
+
+        if (dot && label) {
+          if (this.state === CameraState.ACTIVE) {
+            dot.innerText = "●";
+            dot.style.color = "var(--status-success)";
+            dot.classList.add("camera-active-pulse");
+            label.innerText = "Camera active";
+            if (placeholder) placeholder.style.display = "none";
+          } else {
+            dot.innerText = "○";
+            dot.style.color = "var(--text-dim)";
+            dot.classList.remove("camera-active-pulse");
+            label.innerText = "Camera off";
+            if (placeholder && currentSessionPlan) placeholder.style.display = "flex";
+          }
+        }
+      }
+    };
+
+    // Tab visibility privacy guard: Automatically stop camera when tab is hidden
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        if (CameraManager.isCameraActive()) {
+          CameraManager.pauseCamera();
+        }
+      }
+    });
+
+    // ==========================================
+    // 3. CLIENT VOICE MANAGER & SPEECH CONTROLLER
+    // ==========================================
+    const VoicePriority = { CRITICAL: 4, HIGH: 3, NORMAL: 2, LOW: 1 };
+    const VoiceState = { IDLE: 'IDLE', QUEUED: 'QUEUED', SPEAKING: 'SPEAKING', INTERRUPTED: 'INTERRUPTED', MUTED: 'MUTED', LISTENING: 'LISTENING', STOPPED: 'STOPPED' };
+
+    class ClientVoiceManager {
+      constructor() {
+        this.state = VoiceState.IDLE;
+        this.queue = [];
+        this.maxQueueSize = 3;
+        this.activeRequest = null;
+        this.activeUtterance = null;
+        this.currentPoseId = null;
+        this.currentSessionId = null;
+        this.isMuted = false;
+        this.isStopped = false;
+        this.stoppedUntil = 0;
+        this.lastSpokenByEvent = new Map();
+        this.lastSpokenTextByEvent = new Map();
+        this.eventCooldowns = {
+          'alignment_correction': 4000,
+          'alignment_good': 8000,
+          'hold_paused': 6000,
+          'hold_resumed': 6000,
+          'instruction': 8000,
+          'session_start': 5000,
+          'session_complete': 5000,
+          'transition_countdown': 4000,
+          'coach_response': 3000,
+          'default': 4000
+        };
+      }
+
+      updateUI() {
+        const pill = document.getElementById("hud-voice-pill");
+        const waveBox = document.getElementById("audio-wave-box");
+        if (pill) {
+          pill.innerText = this.state;
+          if (this.state === VoiceState.SPEAKING) {
+            pill.style.background = "rgba(201, 130, 103, 0.2)";
+            pill.style.color = "var(--terracotta)";
+            if (waveBox) waveBox.style.display = "inline-flex";
+          } else {
+            pill.style.background = "var(--cream)";
+            pill.style.color = "var(--espresso)";
+            if (waveBox) waveBox.style.display = "none";
+          }
+        }
+
+        const cardMuteBtn = document.getElementById("hud-card-mute-btn");
+        if (cardMuteBtn) {
+          cardMuteBtn.innerText = this.isMuted ? "🔊 UNMUTE" : "🔈 MUTE";
+        }
+      }
+
+      setContext(poseId, sessionId = null) {
+        if (this.currentPoseId !== poseId) {
+          this.queue = this.queue.filter(req => !req.poseId || req.poseId === poseId);
+          if (this.activeRequest && this.activeRequest.poseId && this.activeRequest.poseId !== poseId && this.activeRequest.interruptible) {
+            this._cancelBrowserTTS();
+            this.activeRequest = null;
+          }
+          this.currentPoseId = poseId;
+          this.currentSessionId = sessionId;
+        }
+      }
+
+      onSessionCompleted() {
+        this._cancelBrowserTTS();
+        this.queue = [];
+        this.activeRequest = null;
+        this.state = VoiceState.IDLE;
+        this.updateUI();
+        fetch('/api/voice/stop', { method: 'POST' }).catch(() => {});
+      }
+
+      stop(manual = true) {
+        this.isStopped = true;
+        this.stoppedUntil = Date.now() + 1500;
+        this._cancelBrowserTTS();
+        this.queue = [];
+        this.activeRequest = null;
+        this.state = VoiceState.STOPPED;
+        this.updateUI();
+        fetch('/api/voice/stop', { method: 'POST' }).catch(() => {});
+
+        setTimeout(() => {
+          if (this.state === VoiceState.STOPPED) {
+            this.state = this.isMuted ? VoiceState.MUTED : VoiceState.IDLE;
+            this.isStopped = false;
+            this.updateUI();
+          }
+        }, 1500);
+      }
+
+      toggleMute() {
+        if (this.isMuted) {
+          this.unmute();
+        } else {
+          this.mute();
+        }
+      }
+
+      mute() {
+        this.isMuted = true;
+        userPreferences.voice_enabled = 0;
+        this.stop(false);
+        this.state = VoiceState.MUTED;
+        this.updateUI();
+        fetch('/api/voice/mute', { method: 'POST' }).catch(() => {});
+      }
+
+      unmute() {
+        this.isMuted = false;
+        userPreferences.voice_enabled = 1;
+        this.state = VoiceState.IDLE;
+        this.updateUI();
+        fetch('/api/voice/unmute', { method: 'POST' }).catch(() => {});
+      }
+
+      interruptForListening() {
+        this._cancelBrowserTTS();
+        this.queue = [];
+        this.activeRequest = null;
+        this.state = VoiceState.LISTENING;
+        this.updateUI();
+        fetch('/api/voice/interrupt', { method: 'POST' }).catch(() => {});
+      }
+
+      _cancelBrowserTTS() {
+        if ('speechSynthesis' in window) {
+          try { window.speechSynthesis.cancel(); } catch (e) {}
+        }
+      }
+
+      speakRequest(options) {
+        if (!options || !options.text) return false;
+        const text = options.text.trim();
+        if (!text) return false;
+
+        const priorityStr = (options.priority || 'normal').toLowerCase();
+        const priorityScore = VoicePriority[priorityStr.toUpperCase()] || VoicePriority.NORMAL;
+        const eventKey = options.eventKey || 'default';
+        const poseId = options.poseId || this.currentPoseId;
+        const interruptible = options.interruptible !== false;
+        const expiresAfterSeconds = options.expiresAfterSeconds || 6;
+
+        if (this.isMuted && priorityScore < VoicePriority.CRITICAL) return false;
+        if (this.isStopped && Date.now() < this.stoppedUntil && priorityScore < VoicePriority.CRITICAL) return false;
+
+        const now = Date.now();
+        const cooldown = this.eventCooldowns[eventKey] || this.eventCooldowns['default'];
+        const lastSpoken = this.lastSpokenByEvent.get(eventKey) || 0;
+        const lastText = this.lastSpokenTextByEvent.get(eventKey) || '';
+
+        if (priorityScore < VoicePriority.CRITICAL) {
+          if (now - lastSpoken < cooldown) return false;
+          if (text === lastText && now - lastSpoken < cooldown * 2) return false;
+        }
+
+        const request = {
+          text,
+          priority: priorityStr,
+          priorityScore,
+          eventKey,
+          poseId,
+          interruptible,
+          createdAt: now,
+          expiresAt: now + (expiresAfterSeconds * 1000)
+        };
+
+        if (this.state === VoiceState.SPEAKING && this.activeRequest) {
+          if (request.priorityScore > this.activeRequest.priorityScore && this.activeRequest.interruptible) {
+            this._cancelBrowserTTS();
+            this.activeRequest = null;
+            this._playUtterance(request);
+            return true;
+          }
+
+          if (this.queue.length >= this.maxQueueSize) {
+            this.queue.sort((a, b) => b.priorityScore - a.priorityScore);
+            if (request.priorityScore > this.queue[this.queue.length - 1].priorityScore) {
+              this.queue.pop();
+              this.queue.push(request);
+            } else {
+              return false;
+            }
+          } else {
+            this.queue.push(request);
+          }
+
+          this.state = VoiceState.QUEUED;
+          this.updateUI();
+          return true;
+        }
+
+        this._playUtterance(request);
+        return true;
+      }
+
+      _playUtterance(request) {
+        if (!('speechSynthesis' in window)) return;
+        if (this.isMuted && request.priorityScore < VoicePriority.CRITICAL) return;
+
+        this.lastSpokenByEvent.set(request.eventKey, Date.now());
+        this.lastSpokenTextByEvent.set(request.eventKey, request.text);
+        this.activeRequest = request;
+        this.state = VoiceState.SPEAKING;
+        this.updateUI();
+
+        const hudFeedback = document.getElementById("hud-feedback");
+        if (hudFeedback && request.eventKey !== 'transition_countdown') {
+          hudFeedback.innerText = request.text;
+        }
+
+        this._cancelBrowserTTS();
+
+        const utterance = new SpeechSynthesisUtterance(request.text);
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        utterance.onend = () => {
+          this.activeRequest = null;
+          this.activeUtterance = null;
+          this._processQueue();
+        };
+
+        utterance.onerror = () => {
+          this.activeRequest = null;
+          this.activeUtterance = null;
+          this._processQueue();
+        };
+
+        this.activeUtterance = utterance;
+        window.speechSynthesis.speak(utterance);
+      }
+
+      _processQueue() {
+        const now = Date.now();
+        this.queue = this.queue.filter(req => now < req.expiresAt);
+
+        if (this.currentPoseId) {
+          this.queue = this.queue.filter(req => !req.poseId || req.poseId === this.currentPoseId);
+        }
+
+        if (this.queue.length === 0) {
+          this.state = this.isMuted ? VoiceState.MUTED : VoiceState.IDLE;
+          this.updateUI();
+          return;
+        }
+
+        this.queue.sort((a, b) => {
+          if (b.priorityScore !== a.priorityScore) {
+            return b.priorityScore - a.priorityScore;
+          }
+          return a.createdAt - b.createdAt;
+        });
+
+        const nextReq = this.queue.shift();
+        this._playUtterance(nextReq);
+      }
+    }
+
+    window.VoiceManager = new ClientVoiceManager();
+
+    // ==========================================
+    // 4. TEMPORAL-STABILITY POSE EVENT DETECTOR
+    // ==========================================
+    const PoseEventDetector = {
+      previousAlignmentState: null,
+      consecutiveGoodFrames: 0,
+      consecutiveBadFrames: 0,
+      lastReportedFeedback: "",
+      feedbackConsistencyCount: 0,
+      isHoldCurrentlyPaused: false,
+
+      reset() {
+        this.previousAlignmentState = null;
+        this.consecutiveGoodFrames = 0;
+        this.consecutiveBadFrames = 0;
+        this.lastReportedFeedback = "";
+        this.feedbackConsistencyCount = 0;
+        this.isHoldCurrentlyPaused = false;
+      },
+
+      processFrame(evalData, currentPoseId, currentPoseName) {
+        const isAligned = !!(evalData.is_correct_pose || (evalData.overall_score >= 78));
+        const feedback = (evalData.primary_feedback || "").trim();
+
+        if (isAligned) {
+          this.consecutiveGoodFrames++;
+          this.consecutiveBadFrames = 0;
+        } else {
+          this.consecutiveBadFrames++;
+          this.consecutiveGoodFrames = 0;
+        }
+
+        if (this.consecutiveGoodFrames >= 3) {
+          if (this.previousAlignmentState !== 'ALIGNED') {
+            this.previousAlignmentState = 'ALIGNED';
+            window.VoiceManager.speakRequest({
+              text: `Good alignment in ${currentPoseName || 'pose'}. Maintain steady breath and hold.`,
+              priority: 'high',
+              eventKey: 'alignment_good',
+              poseId: currentPoseId,
+              expiresAfterSeconds: 5
+            });
+          }
+        } else if (this.consecutiveBadFrames >= 3) {
+          if (this.previousAlignmentState !== 'NOT_ALIGNED') {
+            this.previousAlignmentState = 'NOT_ALIGNED';
+            if (feedback) {
+              window.VoiceManager.speakRequest({
+                text: feedback,
+                priority: 'high',
+                eventKey: 'alignment_correction',
+                poseId: currentPoseId,
+                expiresAfterSeconds: 5
+              });
+            }
+          } else {
+            if (feedback && feedback === this.lastReportedFeedback) {
+              this.feedbackConsistencyCount++;
+              if (this.feedbackConsistencyCount >= 6) {
+                window.VoiceManager.speakRequest({
+                  text: feedback,
+                  priority: 'normal',
+                  eventKey: 'alignment_correction',
+                  poseId: currentPoseId,
+                  expiresAfterSeconds: 4
+                });
+                this.feedbackConsistencyCount = 0;
+              }
+            } else {
+              this.lastReportedFeedback = feedback;
+              this.feedbackConsistencyCount = 1;
+            }
+          }
+        }
+      }
+    };
+
+    // ==========================================
+    // 5. PAYMENT & SUBSCRIPTION MANAGER
+    // ==========================================
+    const PaymentManager = {
+      pendingOrder: null,
+
+      async startSubscriptionFlow(planType = "PRO_MONTHLY") {
+        const btn = document.getElementById("btn-upgrade-pro");
+        if (btn) btn.innerText = "Creating Order...";
+
+        try {
+          const res = await fetch("/api/payment/create-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: currentUser.id,
+              plan_type: planType,
+              email: currentUser.email,
+              name: currentUser.name
+            })
+          });
+
+          const orderData = await res.json();
+          if (btn) btn.innerText = "UPGRADE TO PRO →";
+
+          if (orderData.status === "success") {
+            this.pendingOrder = orderData;
+            this.showCheckoutModal(orderData);
+          } else {
+            alert("Unable to initiate subscription order: " + (orderData.message || "Unknown error"));
+          }
+        } catch (e) {
+          if (btn) btn.innerText = "UPGRADE TO PRO →";
+          alert("Network error contacting payment service.");
+        }
+      },
+
+      showCheckoutModal(orderData) {
+        document.getElementById("checkout-plan-name").innerText = orderData.plan_name || "KI.AI Pro";
+        const amt = (orderData.amount / 100).toFixed(2);
+        document.getElementById("checkout-amount").innerText = `₹${amt}`;
+        document.getElementById("payment-status-message").style.display = "none";
+        document.getElementById("btn-submit-payment").innerText = `Pay ₹${amt} (Verify Signature)`;
+        document.getElementById("btn-submit-payment").disabled = false;
+        document.getElementById("modal-payment-checkout").style.display = "flex";
+      },
+
+      closeCheckoutModal() {
+        document.getElementById("modal-payment-checkout").style.display = "none";
+      },
+
+      async simulateTestPaymentSuccess() {
+        if (!this.pendingOrder) return;
+
+        const btn = document.getElementById("btn-submit-payment");
+        const msg = document.getElementById("payment-status-message");
+        btn.innerText = "Verifying HMAC Signature...";
+        btn.disabled = true;
+
+        const paymentId = "pay_test_" + Math.random().toString(36).substring(2, 10);
+        // Signature formatted for verification
+        const signature = `test_sig_${this.pendingOrder.order_id}_${paymentId}`;
+
+        try {
+          const res = await fetch("/api/payment/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: currentUser.id,
+              order_id: this.pendingOrder.order_id,
+              payment_id: paymentId,
+              signature: signature,
+              plan_type: this.pendingOrder.plan_type
+            })
+          });
+
+          const verifyData = await res.json();
+          if (verifyData.status === "success") {
+            msg.style.display = "block";
+            msg.style.background = "rgba(61, 106, 82, 0.15)";
+            msg.style.color = "var(--status-success)";
+            msg.innerText = "✓ Payment verified! Pro subscription activated.";
+
+            currentUser.is_pro = true;
+            this.updateProUI(true);
+
+            setTimeout(() => {
+              this.closeCheckoutModal();
+              switchView("home");
+            }, 1200);
+          } else {
+            msg.style.display = "block";
+            msg.style.background = "rgba(176, 58, 46, 0.15)";
+            msg.style.color = "var(--status-error)";
+            msg.innerText = "Verification failed: " + (verifyData.message || "Invalid signature");
+            btn.innerText = "Retry Payment";
+            btn.disabled = false;
+          }
+        } catch (e) {
+          msg.style.display = "block";
+          msg.style.background = "rgba(176, 58, 46, 0.15)";
+          msg.style.color = "var(--status-error)";
+          msg.innerText = "Network error during verification.";
+          btn.innerText = "Retry Payment";
+          btn.disabled = false;
+        }
+      },
+
+      updateProUI(isPro) {
+        const badge = document.getElementById("nav-plan-badge");
+        if (badge) {
+          if (isPro) {
+            badge.innerText = "PRO";
+            badge.className = "badge-pro";
+          } else {
+            badge.innerText = "FREE";
+            badge.className = "badge-free";
+          }
+        }
+      }
+    };
+
+    // ==========================================
+    // 6. INITIALIZATION & NAVIGATION LIFECYCLE
+    // ==========================================
+    window.addEventListener("DOMContentLoaded", async () => {
+      updateDynamicGreeting();
+      await checkSubscriptionStatus();
+      await loadUserPreferences();
+      await loadPoses();
+      await fetchTodaySession();
+      setupSpeechRecognition();
+    });
+
+    function updateDynamicGreeting() {
+      const hour = new Date().getHours();
+      let greeting = "GOOD MORNING";
+      if (hour >= 12 && hour < 17) {
+        greeting = "GOOD AFTERNOON";
+      } else if (hour >= 17 || hour < 5) {
+        greeting = "GOOD EVENING";
+      }
+      const el = document.getElementById("home-greeting");
+      if (el) el.innerText = `${greeting}, ${currentUser.name.toUpperCase()} 👋`;
+    }
+
+    async function checkSubscriptionStatus() {
+      try {
+        const res = await fetch(`/api/subscription/${currentUser.id}`);
+        const data = await res.json();
+        if (data.status === "success") {
+          currentUser.is_pro = data.is_pro;
+          PaymentManager.updateProUI(data.is_pro);
+        }
+      } catch (e) {}
+    }
+
+    function switchView(viewName) {
+      // Camera Privacy Rule: STOP camera immediately if leaving practice view
+      if (viewName !== 'practice') {
+        CameraManager.stopCamera();
+        if (window.VoiceManager) {
+          window.VoiceManager.stop(false);
+        }
+      }
+
+      document.querySelectorAll(".view-section").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".desktop-nav-links button").forEach(el => el.classList.remove("active"));
+
+      const targetSection = document.getElementById(`view-${viewName}`);
+      if (targetSection) targetSection.classList.add("active");
+
+      const navBtn = document.getElementById(`nav-btn-${viewName}`);
+      if (navBtn) navBtn.classList.add("active");
+
+      if (viewName === "progress") renderCharts();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function toggleMobileMenu() {
+      const drawer = document.getElementById("mobile-drawer");
+      drawer.classList.toggle("open");
+    }
+
+    // ==========================================
+    // 7. USER PREFERENCES
+    // ==========================================
+    async function loadUserPreferences() {
+      try {
+        const res = await fetch(`/api/user/preferences/${currentUser.id}`);
+        const data = await res.json();
+        if (data.status === "success" && data.preferences) {
+          userPreferences = data.preferences;
+          currentUser.goal = userPreferences.goal;
+          currentUser.level = userPreferences.level;
+          document.getElementById("pref-goal").value = userPreferences.goal;
+          document.getElementById("pref-level").value = userPreferences.level;
+          document.getElementById("pref-duration").value = String(userPreferences.duration_minutes || 20);
+          document.getElementById("pref-focus").value = userPreferences.focus_area || "Full Body";
+          document.getElementById("pref-voice").checked = !!userPreferences.voice_enabled;
+
+          if (window.VoiceManager) {
+            window.VoiceManager.isMuted = !userPreferences.voice_enabled;
+            window.VoiceManager.updateUI();
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function savePreferences() {
+      const updated = {
+        user_id: currentUser.id,
+        goal: document.getElementById("pref-goal").value,
+        level: document.getElementById("pref-level").value,
+        duration_minutes: parseInt(document.getElementById("pref-duration").value),
+        focus_area: document.getElementById("pref-focus").value,
+        voice_enabled: document.getElementById("pref-voice").checked ? 1 : 0
+      };
+
+      try {
+        const res = await fetch("/api/user/preferences", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updated)
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          userPreferences = data.preferences;
+          alert("Preferences updated! Today's session roadmap refreshed.");
+          await fetchTodaySession();
+          switchView("home");
+        }
+      } catch (e) {}
+    }
+
+    function openPreferencesModal() {
+      switchView("preferences");
+    }
+
+    // ==========================================
+    // 8. AI SESSION PLANNING & ROADMAP
+    // ==========================================
+    async function fetchTodaySession() {
+      try {
+        const res = await fetch(`/api/daily-session/${currentUser.id}?duration=${userPreferences.duration_minutes}&goal=${encodeURIComponent(userPreferences.goal)}&level=${encodeURIComponent(userPreferences.level)}&focus=${encodeURIComponent(userPreferences.focus_area)}`);
+        const data = await res.json();
+        if (data.status === "success" && data.session) {
+          currentSessionPlan = data.session;
+          document.getElementById("home-today-title").innerText = currentSessionPlan.title;
+          document.getElementById("home-today-desc").innerText = currentSessionPlan.description;
+          document.getElementById("home-today-meta").innerHTML = `
+            <span>⏱ ${currentSessionPlan.target_duration_minutes} Minutes</span>
+            <span>•</span>
+            <span>${currentSessionPlan.level} Level</span>
+            <span>•</span>
+            <span>${currentSessionPlan.focus_area}</span>
+          `;
+          document.getElementById("home-program-name").innerText = `${currentSessionPlan.level} Level`;
+        }
+      } catch (e) {}
+    }
+
+    async function openPracticeIntro(level = null) {
+      const lvl = level || userPreferences.level || "Beginner";
+      try {
+        const res = await fetch(`/api/daily-session/${currentUser.id}?level=${lvl}&duration=${userPreferences.duration_minutes}&goal=${encodeURIComponent(userPreferences.goal)}`);
+        const data = await res.json();
+        currentSessionPlan = data.session;
+
+        document.getElementById("intro-session-title").innerText = currentSessionPlan.title;
+        document.getElementById("intro-session-sub").innerText = `Focus: ${currentSessionPlan.focus_area} • ${currentSessionPlan.level} Level • ${currentSessionPlan.target_duration_minutes} Min`;
+        document.getElementById("intro-session-overview").innerText = currentSessionPlan.description;
+
+        const container = document.getElementById("intro-roadmap-container");
+        container.innerHTML = currentSessionPlan.roadmap.map((item, idx) => `
+          <div style="background: var(--cream); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--warm-white); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: var(--espresso);">0${idx+1}</div>
+              <div>
+                <div style="font-weight: 700; color: var(--espresso); font-size: 15px;">${item.name}</div>
+                <div style="font-size: 12px; color: var(--text-muted);">${item.breathing_cue || 'Controlled breathing'}</div>
+              </div>
+            </div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--terracotta);">${item.hold_seconds}s hold</div>
+          </div>
+        `).join("");
+
+        switchView("session-intro");
+      } catch (e) {}
+    }
+
+    function startProgramSession(level) {
+      openPracticeIntro(level);
+    }
+
+    // Camera Permission Guard Modal
+    function promptCameraPermissionAndStart() {
+      document.getElementById("modal-camera-privacy").style.display = "flex";
+    }
+
+    function closeCameraPrivacyModal() {
+      document.getElementById("modal-camera-privacy").style.display = "none";
+    }
+
+    async function confirmStartPracticeCamera() {
+      closeCameraPrivacyModal();
+      if (!currentSessionPlan || !currentSessionPlan.roadmap.length) return;
+      currentStepIndex = 0;
+      switchView("practice");
+      loadRoadmapStep(currentStepIndex);
+
+      // Start Camera Only In Practice
+      await CameraManager.startCamera();
+
+      window.VoiceManager.speakRequest({
+        text: `Starting today's practice session. Let's begin with ${currentSessionPlan.roadmap[0].name}.`,
+        priority: 'high',
+        eventKey: 'session_start',
+        expiresAfterSeconds: 6
+      });
+    }
+
+    // ==========================================
+    // 9. EXERCISE STEPPER & AUTOMATIC TRANSITIONS
+    // ==========================================
+    function loadRoadmapStep(index) {
+      const step = currentSessionPlan.roadmap[index];
+      if (!step) {
+        completeFullSession();
+        return;
+      }
+
+      PoseEventDetector.reset();
+      const poseId = step.target_pose_id || step.pose_id || step.name;
+      window.VoiceManager.setContext(poseId, currentSessionPlan.id || 1);
+
+      document.getElementById("hud-step-num").innerText = `${String(index + 1).padStart(2, '0')}/${String(currentSessionPlan.roadmap.length).padStart(2, '0')}`;
+      document.getElementById("hud-pose-title").innerText = step.name.toUpperCase();
+      document.getElementById("hud-breathing").innerText = `💨 ${step.breathing_cue || 'Breathe steadily'}`;
+      
+      const nextStep = currentSessionPlan.roadmap[index + 1];
+      document.getElementById("hud-next-upcoming").innerText = nextStep ? `Next: ${nextStep.name}` : "Final Exercise";
+
+      validHoldCount = 0;
+      updateHoldDisplay(0, step.hold_seconds);
+      startIntelligentHoldTicker(step.hold_seconds);
+
+      window.VoiceManager.speakRequest({
+        text: `Pose: ${step.name}. ${step.breathing_cue || 'Focus on alignment and breathe steadily'}.`,
+        priority: 'high',
+        eventKey: 'instruction',
+        poseId: poseId,
+        expiresAfterSeconds: 6
+      });
+    }
+
+    function updateHoldDisplay(current, target) {
+      document.getElementById("hud-hold-display").innerText = `00:${String(current).padStart(2, '0')} / 00:${String(target).padStart(2, '0')}`;
+      const pct = Math.min(100, Math.round((current / target) * 100));
+      document.getElementById("hud-hold-progress-bar").style.width = `${pct}%`;
+    }
+
+    function startIntelligentHoldTicker(targetHoldSeconds) {
+      clearInterval(holdTimerInterval);
+      holdTimerInterval = setInterval(() => {
+        const currentStep = currentSessionPlan?.roadmap[currentStepIndex];
+        const poseId = currentStep?.target_pose_id || currentStep?.pose_id || currentStep?.name || 1;
+
+        if (currentPoseScore >= 78) {
+          validHoldCount++;
+          updateHoldDisplay(validHoldCount, targetHoldSeconds);
+          document.getElementById("hud-hold-status").innerText = "✓ Valid hold ticking — Posture aligned";
+          document.getElementById("hud-hold-status").style.color = "var(--status-success)";
+
+          if (PoseEventDetector.isHoldCurrentlyPaused && validHoldCount > 1) {
+            PoseEventDetector.isHoldCurrentlyPaused = false;
+            window.VoiceManager.speakRequest({
+              text: "Hold resumed. Great focus.",
+              priority: 'normal',
+              eventKey: 'hold_resumed',
+              poseId: poseId,
+              expiresAfterSeconds: 4
+            });
+          }
+
+          if (validHoldCount >= targetHoldSeconds) {
+            clearInterval(holdTimerInterval);
+            triggerAutomaticTransition();
+          }
+        } else {
+          document.getElementById("hud-hold-status").innerText = "⏸ Hold Paused — Adjust alignment to resume hold";
+          document.getElementById("hud-hold-status").style.color = "var(--status-warning)";
+
+          if (!PoseEventDetector.isHoldCurrentlyPaused && validHoldCount > 0) {
+            PoseEventDetector.isHoldCurrentlyPaused = true;
+            window.VoiceManager.speakRequest({
+              text: "Hold paused. Realign posture to continue timer.",
+              priority: 'normal',
+              eventKey: 'hold_paused',
+              poseId: poseId,
+              expiresAfterSeconds: 4
+            });
+          }
+        }
+      }, 1000);
+    }
+
+    function triggerAutomaticTransition() {
+      const overlay = document.getElementById("transition-overlay");
+      const nextStep = currentSessionPlan.roadmap[currentStepIndex + 1];
+      
+      document.getElementById("trans-score-display").innerText = `Score: ${currentPoseScore}%`;
+      document.getElementById("trans-next-name").innerText = nextStep ? nextStep.name : "Session Completion";
+
+      overlay.style.display = "flex";
+      let count = 3;
+      document.getElementById("trans-countdown-num").innerText = count;
+      window.VoiceManager.speakRequest({
+        text: `Great work! Score is ${currentPoseScore} percent. Moving to next exercise in three seconds.`,
+        priority: 'high',
+        eventKey: 'transition_countdown',
+        expiresAfterSeconds: 4
+      });
+
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          document.getElementById("trans-countdown-num").innerText = count;
+        } else {
+          clearInterval(countdownInterval);
+          overlay.style.display = "none";
+          currentStepIndex++;
+          loadRoadmapStep(currentStepIndex);
+        }
+      }, 1000);
+    }
+
+    function skipCurrentExercise() {
+      clearInterval(holdTimerInterval);
+      window.VoiceManager.stop(false);
+      currentStepIndex++;
+      if (currentStepIndex < currentSessionPlan.roadmap.length) {
+        loadRoadmapStep(currentStepIndex);
+        window.VoiceManager.speakRequest({
+          text: `Skipped. Next is ${currentSessionPlan.roadmap[currentStepIndex].name}.`,
+          priority: 'high',
+          eventKey: 'exercise_skipped',
+          expiresAfterSeconds: 4
+        });
+      } else {
+        completeFullSession();
+      }
+    }
+
+    async function completeFullSession() {
+      clearInterval(holdTimerInterval);
+      CameraManager.stopCamera();
+      PoseEventDetector.reset();
+      window.VoiceManager.onSessionCompleted();
+      switchView("session-complete");
+      window.VoiceManager.speakRequest({
+        text: "Practice complete! Outstanding dedication to your body.",
+        priority: 'high',
+        eventKey: 'session_complete',
+        expiresAfterSeconds: 6
+      });
+
+      try {
+        const res = await fetch("/api/session/complete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: currentUser.id,
+            total_duration_seconds: (currentSessionPlan?.target_duration_minutes || 20) * 60,
+            average_accuracy: 91.2,
+            completed_exercises: currentSessionPlan?.roadmap?.length || 8,
+            program_level: currentSessionPlan?.level || "Beginner"
+          })
+        });
+        const comp = await res.json();
+        if (comp.status === "success") {
+          document.getElementById("summary-duration").innerText = `${comp.summary.duration_minutes} min`;
+          document.getElementById("summary-accuracy").innerText = `${comp.summary.average_accuracy}%`;
+        }
+      } catch (e) {}
+    }
+
+    // ==========================================
+    // 10. COMPUTER VISION SKELETON & EVALUATION
+    // ==========================================
+    function drawSkeleton(ctx, landmarks, w, h) {
+      const connections = [[11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [11, 23], [12, 24], [23, 24], [23, 25], [24, 26], [25, 27], [26, 28]];
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = currentPoseScore >= 78 ? "#3D6A52" : "#C98267";
+      connections.forEach(([i, j]) => {
+        if (landmarks[i] && landmarks[j]) {
+          ctx.beginPath();
+          ctx.moveTo(landmarks[i].x * w, landmarks[i].y * h);
+          ctx.lineTo(landmarks[j].x * w, landmarks[j].y * h);
+          ctx.stroke();
+        }
+      });
+
+      landmarks.forEach((lm) => {
+        if (lm.visibility > 0.5) {
+          ctx.beginPath();
+          ctx.arc(lm.x * w, lm.y * h, 4, 0, 2 * Math.PI);
+          ctx.fillStyle = currentPoseScore >= 78 ? "#A8B19B" : "#B03A2E";
+          ctx.fill();
+        }
+      });
+    }
+
+    let lastSend = 0;
+    async function sendLandmarksToBackend(landmarksArray) {
+      const now = Date.now();
+      if (now - lastSend < 180) return;
+      lastSend = now;
+
+      const landmarkNames = ["NOSE", "LEFT_EYE_INNER", "LEFT_EYE", "LEFT_EYE_OUTER", "RIGHT_EYE_INNER", "RIGHT_EYE", "RIGHT_EYE_OUTER", "LEFT_EAR", "RIGHT_EAR", "MOUTH_LEFT", "MOUTH_RIGHT", "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_ELBOW", "RIGHT_ELBOW", "LEFT_WRIST", "RIGHT_WRIST", "LEFT_PINKY", "RIGHT_PINKY", "LEFT_INDEX", "RIGHT_INDEX", "LEFT_THUMB", "RIGHT_THUMB", "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"];
+      const dict = {};
+      landmarksArray.forEach((lm, idx) => { if (landmarkNames[idx]) dict[landmarkNames[idx]] = { x: lm.x, y: lm.y, z: lm.z, visibility: lm.visibility }; });
+
+      const currentStep = currentSessionPlan?.roadmap[currentStepIndex];
+      const poseId = currentStep?.target_pose_id || currentStep?.pose_id || 1;
+
+      try {
+        const res = await fetch("/api/analyze_posture", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ landmarks: dict, pose_id: poseId })
+        });
+        const evalData = await res.json();
+        if (evalData.status === "success") {
+          currentPoseScore = Math.round(evalData.overall_score || 0);
+          
+          // Smooth Score Number Update
+          animateScoreNumber(currentPoseScore);
+
+          const isRight = evalData.is_correct_pose || currentPoseScore >= 78;
+          const rwBadge = document.getElementById("hud-right-wrong-badge");
+          if (isRight) {
+            rwBadge.innerText = "✓ RIGHT POSTURE";
+            rwBadge.className = "posture-eval-badge badge-correct";
+            document.getElementById("hud-status-badge").innerText = "🟢 Aligned";
+            document.getElementById("hud-status-badge").style.color = "var(--status-success)";
+          } else {
+            rwBadge.innerText = "⚠ ADJUST POSTURE";
+            rwBadge.className = "posture-eval-badge badge-adjust";
+            document.getElementById("hud-status-badge").innerText = "🟡 Adjust Alignment";
+            document.getElementById("hud-status-badge").style.color = "var(--status-warning)";
+          }
+
+          if (evalData.primary_feedback) {
+            document.getElementById("hud-feedback").innerText = evalData.primary_feedback;
+          }
+
+          const poseName = currentStep?.name || "current pose";
+          PoseEventDetector.processFrame(evalData, poseId, poseName);
+        }
+      } catch (e) {}
+    }
+
+    function animateScoreNumber(targetScore) {
+      const el = document.getElementById("hud-score");
+      if (!el) return;
+      if (Math.abs(displayedPoseScore - targetScore) <= 2) {
+        displayedPoseScore = targetScore;
+        el.innerText = `${displayedPoseScore}%`;
+        return;
+      }
+      displayedPoseScore += displayedPoseScore < targetScore ? 1 : -1;
+      el.innerText = `${displayedPoseScore}%`;
+    }
+
+    // ==========================================
+    // 11. SPEECH RECOGNITION (TALK TO COACH)
+    // ==========================================
+    function setupSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        isListening = true;
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        alert(`AI Coach heard: "${transcript}". Consulting biomechanics model.`);
+      };
+
+      recognition.onerror = () => { isListening = false; };
+      recognition.onend = () => { isListening = false; };
+    }
+
+    function toggleSpeechRecognition() {
+      if (!recognition) {
+        alert("Speech recognition is not supported in this browser.");
+        return;
+      }
+      if (isListening) {
+        recognition.stop();
+      } else {
+        if (window.VoiceManager) {
+          window.VoiceManager.interruptForListening();
+        }
+        recognition.start();
+      }
+    }
+
+    // ==========================================
+    // 12. POSE LIBRARY & ANALYTICS
+    // ==========================================
+    async function loadPoses() {
+      try {
+        const res = await fetch("/api/poses");
+        allPoses = await res.json();
+        renderLibrary(allPoses);
+      } catch (e) {}
+    }
+
+    function renderLibrary(poses) {
+      const grid = document.getElementById("library-grid");
+      if (!grid) return;
+      grid.innerHTML = poses.map(p => `
+        <div class="card" style="padding: 22px;">
+          <h3 style="font-size: 18px; color: var(--espresso);">${p.name}</h3>
+          <div style="font-size: 12px; color: var(--terracotta); margin: 4px 0 10px; font-weight: 600;">${p.sanskrit_name || ''}</div>
+          <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">${p.description ? p.description.substring(0, 90) + '...' : ''}</p>
+          <div style="display: flex; gap: 10px; margin-top: 16px;">
+            <button class="btn btn-secondary" style="flex: 1; min-height: 36px; padding: 6px 12px; font-size: 12px;" onclick="practiceSinglePose(${p.id}, '${p.name}')">Practice</button>
+            <button class="btn btn-primary" style="flex: 1; min-height: 36px; padding: 6px 12px; font-size: 12px;" onclick="alert('Added ${p.name} to focus routines!')">+ Focus</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function filterLibrary(query) {
+      const q = query.toLowerCase();
+      const filtered = allPoses.filter(p => p.name.toLowerCase().includes(q) || (p.sanskrit_name && p.sanskrit_name.toLowerCase().includes(q)));
+      renderLibrary(filtered);
+    }
+
+    function practiceSinglePose(poseId, poseName) {
+      currentSessionPlan = {
+        title: `Targeted Practice: ${poseName}`,
+        level: "Custom",
+        roadmap: [{ name: poseName, target_pose_id: poseId, hold_seconds: 20, breathing_cue: "Deep steady breath" }]
+      };
+      promptCameraPermissionAndStart();
+    }
+
+    function renderCharts() {
+      const ctx1 = document.getElementById('chart-progress');
+      if (ctx1) {
+        new Chart(ctx1.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+            datasets: [{ label: 'Accuracy (%)', data: [74, 79, 82, 85, 84, 91, 94], borderColor: '#4A3425', backgroundColor: 'rgba(201, 130, 103, 0.1)', tension: 0.3 }]
+          },
+          options: { plugins: { legend: { labels: { color: '#4A3425' } } } }
+        });
+      }
+
+      const ctx2 = document.getElementById('chart-poses');
+      if (ctx2) {
+        new Chart(ctx2.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: ['Warrior II', 'Trikonasana', 'Tree Pose', 'Cobra', 'Chair'],
+            datasets: [{ label: 'Accuracy Score', data: [92, 88, 86, 90, 84], backgroundColor: '#C98267' }]
+          },
+          options: { plugins: { legend: { labels: { color: '#4A3425' } } } }
+        });
+      }
+    }
+
+    function showKarateModal() {
+      document.getElementById("karate-modal").style.display = "flex";
+    }
+  </script>
+</body>
+</html>

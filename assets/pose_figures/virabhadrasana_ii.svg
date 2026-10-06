@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="48" cy="24" r="6" fill="#FFFFFF" />
+  <!-- Vertical Torso -->
+  <line x1="48" y1="30" x2="48" y2="58" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+  <!-- Outstretched Arms -->
+  <line x1="16" y1="36" x2="80" y2="36" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+  <!-- Front Bent Knee (Left) -->
+  <polyline points="48,58 24,62 24,90" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Back Straight Leg (Right) -->
+  <line x1="48" y1="58" x2="82" y2="90" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+</svg>

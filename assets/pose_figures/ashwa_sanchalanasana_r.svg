@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="34" cy="30" r="6" fill="#10B981" />
+  <!-- Torso upright lunge -->
+  <line x1="34" y1="36" x2="42" y2="60" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+  <!-- Front bent knee (Left Forward) -->
+  <line x1="42" y1="60" x2="30" y2="64" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" />
+  <line x1="30" y1="64" x2="30" y2="86" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" />
+  <!-- Right leg extended straight back -->
+  <line x1="42" y1="60" x2="68" y2="74" stroke="#10B981" stroke-width="3.5" stroke-linecap="round" />
+  <line x1="68" y1="74" x2="88" y2="86" stroke="#10B981" stroke-width="3.5" stroke-linecap="round" />
+  <!-- Hands on floor -->
+  <line x1="36" y1="46" x2="28" y2="86" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" />
+  <!-- Label badge for R-back -->
+  <text x="74" y="24" font-family="Segoe UI, sans-serif" font-size="10" font-weight="bold" fill="#34D399">R ➔</text>
+</svg>

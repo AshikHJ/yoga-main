@@ -1,0 +1,496 @@
+[
+  {
+    "step_number": 1,
+    "name": "Pranamasana",
+    "english_name": "Prayer Pose",
+    "sanskrit_name": "Pranamasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Beginner",
+    "target_goal": "Balance",
+    "breathing_cue": "Exhale \u2014 Bring palms together in front of the chest.",
+    "description": "The opening and closing prayer stance of the Sun Salutation sequence.",
+    "benefits": "Calms the nervous system, centers the mind, and establishes steady breathing rhythm.",
+    "instructions": "1. Stand upright with feet together.\n2. Bring palms together in Anjali Mudra at heart center.\n3. Relax shoulders downward and lengthen spine.",
+    "precautions": "Keep weight evenly distributed across both feet; avoid locking knees.",
+    "hold_duration": 10,
+    "rules": [
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 90.0,
+        "tolerance": 12.0,
+        "weight": 35.0,
+        "feedback_message": "Stand straight with your spine erect"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 178.0,
+        "tolerance": 12.0,
+        "weight": 25.0,
+        "feedback_message": "Keep left leg straight without locking the knee"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 178.0,
+        "tolerance": 12.0,
+        "weight": 25.0,
+        "feedback_message": "Keep right leg straight without locking the knee"
+      },
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 65.0,
+        "tolerance": 20.0,
+        "weight": 15.0,
+        "feedback_message": "Hold palms firmly in front of the heart"
+      }
+    ],
+    "figure_path": "assets/pose_figures/pranamasana.svg",
+    "pose_figure": "assets/pose_figures/pranamasana.svg"
+  },
+  {
+    "step_number": 2,
+    "name": "Hasta Uttanasana",
+    "english_name": "Raised Arms Pose",
+    "sanskrit_name": "Hasta Uttanasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Beginner",
+    "target_goal": "Flexibility",
+    "breathing_cue": "Inhale \u2014 Sweep arms up and gently arch the upper back.",
+    "description": "Upward expansion and arch of the thoracic spine with raised arms.",
+    "benefits": "Expands chest capacity, stretches abdomen, and stimulates thyroid gland.",
+    "instructions": "1. Inhale deeply and sweep arms overhead.\n2. Keep biceps close to ears.\n3. Gently arch upper back while maintaining core engagement.",
+    "precautions": "Avoid over-compressing the lumbar spine; lift from the chest.",
+    "hold_duration": 10,
+    "rules": [
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 175.0,
+        "tolerance": 15.0,
+        "weight": 30.0,
+        "feedback_message": "Extend your left arm straight overhead"
+      },
+      {
+        "joint_name": "right_elbow",
+        "target_angle": 175.0,
+        "tolerance": 15.0,
+        "weight": 30.0,
+        "feedback_message": "Extend your right arm straight overhead"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 105.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Gently lift your chest upward and backward"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 175.0,
+        "tolerance": 15.0,
+        "weight": 15.0,
+        "feedback_message": "Keep both legs stable and straight"
+      }
+    ],
+    "figure_path": "assets/pose_figures/hasta_uttanasana.svg",
+    "pose_figure": "assets/pose_figures/hasta_uttanasana.svg"
+  },
+  {
+    "step_number": 3,
+    "name": "Uttanasana",
+    "english_name": "Standing Forward Fold",
+    "sanskrit_name": "Uttanasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Beginner",
+    "target_goal": "Flexibility",
+    "breathing_cue": "Exhale \u2014 Fold forward from the hips, bringing hands toward the floor.",
+    "description": "Deep standing forward fold stretching the entire posterior chain.",
+    "benefits": "Deeply stretches hamstrings and calves, calms the brain, and aids digestion.",
+    "instructions": "1. Exhale and hinge from the hip joints.\n2. Keep spine long as you fold forward.\n3. Bring hands beside feet on the floor.",
+    "precautions": "Bend knees slightly if hamstrings or lower back feel strained.",
+    "hold_duration": 12,
+    "rules": [
+      {
+        "joint_name": "left_hip",
+        "target_angle": 65.0,
+        "tolerance": 20.0,
+        "weight": 40.0,
+        "feedback_message": "Hinge deeper from the hips toward your thighs"
+      },
+      {
+        "joint_name": "right_hip",
+        "target_angle": 65.0,
+        "tolerance": 20.0,
+        "weight": 40.0,
+        "feedback_message": "Fold evenly through both hips"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 170.0,
+        "tolerance": 18.0,
+        "weight": 20.0,
+        "feedback_message": "Keep legs extended without hyperextending knees"
+      }
+    ],
+    "figure_path": "assets/pose_figures/uttanasana.svg",
+    "pose_figure": "assets/pose_figures/uttanasana.svg"
+  },
+  {
+    "step_number": 4,
+    "name": "Ashwa Sanchalanasana (Right Leg Back)",
+    "english_name": "Equestrian / Lunge Pose (Right Leg Back)",
+    "sanskrit_name": "Ashwa Sanchalanasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Intermediate",
+    "target_goal": "Strength",
+    "breathing_cue": "Inhale \u2014 Step right leg far back, drop right knee, gaze forward.",
+    "description": "Low lunge position stretching the hip flexors and strengthening the front thigh.",
+    "benefits": "Strengthens quadriceps, increases hip flexibility, and tones abdominal organs.",
+    "instructions": "1. Step right leg far back and lower right knee to mat.\n2. Bend left knee to 90 degrees over left ankle.\n3. Press hips forward and gaze gently upward.",
+    "precautions": "Ensure front left knee does not drift past left toes.",
+    "hold_duration": 12,
+    "rules": [
+      {
+        "joint_name": "left_knee",
+        "target_angle": 90.0,
+        "tolerance": 15.0,
+        "weight": 45.0,
+        "feedback_message": "Bend front left knee to a 90 degree angle"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 85.0,
+        "tolerance": 15.0,
+        "weight": 35.0,
+        "feedback_message": "Keep torso open and upright"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 150.0,
+        "tolerance": 25.0,
+        "weight": 20.0,
+        "feedback_message": "Extend right leg smoothly back"
+      }
+    ],
+    "figure_path": "assets/pose_figures/ashwa_sanchalanasana_r.svg",
+    "pose_figure": "assets/pose_figures/ashwa_sanchalanasana_r.svg"
+  },
+  {
+    "step_number": 5,
+    "name": "Dandasana (Plank Pose)",
+    "english_name": "Plank Pose",
+    "sanskrit_name": "Phalakasana / Dandasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Intermediate",
+    "target_goal": "Strength",
+    "breathing_cue": "Retain Breath \u2014 Step left leg back to join right leg in high plank.",
+    "description": "Rigid, straight-body plank position forming the foundational core posture.",
+    "benefits": "Builds intense core strength, stabilizes shoulders, and strengthens wrists.",
+    "instructions": "1. Step left leg back beside right leg.\n2. Keep shoulders directly over wrists.\n3. Form a straight line from crown of head to heels.",
+    "precautions": "Do not let hips sag or poke excessively upward.",
+    "hold_duration": 12,
+    "rules": [
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 178.0,
+        "tolerance": 15.0,
+        "weight": 30.0,
+        "feedback_message": "Keep arms straight and firm below shoulders"
+      },
+      {
+        "joint_name": "left_hip",
+        "target_angle": 175.0,
+        "tolerance": 15.0,
+        "weight": 40.0,
+        "feedback_message": "Keep hips aligned in a straight line with spine"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 178.0,
+        "tolerance": 15.0,
+        "weight": 30.0,
+        "feedback_message": "Engage thighs and keep legs fully straight"
+      }
+    ],
+    "figure_path": "assets/pose_figures/dandasana.svg",
+    "pose_figure": "assets/pose_figures/dandasana.svg"
+  },
+  {
+    "step_number": 6,
+    "name": "Ashtanga Namaskara",
+    "english_name": "Eight-Point Salute",
+    "sanskrit_name": "Ashtanga Namaskara",
+    "category": "Surya Namaskar",
+    "difficulty": "Intermediate",
+    "target_goal": "Strength",
+    "breathing_cue": "Exhale \u2014 Lower knees, chest, and chin to floor with hips lifted.",
+    "description": "Eight body parts touch the ground: feet, knees, hands, chest, and chin.",
+    "benefits": "Strengthens arm and back muscles, enhances spinal flexibility.",
+    "instructions": "1. Lower both knees to floor.\n2. Lower chest between hands and chin to mat.\n3. Keep hips and abdomen slightly elevated.",
+    "precautions": "Keep elbows tucked close to ribcage.",
+    "hold_duration": 10,
+    "rules": [
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 80.0,
+        "tolerance": 20.0,
+        "weight": 40.0,
+        "feedback_message": "Bend elbows back alongside your ribcage"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 100.0,
+        "tolerance": 25.0,
+        "weight": 30.0,
+        "feedback_message": "Place knees on the mat with hips elevated"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 30.0,
+        "tolerance": 20.0,
+        "weight": 30.0,
+        "feedback_message": "Keep chest close to the floor"
+      }
+    ],
+    "figure_path": "assets/pose_figures/ashtanga_namaskara.svg",
+    "pose_figure": "assets/pose_figures/ashtanga_namaskara.svg"
+  },
+  {
+    "step_number": 7,
+    "name": "Bhujangasana (Cobra Pose)",
+    "english_name": "Cobra Pose",
+    "sanskrit_name": "Bhujangasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Beginner",
+    "target_goal": "Flexibility",
+    "breathing_cue": "Inhale \u2014 Slide chest forward and lift upward into Cobra.",
+    "description": "Gentle backward spinal extension lifting the chest while pelvis rests on mat.",
+    "benefits": "Strengthens entire spine, opens lungs and chest, relieves stress.",
+    "instructions": "1. Slide forward, uncurling toes.\n2. Press hands into mat and lift chest upward.\n3. Roll shoulders down and back away from ears.",
+    "precautions": "Do not force height with arm strength; use spinal extensors.",
+    "hold_duration": 12,
+    "rules": [
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 55.0,
+        "tolerance": 15.0,
+        "weight": 45.0,
+        "feedback_message": "Lift chest up and open your heart forward"
+      },
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 155.0,
+        "tolerance": 20.0,
+        "weight": 30.0,
+        "feedback_message": "Keep slight softness in elbows; shoulders down"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 175.0,
+        "tolerance": 15.0,
+        "weight": 25.0,
+        "feedback_message": "Keep legs extended together along the floor"
+      }
+    ],
+    "figure_path": "assets/pose_figures/bhujangasana.svg",
+    "pose_figure": "assets/pose_figures/bhujangasana.svg"
+  },
+  {
+    "step_number": 8,
+    "name": "Parvatasana / Downward Dog",
+    "english_name": "Mountain / Downward-Facing Dog",
+    "sanskrit_name": "Parvatasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Beginner",
+    "target_goal": "Strength",
+    "breathing_cue": "Exhale \u2014 Tuck toes and lift hips upward into inverted V.",
+    "description": "Inverted V-posture with hips driving toward the ceiling.",
+    "benefits": "Energizes body, strengthens arms and legs, stretches hamstrings.",
+    "instructions": "1. Tuck toes under and lift hips high toward sky.\n2. Press heels toward mat and lengthen through spine.\n3. Form an inverted V shape with body.",
+    "precautions": "Press evenly into palms to protect wrists.",
+    "hold_duration": 12,
+    "rules": [
+      {
+        "joint_name": "left_hip",
+        "target_angle": 80.0,
+        "tolerance": 18.0,
+        "weight": 40.0,
+        "feedback_message": "Lift hips high toward the ceiling to form inverted V"
+      },
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 175.0,
+        "tolerance": 15.0,
+        "weight": 30.0,
+        "feedback_message": "Press firmly through straight arms"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 175.0,
+        "tolerance": 15.0,
+        "weight": 30.0,
+        "feedback_message": "Straighten legs and sink heels toward the mat"
+      }
+    ],
+    "figure_path": "assets/pose_figures/parvatasana.svg",
+    "pose_figure": "assets/pose_figures/parvatasana.svg"
+  },
+  {
+    "step_number": 9,
+    "name": "Ashwa Sanchalanasana (Right Leg Forward)",
+    "english_name": "Equestrian / Lunge Pose (Right Leg Forward)",
+    "sanskrit_name": "Ashwa Sanchalanasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Intermediate",
+    "target_goal": "Strength",
+    "breathing_cue": "Inhale \u2014 Step right foot forward between hands, drop left knee.",
+    "description": "Low lunge with right foot forward and left leg extended back.",
+    "benefits": "Increases hip flexibility, tones thigh muscles, and aids balance.",
+    "instructions": "1. Step right foot forward between palms.\n2. Drop left knee to floor and press hips forward.\n3. Lift chest and look gently forward.",
+    "precautions": "Keep front right knee vertically stacked over right ankle.",
+    "hold_duration": 12,
+    "rules": [
+      {
+        "joint_name": "right_knee",
+        "target_angle": 90.0,
+        "tolerance": 15.0,
+        "weight": 45.0,
+        "feedback_message": "Bend front right knee to 90 degrees"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 85.0,
+        "tolerance": 15.0,
+        "weight": 35.0,
+        "feedback_message": "Keep chest elevated and spine tall"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 150.0,
+        "tolerance": 25.0,
+        "weight": 20.0,
+        "feedback_message": "Extend back left leg smoothly"
+      }
+    ],
+    "figure_path": "assets/pose_figures/ashwa_sanchalanasana_l.svg",
+    "pose_figure": "assets/pose_figures/ashwa_sanchalanasana_l.svg"
+  },
+  {
+    "step_number": 10,
+    "name": "Uttanasana (Forward Fold)",
+    "english_name": "Standing Forward Fold",
+    "sanskrit_name": "Uttanasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Beginner",
+    "target_goal": "Flexibility",
+    "breathing_cue": "Exhale \u2014 Step left foot forward beside right, folding down.",
+    "description": "Deep standing forward bend bringing forehead toward shins.",
+    "benefits": "Relieves tension in spine and hamstrings, calms mind.",
+    "instructions": "1. Step left foot forward to meet right foot.\n2. Fold forward from hips.\n3. Bring hands beside feet or hold ankles.",
+    "precautions": "Avoid rounding the upper back aggressively.",
+    "hold_duration": 10,
+    "rules": [
+      {
+        "joint_name": "left_hip",
+        "target_angle": 65.0,
+        "tolerance": 20.0,
+        "weight": 40.0,
+        "feedback_message": "Hinge deeply at the hips"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 170.0,
+        "tolerance": 18.0,
+        "weight": 30.0,
+        "feedback_message": "Keep legs straight with subtle knee softness"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 35.0,
+        "tolerance": 20.0,
+        "weight": 30.0,
+        "feedback_message": "Fold upper body smoothly toward legs"
+      }
+    ],
+    "figure_path": "assets/pose_figures/uttanasana.svg",
+    "pose_figure": "assets/pose_figures/uttanasana.svg"
+  },
+  {
+    "step_number": 11,
+    "name": "Hasta Uttanasana",
+    "english_name": "Raised Arms Pose",
+    "sanskrit_name": "Hasta Uttanasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Beginner",
+    "target_goal": "Flexibility",
+    "breathing_cue": "Inhale \u2014 Sweep arms overhead, arch spine slightly backward.",
+    "description": "Upward standing stretch opening chest and abdominal muscles.",
+    "benefits": "Expands lung capacity and tones back and shoulder muscles.",
+    "instructions": "1. Inhale and rise all the way up.\n2. Sweep arms overhead and back.\n3. Look upward toward thumbs.",
+    "precautions": "Keep glutes slightly engaged to protect lower back.",
+    "hold_duration": 10,
+    "rules": [
+      {
+        "joint_name": "left_elbow",
+        "target_angle": 175.0,
+        "tolerance": 15.0,
+        "weight": 30.0,
+        "feedback_message": "Reach arms straight overhead"
+      },
+      {
+        "joint_name": "right_elbow",
+        "target_angle": 175.0,
+        "tolerance": 15.0,
+        "weight": 30.0,
+        "feedback_message": "Reach arms straight overhead"
+      },
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 105.0,
+        "tolerance": 15.0,
+        "weight": 40.0,
+        "feedback_message": "Lift chest up and arch gently back"
+      }
+    ],
+    "figure_path": "assets/pose_figures/hasta_uttanasana.svg",
+    "pose_figure": "assets/pose_figures/hasta_uttanasana.svg"
+  },
+  {
+    "step_number": 12,
+    "name": "Pranamasana / Relax",
+    "english_name": "Prayer Pose / Final Alignment",
+    "sanskrit_name": "Pranamasana",
+    "category": "Surya Namaskar",
+    "difficulty": "Beginner",
+    "target_goal": "Relaxation",
+    "breathing_cue": "Exhale \u2014 Lower hands to heart center and breathe steadily.",
+    "description": "Final completion of the cycle, standing balanced in peaceful stillness.",
+    "benefits": "Restores baseline heart rate, integrates the benefits of the cycle.",
+    "instructions": "1. Bring palms back together at heart center.\n2. Lower arms to sides into Tadasana when ready.\n3. Take 3 deep, grounding breaths.",
+    "precautions": "Observe body sensations without sudden movements.",
+    "hold_duration": 10,
+    "rules": [
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 90.0,
+        "tolerance": 12.0,
+        "weight": 40.0,
+        "feedback_message": "Stand tall, relaxed and centered"
+      },
+      {
+        "joint_name": "left_knee",
+        "target_angle": 178.0,
+        "tolerance": 12.0,
+        "weight": 30.0,
+        "feedback_message": "Keep legs steady and grounded"
+      },
+      {
+        "joint_name": "right_knee",
+        "target_angle": 178.0,
+        "tolerance": 12.0,
+        "weight": 30.0,
+        "feedback_message": "Keep legs steady and grounded"
+      }
+    ],
+    "figure_path": "assets/pose_figures/pranamasana.svg",
+    "pose_figure": "assets/pose_figures/pranamasana.svg"
+  }
+]
