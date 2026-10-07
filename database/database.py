@@ -1318,7 +1318,7 @@ class Database:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                SELECT id, user_id, subscription_id, provider, order_id, payment_id, amount, currency, status, created_at
+                SELECT id, user_id, subscription_id, provider, order_id, payment_id, amount, currency, status, signature, created_at
                 FROM payments
                 WHERE order_id = ?
                 LIMIT 1;

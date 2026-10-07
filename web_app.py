@@ -177,79 +177,169 @@ def analyze_posture():
 
     # Normalize landmarks into dictionary expected by AngleCalculator
     landmarks = {}
+    total_visible = 0
     for name, lm in landmarks_raw.items():
+        vis = float(lm.get("visibility", 0.9))
+        if vis >= 0.5:
+            total_visible += 1
         landmarks[name] = {
             "x": float(lm.get("x", 0.0)),
             "y": float(lm.get("y", 0.0)),
             "z": float(lm.get("z", 0.0)),
-            "visibility": float(lm.get("visibility", 0.9)),
+            "visibility": vis,
             "px": int(lm.get("x", 0.0) * 640),
             "py": int(lm.get("y", 0.0) * 480),
         }
 
+    # Tracking & Body Visibility Validation
+    key_upper = ["LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP"]
+    key_lower = ["LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"]
+    upper_vis = sum(1 for k in key_upper if landmarks.get(k, {}).get("visibility", 0.0) >= 0.5)
+    lower_vis = sum(1 for k in key_lower if landmarks.get(k, {}).get("visibility", 0.0) >= 0.4)
+
+    if upper_vis < 2:
+        tracking_state = "NO_PERSON"
+        is_body_visible = False
+        visibility_message = "No person detected. Step into camera view."
+    elif lower_vis < 2 and total_visible < 14:
+        tracking_state = "PARTIAL_BODY"
+        is_body_visible = False
+        visibility_message = "Move back so your full body from head to feet is visible."
+    else:
+        tracking_state = "GOOD_TRACKING"
+        is_body_visible = True
+        visibility_message = ""
+
     # Extract 2D/3D joint angles
     actual_angles = AngleCalculator.extract_all_angles(landmarks)
-
-    # Pose Classification
-    detected_name, match_score, matched_pose = PoseClassifier.identify_pose(
-        actual_angles, all_poses_cache, confidence_threshold=55.0
-    )
 
     target_pose = None
     auto_detected = False
 
-    if mode == "auto" or str(pose_id).lower() == "auto" or not pose_id:
-        auto_detected = True
-        if matched_pose:
-            target_pose = matched_pose
-        else:
-            # Fallback if no pose meets threshold
-            target_pose = all_poses_cache[0] if all_poses_cache else None
-    else:
+    if mode != "auto" and str(pose_id).lower() != "auto" and pose_id:
         try:
             target_pose = db.get_pose_by_id(int(pose_id))
         except (ValueError, TypeError):
             target_pose = None
 
+    # Actual Pose Classification from live landmark geometry
+    detected_name, match_score, matched_pose = PoseClassifier.identify_pose(
+        actual_angles, all_poses_cache, confidence_threshold=55.0, expected_pose=target_pose
+    )
+
+    if not target_pose:
+        auto_detected = True
+        if matched_pose:
+            target_pose = matched_pose
+        else:
+            target_pose = all_poses_cache[0] if all_poses_cache else None
+
     if not target_pose:
         return jsonify({
             "status": "success",
             "auto_detected": auto_detected,
+            "tracking_state": tracking_state,
+            "is_body_visible": is_body_visible,
             "detected_pose": detected_name,
+            "detected_pose_id": matched_pose.get("id") if matched_pose else None,
             "target_pose_name": "Unknown",
+            "target_pose_id": None,
+            "expected_pose_id": None,
+            "expected_pose_name": "Unknown",
+            "pose_matched": False,
             "match_score": round(match_score, 1),
             "overall_score": 0.0,
-            "right_wrong_status": "WRONG",
+            "pose_status": "WAITING",
+            "right_wrong_status": "WAITING",
+            "is_correct_pose": False,
+            "is_hold_valid": False,
             "score_level": "INCORRECT",
             "level_info": settings.SCORE_LEVELS["INCORRECT"],
             "joint_results": [],
-            "primary_feedback": "Position yourself in camera view to begin pose auto-detection.",
+            "incorrect_joints": [],
+            "critical_incorrect_joints": [],
+            "primary_feedback": visibility_message or "Position yourself in camera view to begin.",
             "structured_feedback": [],
             "actual_angles": {k: round(v, 1) for k, v in actual_angles.items()},
         })
 
-    # Posture Evaluation & Scoring against target_pose
-    posture_result = posture_checker.check_posture(target_pose, actual_angles, is_body_visible=True)
+    # Posture Evaluation & Scoring against expected target_pose
+    posture_result = posture_checker.check_posture(
+        target_pose,
+        actual_angles,
+        is_body_visible=is_body_visible,
+        visibility_message=visibility_message,
+    )
     overall_score = round(posture_result.get("overall_score", 0.0), 1)
 
-    # Determine RIGHT / WRONG Status
-    is_correct = overall_score >= 80.0
-    right_wrong_status = "RIGHT" if is_correct else "WRONG"
+    expected_name = target_pose.get("name", "Unknown")
+    expected_clean = expected_name.lower().split("(")[0].strip()
+    detected_clean = detected_name.lower().split("(")[0].strip()
+
+    # Determine if detected pose matches expected pose
+    pose_matched = (
+        (matched_pose and matched_pose.get("id") == target_pose.get("id"))
+        or (expected_clean in detected_clean)
+        or (detected_clean in expected_clean)
+        or ("step" in expected_clean and "surya" in detected_clean)
+        or ("transitioning" in detected_clean and expected_clean in detected_clean)
+        or (overall_score >= 60.0)
+    )
+
+    # 4-State Posture & Hold Validation
+    if not is_body_visible:
+        pose_status = "WAITING"
+        right_wrong_status = "WAITING"
+        is_correct = False
+        is_hold_valid = False
+        primary_fb = visibility_message
+    elif not pose_matched and match_score >= 50.0:
+        pose_status = "WRONG_POSE"
+        right_wrong_status = "WRONG"
+        is_correct = False
+        is_hold_valid = False
+        overall_score = min(overall_score, 45.0)  # Penalize score for performing wrong pose
+        primary_fb = f"That looks like {detected_name}. Move into {expected_name} to continue."
+    else:
+        # User is in target pose family; verify joint tolerances
+        crit_incorrect = posture_result.get("critical_incorrect_joints", [])
+        if overall_score >= 78.0 and not crit_incorrect:
+            pose_status = "CORRECT"
+            right_wrong_status = "RIGHT"
+            is_correct = True
+            is_hold_valid = True
+            primary_fb = posture_result.get("primary_feedback") or f"Good form in {expected_name}! Hold steadily."
+        else:
+            pose_status = "ADJUST"
+            right_wrong_status = "ADJUST"
+            is_correct = False
+            is_hold_valid = False
+            primary_fb = posture_result.get("primary_feedback") or "Adjust your alignment to enter valid hold."
 
     return jsonify({
         "status": "success",
         "auto_detected": auto_detected,
+        "tracking_state": tracking_state,
+        "is_body_visible": is_body_visible,
         "detected_pose": detected_name,
-        "target_pose_name": target_pose.get("name", "Unknown"),
+        "detected_pose_id": matched_pose.get("id") if matched_pose else None,
+        "target_pose_name": expected_name,
         "target_pose_id": target_pose.get("id"),
+        "expected_pose_id": target_pose.get("id"),
+        "expected_pose_name": expected_name,
+        "pose_matched": pose_matched,
         "match_score": round(match_score, 1),
         "overall_score": overall_score,
+        "pose_status": pose_status,
         "right_wrong_status": right_wrong_status,
         "is_correct_pose": is_correct,
+        "is_hold_valid": is_hold_valid,
         "score_level": posture_result.get("score_level", "INCORRECT"),
         "level_info": posture_result.get("level_info", settings.SCORE_LEVELS["INCORRECT"]),
         "joint_results": posture_result.get("joint_results", []),
-        "primary_feedback": posture_result.get("primary_feedback", ""),
+        "incorrect_joints": posture_result.get("incorrect_joints", []),
+        "critical_incorrect_joints": posture_result.get("critical_incorrect_joints", []),
+        "primary_feedback": primary_fb,
         "structured_feedback": posture_result.get("structured_feedback", []),
         "actual_angles": {k: round(v, 1) for k, v in actual_angles.items()},
     })
@@ -567,43 +657,102 @@ def session_evaluate_frame():
         return jsonify({"status": "error", "message": "No landmarks provided"}), 400
 
     landmarks = {}
+    total_visible = 0
     for name, lm in landmarks_raw.items():
+        vis = float(lm.get("visibility", 0.9))
+        if vis >= 0.5:
+            total_visible += 1
         landmarks[name] = {
             "x": float(lm.get("x", 0.0)),
             "y": float(lm.get("y", 0.0)),
             "z": float(lm.get("z", 0.0)),
-            "visibility": float(lm.get("visibility", 0.9)),
+            "visibility": vis,
             "px": int(lm.get("x", 0.0) * 640),
             "py": int(lm.get("y", 0.0) * 480),
         }
 
-    actual_angles = AngleCalculator.extract_all_angles(landmarks)
-    detected_name, match_score, matched_pose = PoseClassifier.identify_pose(
-        actual_angles, all_poses_cache, confidence_threshold=55.0
-    )
+    # Tracking & Body Visibility Validation
+    key_upper = ["LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP"]
+    key_lower = ["LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"]
+    upper_vis = sum(1 for k in key_upper if landmarks.get(k, {}).get("visibility", 0.0) >= 0.5)
+    lower_vis = sum(1 for k in key_lower if landmarks.get(k, {}).get("visibility", 0.0) >= 0.4)
 
-    target_pose = matched_pose or (all_poses_cache[0] if all_poses_cache else None)
+    if upper_vis < 2:
+        tracking_state = "NO_PERSON"
+        is_body_visible = False
+        visibility_message = "No person detected. Step into camera view."
+    elif lower_vis < 2 and total_visible < 14:
+        tracking_state = "PARTIAL_BODY"
+        is_body_visible = False
+        visibility_message = "Move back so your full body from head to feet is visible."
+    else:
+        tracking_state = "GOOD_TRACKING"
+        is_body_visible = True
+        visibility_message = ""
+
+    target_pose = None
     if exercise and exercise.get("target_pose_id"):
         t_id = exercise.get("target_pose_id")
         try:
-            target_pose = db.get_pose_by_id(int(t_id)) or target_pose
+            target_pose = db.get_pose_by_id(int(t_id))
         except Exception:
-            pass
+            target_pose = None
 
-    posture_result = posture_checker.check_posture(target_pose or {}, actual_angles, is_body_visible=True)
+    actual_angles = AngleCalculator.extract_all_angles(landmarks)
+    detected_name, match_score, matched_pose = PoseClassifier.identify_pose(
+        actual_angles, all_poses_cache, confidence_threshold=55.0, expected_pose=target_pose
+    )
+
+    if not target_pose:
+        target_pose = matched_pose or (all_poses_cache[0] if all_poses_cache else None)
+
+    posture_result = posture_checker.check_posture(
+        target_pose or {},
+        actual_angles,
+        is_body_visible=is_body_visible,
+        visibility_message=visibility_message,
+    )
     frame_eval = coach_engine.evaluate_frame(
         detected_pose_name=detected_name,
         match_score=match_score,
         posture_eval=posture_result,
-        is_body_visible=True,
+        is_body_visible=is_body_visible,
+    )
+
+    expected_name = (target_pose.get("name") if target_pose else "Yoga Pose")
+    exp_clean = expected_name.lower().split("(")[0].strip()
+    det_clean = detected_name.lower().split("(")[0].strip()
+    pose_matched = (
+        (matched_pose and target_pose and matched_pose.get("id") == target_pose.get("id"))
+        or (exp_clean in det_clean)
+        or (det_clean in exp_clean)
+        or ("step" in exp_clean and "surya" in det_clean)
+        or ("transitioning" in det_clean and exp_clean in det_clean)
+        or (posture_result.get("overall_score", 0.0) >= 60.0)
+    )
+
+    is_hold_valid = (
+        is_body_visible
+        and pose_matched
+        and frame_eval.get("is_aligned", False)
+        and frame_eval.get("state") == "HOLDING"
     )
 
     return jsonify({
         "status": "success",
         "evaluation": frame_eval,
         "posture_result": posture_result,
+        "tracking_state": tracking_state,
+        "is_body_visible": is_body_visible,
         "detected_pose": detected_name,
+        "detected_pose_id": matched_pose.get("id") if matched_pose else None,
+        "expected_pose_name": expected_name,
+        "expected_pose_id": target_pose.get("id") if target_pose else None,
+        "pose_matched": pose_matched,
         "match_score": round(match_score, 1),
+        "is_hold_valid": is_hold_valid,
+        "incorrect_joints": posture_result.get("incorrect_joints", []),
+        "critical_incorrect_joints": posture_result.get("critical_incorrect_joints", []),
     })
 
 

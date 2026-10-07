@@ -608,33 +608,208 @@
     }
 
     /* ============================================================
-       PART 6, 17 — CAMERA & PRACTICE STUDIO
+       PART 6, 17 — CAMERA & PRACTICE STUDIO (50/50 EDITORIAL LAYOUT)
        ============================================================ */
-    .practice-viewport-layout {
-      display: grid;
-      grid-template-columns: 1.6fr 1fr;
-      gap: 28px;
-      align-items: start;
+    .practice-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
-    .camera-viewport-card {
-      position: relative;
-      background: #1A1614;
+    .hud-step-badge {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--terracotta);
+      background: rgba(201, 130, 103, 0.15);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+    }
+
+    .practice-mobile-tabs {
+      display: none;
+      gap: 6px;
+      background: var(--sand);
+      padding: 4px;
+      border-radius: var(--radius-pill);
+    }
+
+    .practice-mobile-tabs .tab-btn {
+      background: none;
+      border: none;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--espresso);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .practice-mobile-tabs .tab-btn.active {
+      background: var(--ivory);
+      color: var(--terracotta);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    /* 50% LEFT / 50% RIGHT STUDIO GRID */
+    .practice-studio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .practice-panel-card {
+      background: var(--warm-white);
       border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      background: var(--ivory);
+    }
+
+    .panel-eyebrow {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--terracotta);
+      text-transform: uppercase;
+    }
+
+    .panel-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Left Panel: Demonstration Visual Card */
+    .demo-visual-card {
+      position: relative;
+      background: #FAF8F5;
       aspect-ratio: 4/3;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-md);
-      border: 1px solid var(--border);
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+      padding: 24px;
+    }
+
+    .demo-pose-image {
+      max-width: 85%;
+      max-height: 85%;
+      object-fit: contain;
+      transition: transform 0.4s ease;
+    }
+
+    .demo-pose-image:hover {
+      transform: scale(1.03);
+    }
+
+    .demo-overlay-pill {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(74, 52, 37, 0.85);
+      backdrop-filter: blur(8px);
+      color: var(--ivory);
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .demo-alignment-section {
+      padding: 16px 20px;
+      flex: 1;
+    }
+
+    .section-title-micro {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .demo-rules-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .demo-rule-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--ivory);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      border: 1px solid var(--border-light);
+    }
+
+    .demo-rule-item span {
+      color: var(--charcoal);
+      font-weight: 500;
+    }
+
+    .demo-rule-item b {
+      color: var(--espresso);
+      font-weight: 700;
+    }
+
+    .demo-breathing-bar {
+      padding: 12px 20px;
+      background: rgba(168, 177, 155, 0.15);
+      border-top: 1px solid var(--border);
+      font-size: 12.5px;
+      color: var(--espresso);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Right Panel: Camera Viewport Card */
+    .camera-viewport-card {
+      position: relative;
+      background: #1A1614;
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    .camera-media-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     video#webcam-video {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      transform: scaleX(-1); /* Natural mirror view */
+      object-fit: contain;
+      transform: scaleX(-1); /* Natural selfie mirror view */
     }
 
     canvas#skeleton-canvas {
@@ -642,6 +817,7 @@
       inset: 0;
       width: 100%;
       height: 100%;
+      object-fit: contain;
       transform: scaleX(-1);
       pointer-events: none;
     }
@@ -660,7 +836,7 @@
       z-index: 10;
     }
 
-    /* Privacy Badges on Camera */
+    /* Privacy & Status Badges on Camera */
     .camera-status-pill {
       position: absolute;
       top: 16px;
@@ -679,6 +855,66 @@
       z-index: 20;
     }
 
+    .body-tracking-pill {
+      position: absolute;
+      top: 16px;
+      left: 155px;
+      background: rgba(48, 42, 38, 0.88);
+      backdrop-filter: blur(8px);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--ivory);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 20;
+    }
+
+    .stability-pill {
+      position: absolute;
+      top: 56px;
+      left: 16px;
+      background: rgba(48, 42, 38, 0.88);
+      backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--sand);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 20;
+    }
+
+    .live-score-pill {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      background: rgba(201, 130, 103, 0.12);
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(201, 130, 103, 0.25);
+    }
+
+    .live-score-pill .score-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--terracotta);
+    }
+
+    .live-score-pill .score-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--espresso);
+      font-family: 'Playfair Display', serif;
+    }
+
     .posture-eval-badge {
       position: absolute;
       top: 16px;
@@ -693,13 +929,23 @@
     }
 
     .badge-correct {
-      background: rgba(61, 106, 82, 0.92);
+      background: rgba(61, 106, 82, 0.94);
       color: #FFF;
     }
 
     .badge-adjust {
-      background: rgba(184, 103, 40, 0.92);
+      background: rgba(184, 103, 40, 0.94);
       color: #FFF;
+    }
+
+    .badge-wrong {
+      background: rgba(176, 58, 46, 0.95);
+      color: #FFF;
+    }
+
+    .badge-waiting {
+      background: rgba(74, 52, 37, 0.88);
+      color: var(--sand);
     }
 
     /* Transition Overlay */
@@ -718,30 +964,83 @@
       padding: 24px;
     }
 
-    /* Practice Right HUD */
-    .practice-hud-panel {
+    /* Vision Diagnostics Overlay */
+    .vision-debug-box {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(26, 22, 20, 0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(201, 130, 103, 0.4);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      color: #FFF;
+      font-family: monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      width: 220px;
+      z-index: 40;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .vision-debug-box .debug-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 800;
+      color: var(--terracotta);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    .vision-debug-box .dbg-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .vision-debug-box .dbg-line span {
+      color: #A8B19B;
+    }
+
+    .vision-debug-box .dbg-line b {
+      color: #FFF;
+    }
+
+    /* Bottom Studio Bar: AI Coach & Hold Timer */
+    .practice-bottom-bar {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 24px;
+      padding: 20px 24px;
+      background: var(--warm-white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+    }
+
+    .bottom-hold-section {
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      justify-content: center;
+      border-right: 1px solid var(--border);
+      padding-right: 24px;
     }
 
-    .score-circle-card {
-      text-align: center;
-      padding: 24px;
+    .bottom-feedback-section {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
-    .score-display-number {
-      font-size: 58px;
-      font-weight: 800;
+    .hud-feedback-text {
+      font-size: 16px;
+      font-weight: 600;
       color: var(--espresso);
-      font-family: 'Playfair Display', serif;
-      line-height: 1.1;
-      margin: 4px 0;
-      transition: color 0.3s ease;
-    }
-
-    .valid-hold-card {
-      padding: 20px;
+      line-height: 1.4;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
     }
 
     .hold-progress-track {
@@ -749,7 +1048,7 @@
       background: var(--sand);
       border-radius: 4px;
       overflow: hidden;
-      margin: 12px 0 8px;
+      margin: 10px 0 8px;
     }
 
     .hold-progress-fill {
@@ -757,6 +1056,26 @@
       background: var(--terracotta);
       width: 0%;
       transition: width 0.3s ease;
+    }
+
+    @media (max-width: 900px) {
+      .practice-studio-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .practice-mobile-tabs {
+        display: flex;
+      }
+      .practice-bottom-bar {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .bottom-hold-section {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding-right: 0;
+        padding-bottom: 16px;
+      }
     }
 
     /* ============================================================
@@ -1078,122 +1397,207 @@
       </div>
     </section>
 
-    <!-- 3. LIVE AI CAMERA PRACTICE VIEWPORT -->
+    <!-- 3. LIVE AI CAMERA & DEMO PRACTICE STUDIO (50/50 SPLIT) -->
     <section id="view-practice" class="view-section">
       <!-- Practice Studio Header Bar -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 14px;">
-          <span style="font-size: 13px; font-weight: 800; color: var(--terracotta);" id="hud-step-num">01/08</span>
-          <h2 style="font-size: 24px; font-weight: 700; color: var(--espresso);" id="hud-pose-title">TADASANA (MOUNTAIN POSE)</h2>
+      <div class="practice-header-bar">
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <span class="hud-step-badge" id="hud-step-num">01/08</span>
+          <div>
+            <h2 style="font-size: 24px; font-weight: 700; color: var(--espresso); margin: 0;" id="hud-pose-title">TADASANA (MOUNTAIN POSE)</h2>
+            <div style="font-size: 13px; color: var(--text-muted); font-style: italic;" id="hud-pose-sanskrit">Tādāsana</div>
+          </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <span style="font-size: 13px; color: var(--text-muted);" id="hud-next-upcoming">Next: Vrikshasana</span>
-          <button id="btn-hud-stop-camera" class="btn btn-danger" style="padding: 6px 14px; font-size: 12px; min-height: 36px;" onclick="CameraManager.stopCamera()" title="Stop camera immediately">
-            🔇 Stop Camera
+
+        <!-- Mode Toggle for Mobile / Responsive -->
+        <div class="practice-mobile-tabs" id="practice-mobile-tabs">
+          <button id="tab-btn-both" class="tab-btn active" onclick="setPracticeLayout('both')">Split View</button>
+          <button id="tab-btn-camera" class="tab-btn" onclick="setPracticeLayout('camera')">Camera</button>
+          <button id="tab-btn-demo" class="tab-btn" onclick="setPracticeLayout('demo')">Watch Demo</button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <button id="btn-hud-vision-debug" class="btn btn-secondary" style="padding: 6px 12px; font-size: 11px; min-height: 34px;" onclick="toggleVisionDebug()" title="Toggle Real-Time Computer Vision Diagnostics">
+            🔍 Vision Debug
           </button>
-          <button id="btn-hud-stop-voice" class="btn btn-secondary" style="padding: 6px 14px; font-size: 12px; min-height: 36px;" onclick="window.VoiceManager.stop()" title="Stop speech">
+          <button id="btn-hud-stop-voice" class="btn btn-secondary" style="padding: 6px 12px; font-size: 11px; min-height: 34px;" onclick="window.VoiceManager.stop()" title="Stop speech immediately">
             🔇 Stop Voice
           </button>
-          <button class="btn btn-secondary" style="padding: 6px 14px; font-size: 12px; min-height: 36px;" onclick="skipCurrentExercise()">
+          <button id="btn-hud-stop-camera" class="btn btn-danger" style="padding: 6px 12px; font-size: 11px; min-height: 34px;" onclick="CameraManager.stopCamera()" title="Stop camera hardware immediately">
+            🛑 Stop Camera
+          </button>
+          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 11px; min-height: 34px;" onclick="skipCurrentExercise()">
             Skip Pose ⏭
           </button>
-          <button class="btn btn-secondary" style="padding: 6px 14px; font-size: 12px; min-height: 36px;" onclick="completeFullSession()">
+          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 11px; min-height: 34px;" onclick="completeFullSession()">
             End Practice ⏹
           </button>
         </div>
       </div>
 
-      <!-- Practice Grid -->
-      <div class="practice-viewport-layout">
-        <!-- Center / Left: Camera Box -->
-        <div class="camera-viewport-card" id="camera-card">
-          <video id="webcam-video" autoplay playsinline muted></video>
-          <canvas id="skeleton-canvas"></canvas>
-
-          <!-- Pre-Camera / Stopped Placeholder Overlay -->
-          <div id="camera-placeholder" class="camera-placeholder-overlay" style="display: none;">
-            <div style="font-size: 42px; margin-bottom: 12px;">📷</div>
-            <div style="font-size: 18px; font-weight: 700; color: var(--ivory); margin-bottom: 6px;">Camera Inactive</div>
-            <p style="font-size: 13px; color: var(--sand); max-width: 320px; margin-bottom: 20px;">
-              Camera is paused or stopped for your privacy.
-            </p>
-            <button class="btn btn-primary" onclick="CameraManager.startCamera()">
-              Resume Camera
-            </button>
+      <!-- Practice Split Studio (Left ~50% Watch & Follow, Right ~50% Your Practice) -->
+      <div class="practice-studio-grid" id="practice-studio-grid">
+        <!-- LEFT 50%: WATCH & FOLLOW (Demonstration & Reference Studio) -->
+        <div class="practice-panel-card demo-panel" id="practice-demo-panel">
+          <div class="panel-header">
+            <span class="panel-eyebrow">WATCH &amp; FOLLOW</span>
+            <span class="panel-sub">Correct Alignment Reference</span>
           </div>
 
-          <!-- Camera Privacy Status Indicator -->
-          <div class="camera-status-pill">
-            <span id="hud-camera-dot" style="font-size: 10px;">●</span>
-            <span id="hud-camera-status-label">Camera active</span>
+          <div class="demo-visual-card">
+            <img id="demo-pose-img" src="/assets/pose_figures/tadasana.svg" alt="Correct Yoga Pose Form" class="demo-pose-image" onerror="handleDemoImageError(this)">
+            
+            <div class="demo-overlay-pill">
+              <span id="demo-overlay-name">Tadasana</span>
+            </div>
           </div>
 
-          <!-- Alignment Right / Wrong Badge -->
-          <div id="hud-right-wrong-badge" class="posture-eval-badge badge-correct">
-            ✓ RIGHT POSTURE
+          <!-- Key Biomechanical Alignment Rules for this pose -->
+          <div class="demo-alignment-section">
+            <div class="section-title-micro">KEY ALIGNMENT TARGETS</div>
+            <div id="demo-alignment-list" class="demo-rules-list">
+              <!-- Dynamically populated from active pose rules -->
+              <div class="demo-rule-item"><span>Left Knee</span><b>175° (Straight)</b></div>
+              <div class="demo-rule-item"><span>Right Knee</span><b>175° (Straight)</b></div>
+              <div class="demo-rule-item"><span>Spine / Torso</span><b>90° (Upright)</b></div>
+            </div>
           </div>
 
-          <!-- Transition Countdown Overlay -->
-          <div id="transition-overlay">
-            <div style="color: var(--terracotta); font-size: 13px; font-weight: 800; letter-spacing: 2px;">OUTSTANDING HOLD!</div>
-            <div style="font-size: 54px; font-weight: 900; margin: 8px 0;" id="trans-score-display">Score: 92%</div>
-            <div style="font-size: 15px; color: var(--sand); margin-bottom: 20px;" id="trans-feedback-text">Excellent knee alignment!</div>
-            <div style="font-size: 14px;">Next: <b id="trans-next-name" style="color: var(--terracotta);">Vrikshasana</b></div>
-            <div style="font-size: 72px; font-weight: 900; color: var(--terracotta); margin-top: 12px;" id="trans-countdown-num">3</div>
+          <!-- Breathing & Mindfulness Guidance -->
+          <div class="demo-breathing-bar">
+            <span class="breathing-icon">💨</span>
+            <span id="demo-breathing-guidance">Inhale deeply through nose, expand ribcage. Maintain soft gaze forward.</span>
           </div>
         </div>
 
-        <!-- Right: AI Coach HUD -->
-        <div class="practice-hud-panel">
-          <!-- Score Card -->
-          <div class="card score-circle-card">
-            <div style="font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase;">
-              POSTURE ACCURACY
-            </div>
-            <div class="score-display-number" id="hud-score">--%</div>
-            <div id="hud-status-badge" style="display: inline-block; padding: 4px 14px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; background: var(--sage-soft); color: var(--status-success);">
-              Detecting Pose
-            </div>
-          </div>
-
-          <!-- Hold Timer Card -->
-          <div class="card valid-hold-card">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">VALID HOLD TIMER</span>
-              <span style="font-size: 18px; font-weight: 800; color: var(--espresso);" id="hud-hold-display">00:00 / 00:20</span>
-            </div>
-            <div class="hold-progress-track">
-              <div id="hud-hold-progress-bar" class="hold-progress-fill"></div>
-            </div>
-            <div style="font-size: 12px; color: var(--text-muted);" id="hud-hold-status">Timer advances only when posture &ge; 78%</div>
-          </div>
-
-          <!-- Verbal AI Coach Feedback -->
-          <div class="card" style="border-left: 4px solid var(--terracotta);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <div style="font-size: 11px; font-weight: 800; color: var(--terracotta); letter-spacing: 1px;">AI COACH FEEDBACK</div>
-              <div style="display: flex; gap: 8px; align-items: center;">
-                <div id="audio-wave-box" class="audio-wave-container" style="display: none;">
-                  <span class="wave-bar"></span>
-                  <span class="wave-bar"></span>
-                  <span class="wave-bar"></span>
-                  <span class="wave-bar"></span>
-                </div>
-                <span id="hud-voice-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 12px; background: var(--cream); color: var(--espresso); font-weight: 700; border: 1px solid var(--border);">IDLE</span>
-                <button id="hud-card-mute-btn" onclick="window.VoiceManager.toggleMute()" title="Mute/Unmute coach speech" style="background: none; border: 1px solid var(--border); color: var(--espresso); font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px; cursor: pointer;">🔈 MUTE</button>
+        <!-- RIGHT 50%: YOUR PRACTICE (Live Camera + Exoskeleton Studio) -->
+        <div class="practice-panel-card camera-panel" id="practice-camera-panel">
+          <div class="panel-header">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <div>
+                <span class="panel-eyebrow">YOUR PRACTICE</span>
+                <span class="panel-sub">Real-Time AI Biomechanical Tracking</span>
+              </div>
+              <!-- Floating Live Score Pill -->
+              <div class="live-score-pill">
+                <span class="score-label">MATCH</span>
+                <span class="score-val" id="hud-score">--%</span>
               </div>
             </div>
-            <div id="hud-feedback" style="font-size: 14.5px; color: var(--charcoal); line-height: 1.5;">
-              Step into camera view to begin alignment check.
-            </div>
           </div>
 
-          <!-- Breathing Cue -->
-          <div class="card" style="padding: 18px;">
-            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted);">BREATHING GUIDANCE</div>
-            <div id="hud-breathing" style="font-size: 14px; font-weight: 600; color: var(--espresso); margin-top: 4px;">
-              💨 Inhale deeply through nose, expand ribcage
+          <!-- Camera Viewport Card -->
+          <div class="camera-viewport-card" id="camera-card">
+            <div class="camera-media-wrap" id="camera-media-wrap">
+              <video id="webcam-video" autoplay playsinline muted></video>
+              <canvas id="skeleton-canvas"></canvas>
             </div>
+
+            <!-- Overlays inside camera viewport -->
+            <!-- Privacy Status Indicator -->
+            <div class="camera-status-pill">
+              <span id="hud-camera-dot" style="font-size: 10px;">●</span>
+              <span id="hud-camera-status-label">Camera active</span>
+            </div>
+
+            <!-- Body Tracking Pill (🟢 Body Detected / ⚪ No Person / 🟡 Step Back) -->
+            <div class="body-tracking-pill" id="hud-tracking-pill">
+              <span id="hud-tracking-dot">⚪</span>
+              <span id="hud-tracking-label">Detecting Body...</span>
+            </div>
+
+            <!-- Stability Indicator Pill -->
+            <div class="stability-pill" id="hud-stability-pill">
+              <span id="hud-stability-dot">🟡</span>
+              <span id="hud-stability-label">Calibrating</span>
+            </div>
+
+            <!-- Alignment Right / Wrong / Adjust Badge -->
+            <div id="hud-right-wrong-badge" class="posture-eval-badge badge-waiting">
+              ⚪ STEP INTO FRAME
+            </div>
+
+            <!-- Pre-Camera / Stopped Placeholder Overlay -->
+            <div id="camera-placeholder" class="camera-placeholder-overlay" style="display: none;">
+              <div style="font-size: 42px; margin-bottom: 12px;">📷</div>
+              <div style="font-size: 18px; font-weight: 700; color: var(--ivory); margin-bottom: 6px;">Camera Inactive</div>
+              <p style="font-size: 13px; color: var(--sand); max-width: 320px; margin-bottom: 20px;">
+                Camera is paused or stopped for your privacy.
+              </p>
+              <button class="btn btn-primary" onclick="CameraManager.startCamera()">
+                Resume Camera
+              </button>
+            </div>
+
+            <!-- Transition Countdown Overlay -->
+            <div id="transition-overlay">
+              <div style="color: var(--terracotta); font-size: 13px; font-weight: 800; letter-spacing: 2px;">OUTSTANDING HOLD!</div>
+              <div style="font-size: 54px; font-weight: 900; margin: 8px 0;" id="trans-score-display">Score: 92%</div>
+              <div style="font-size: 15px; color: var(--sand); margin-bottom: 20px;" id="trans-feedback-text">Excellent knee alignment!</div>
+              <div style="font-size: 14px;">Next: <b id="trans-next-name" style="color: var(--terracotta);">Vrikshasana</b></div>
+              <div style="font-size: 72px; font-weight: 900; color: var(--terracotta); margin-top: 12px;" id="trans-countdown-num">3</div>
+            </div>
+
+            <!-- Vision Diagnostics Overlay (collapsible) -->
+            <div id="vision-debug-box" class="vision-debug-box" style="display: none;">
+              <div class="debug-title"><span>VISION DIAGNOSTICS</span><button onclick="toggleVisionDebug()" style="background:none;border:none;color:#FFF;cursor:pointer;">✕</button></div>
+              <div class="dbg-line"><span>MediaPipe:</span> <b id="dbg-mp-state">READY</b></div>
+              <div class="dbg-line"><span>Camera:</span> <b id="dbg-cam-res">--</b></div>
+              <div class="dbg-line"><span>FPS:</span> <b id="dbg-fps">0</b></div>
+              <div class="dbg-line"><span>Landmarks:</span> <b id="dbg-lm-count">0/33</b></div>
+              <div class="dbg-line"><span>Tracking:</span> <b id="dbg-track-state">NO_PERSON</b></div>
+              <div class="dbg-line"><span>Expected:</span> <b id="dbg-exp-pose">--</b></div>
+              <div class="dbg-line"><span>Detected:</span> <b id="dbg-det-pose">--</b></div>
+              <div class="dbg-line"><span>Pose Match:</span> <b id="dbg-match">NO</b></div>
+              <div class="dbg-line"><span>Alignment:</span> <b id="dbg-score">0%</b></div>
+              <div class="dbg-line"><span>Stable:</span> <b id="dbg-stable">NO</b></div>
+              <div class="dbg-line"><span>Hold Valid:</span> <b id="dbg-hold">NO</b></div>
+              <div class="dbg-line"><span>Deviations:</span> <span id="dbg-dev-joints" style="color:#C98267;">None</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM BAR: AI COACH FEEDBACK & VALID HOLD PROGRESS -->
+      <div class="practice-bottom-bar card">
+        <!-- Hold Timer Section -->
+        <div class="bottom-hold-section">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase;">
+              VALID HOLD PROGRESS
+            </div>
+            <div style="font-size: 20px; font-weight: 800; color: var(--espresso); font-family: monospace;" id="hud-hold-display">
+              00:00 / 00:20
+            </div>
+          </div>
+          <div class="hold-progress-track">
+            <div id="hud-hold-progress-bar" class="hold-progress-fill"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+            <span id="hud-hold-status">Timer advances only when posture &ge; 78% &amp; stable</span>
+            <span id="hud-next-upcoming" style="color: var(--terracotta); font-weight: 600;">Next: Vrikshasana</span>
+          </div>
+        </div>
+
+        <!-- AI Coach Feedback Section -->
+        <div class="bottom-feedback-section">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11px; font-weight: 800; color: var(--terracotta); letter-spacing: 1px;">AI COACH INSTRUCTION</span>
+              <div id="audio-wave-box" class="audio-wave-container" style="display: none;">
+                <span class="wave-bar"></span>
+                <span class="wave-bar"></span>
+                <span class="wave-bar"></span>
+                <span class="wave-bar"></span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <span id="hud-voice-pill" style="font-size: 10px; padding: 2px 8px; border-radius: 12px; background: var(--cream); color: var(--espresso); font-weight: 700; border: 1px solid var(--border);">IDLE</span>
+              <button id="hud-card-mute-btn" onclick="window.VoiceManager.toggleMute()" title="Mute/Unmute coach speech" style="background: none; border: 1px solid var(--border); color: var(--espresso); font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px; cursor: pointer;">🔈 MUTE</button>
+            </div>
+          </div>
+          <div id="hud-feedback" class="hud-feedback-text">
+            Step into camera view to begin alignment check.
           </div>
         </div>
       </div>
@@ -1553,6 +1957,17 @@
     let isListening = false;
     let allPoses = [];
 
+    // Vision Pipeline & Tracking State
+    let lastEvalData = null;
+    let lastPoseStatus = "WAITING";
+    let lastIncorrectJoints = [];
+    let lastIsStable = false;
+    let stabilityHistory = [];
+    let prevLandmarks = null;
+    let measuredFps = 0;
+    let fpsFrameCount = 0;
+    let lastFpsTimestamp = Date.now();
+
     // ==========================================
     // 2. CENTRALIZED CAMERA MANAGER (P0 PRIVACY)
     // ==========================================
@@ -1611,6 +2026,23 @@
           this.stream = stream;
           if (this.videoElement) {
             this.videoElement.srcObject = stream;
+
+            // Sync aspect ratio and coordinate buffers when metadata loads
+            this.videoElement.onloadedmetadata = () => {
+              const vw = this.videoElement.videoWidth || 640;
+              const vh = this.videoElement.videoHeight || 480;
+              if (this.canvasElement) {
+                this.canvasElement.width = vw;
+                this.canvasElement.height = vh;
+              }
+              const mediaWrap = document.getElementById("camera-media-wrap");
+              if (mediaWrap) {
+                mediaWrap.style.aspectRatio = `${vw} / ${vh}`;
+              }
+              const dbgRes = document.getElementById("dbg-cam-res");
+              if (dbgRes) dbgRes.innerText = `${vw}x${vh}`;
+            };
+
             await this.videoElement.play();
           }
 
@@ -1626,13 +2058,39 @@
 
             this.poseInstance.onResults((results) => {
               if (this.canvasElement && this.canvasCtx && this.videoElement) {
-                this.canvasElement.width = this.videoElement.videoWidth || 640;
-                this.canvasElement.height = this.videoElement.videoHeight || 480;
+                const vw = this.videoElement.videoWidth || 640;
+                const vh = this.videoElement.videoHeight || 480;
+                if (this.canvasElement.width !== vw || this.canvasElement.height !== vh) {
+                  this.canvasElement.width = vw;
+                  this.canvasElement.height = vh;
+                }
                 this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
 
-                if (results.poseLandmarks) {
-                  drawSkeleton(this.canvasCtx, results.poseLandmarks, this.canvasElement.width, this.canvasElement.height);
-                  sendLandmarksToBackend(results.poseLandmarks);
+                // Real-time FPS Calculation
+                fpsFrameCount++;
+                const now = Date.now();
+                if (now - lastFpsTimestamp >= 1000) {
+                  measuredFps = Math.round((fpsFrameCount * 1000) / (now - lastFpsTimestamp));
+                  fpsFrameCount = 0;
+                  lastFpsTimestamp = now;
+                  const dbgFps = document.getElementById("dbg-fps");
+                  if (dbgFps) dbgFps.innerText = measuredFps;
+                }
+
+                if (results.poseLandmarks && results.poseLandmarks.length > 0) {
+                  const smoothed = smoothLandmarks(results.poseLandmarks);
+                  const isStable = calculateStability(smoothed);
+                  lastIsStable = isStable;
+
+                  const visibleCount = smoothed.filter(lm => (lm.visibility ?? 1) >= 0.5).length;
+                  const dbgCount = document.getElementById("dbg-lm-count");
+                  if (dbgCount) dbgCount.innerText = `${visibleCount}/33`;
+
+                  drawSkeleton(this.canvasCtx, smoothed, this.canvasElement.width, this.canvasElement.height);
+                  sendLandmarksToBackend(smoothed, isStable);
+                } else {
+                  lastIsStable = false;
+                  updateBodyTrackingPill("NO_PERSON");
                 }
               }
             });
@@ -1641,14 +2099,20 @@
           this.state = CameraState.ACTIVE;
           this.updateUI();
 
-          const loop = async () => {
+          let lastFrameTime = 0;
+          const frameInterval = 50; // ~20 FPS throttle
+
+          const loop = async (timestamp) => {
             if (this.state === CameraState.ACTIVE && this.videoElement && !this.videoElement.paused && !this.videoElement.ended) {
-              if (!this.isProcessingFrame) {
-                this.isProcessingFrame = true;
-                try {
-                  await this.poseInstance.send({ image: this.videoElement });
-                } catch (e) {}
-                this.isProcessingFrame = false;
+              if (this.videoElement.readyState >= 2 && !this.isProcessingFrame) {
+                if (!lastFrameTime || (timestamp - lastFrameTime >= frameInterval)) {
+                  lastFrameTime = timestamp;
+                  this.isProcessingFrame = true;
+                  try {
+                    await this.poseInstance.send({ image: this.videoElement });
+                  } catch (e) {}
+                  this.isProcessingFrame = false;
+                }
               }
               this.animFrameId = requestAnimationFrame(loop);
             }
@@ -2024,8 +2488,25 @@
       },
 
       processFrame(evalData, currentPoseId, currentPoseName) {
-        const isAligned = !!(evalData.is_correct_pose || (evalData.overall_score >= 78));
+        const isWrongPose = evalData.pose_status === "WRONG_POSE";
+        const isAligned = !!(evalData.pose_status === "CORRECT" || (evalData.overall_score >= 78 && evalData.pose_matched));
         const feedback = (evalData.primary_feedback || "").trim();
+
+        if (isWrongPose) {
+          this.consecutiveGoodFrames = 0;
+          this.consecutiveBadFrames++;
+          if (this.previousAlignmentState !== 'WRONG_POSE') {
+            this.previousAlignmentState = 'WRONG_POSE';
+            window.VoiceManager.speakRequest({
+              text: `Detected ${evalData.detected_pose || 'a different pose'}. Please transition into ${currentPoseName || 'the required pose'}.`,
+              priority: 'high',
+              eventKey: 'wrong_pose_detected',
+              poseId: currentPoseId,
+              expiresAfterSeconds: 5
+            });
+          }
+          return;
+        }
 
         if (isAligned) {
           this.consecutiveGoodFrames++;
@@ -2417,11 +2898,15 @@
       window.VoiceManager.setContext(poseId, currentSessionPlan.id || 1);
 
       document.getElementById("hud-step-num").innerText = `${String(index + 1).padStart(2, '0')}/${String(currentSessionPlan.roadmap.length).padStart(2, '0')}`;
-      document.getElementById("hud-pose-title").innerText = step.name.toUpperCase();
-      document.getElementById("hud-breathing").innerText = `💨 ${step.breathing_cue || 'Breathe steadily'}`;
       
       const nextStep = currentSessionPlan.roadmap[index + 1];
-      document.getElementById("hud-next-upcoming").innerText = nextStep ? `Next: ${nextStep.name}` : "Final Exercise";
+      const nextUpcoming = document.getElementById("hud-next-upcoming");
+      if (nextUpcoming) {
+        nextUpcoming.innerText = nextStep ? `Next: ${nextStep.name}` : "Final Exercise";
+      }
+
+      // Synchronize 50/50 Watch & Follow Reference Studio (Figure, Sanskrit, Breathing, Targets)
+      updateDemoReference(step);
 
       validHoldCount = 0;
       updateHoldDisplay(0, step.hold_seconds);
@@ -2448,11 +2933,23 @@
         const currentStep = currentSessionPlan?.roadmap[currentStepIndex];
         const poseId = currentStep?.target_pose_id || currentStep?.pose_id || currentStep?.name || 1;
 
-        if (currentPoseScore >= 78) {
+        const isValidHold = !!(
+          lastEvalData &&
+          lastEvalData.is_hold_valid &&
+          lastEvalData.pose_status === "CORRECT" &&
+          currentPoseScore >= 75 &&
+          lastIsStable
+        );
+
+        const statusEl = document.getElementById("hud-hold-status");
+
+        if (isValidHold) {
           validHoldCount++;
           updateHoldDisplay(validHoldCount, targetHoldSeconds);
-          document.getElementById("hud-hold-status").innerText = "✓ Valid hold ticking — Posture aligned";
-          document.getElementById("hud-hold-status").style.color = "var(--status-success)";
+          if (statusEl) {
+            statusEl.innerText = "✓ Valid hold ticking — Posture aligned & stable";
+            statusEl.style.color = "var(--status-success)";
+          }
 
           if (PoseEventDetector.isHoldCurrentlyPaused && validHoldCount > 1) {
             PoseEventDetector.isHoldCurrentlyPaused = false;
@@ -2470,8 +2967,20 @@
             triggerAutomaticTransition();
           }
         } else {
-          document.getElementById("hud-hold-status").innerText = "⏸ Hold Paused — Adjust alignment to resume hold";
-          document.getElementById("hud-hold-status").style.color = "var(--status-warning)";
+          if (statusEl) {
+            let pauseReason = "Realign posture to resume hold";
+            if (!lastEvalData || !lastEvalData.is_body_visible) {
+              pauseReason = "Step into camera view";
+            } else if (lastEvalData.pose_status === "WRONG_POSE") {
+              pauseReason = `Wrong pose (${lastEvalData.detected_pose || "different pose"})`;
+            } else if (!lastIsStable) {
+              pauseReason = "Hold still to stabilize";
+            } else if (lastEvalData.pose_status === "ADJUST") {
+              pauseReason = "Adjust highlighted joints";
+            }
+            statusEl.innerText = `⏸ Hold Paused — ${pauseReason}`;
+            statusEl.style.color = "var(--status-warning)";
+          }
 
           if (!PoseEventDetector.isHoldCurrentlyPaused && validHoldCount > 0) {
             PoseEventDetector.isHoldCurrentlyPaused = true;
@@ -2570,38 +3079,245 @@
     // ==========================================
     // 10. COMPUTER VISION SKELETON & EVALUATION
     // ==========================================
+    const SKELETON_CONNECTIONS = [
+      // Head
+      [0, 1], [1, 2], [2, 3], [3, 7], [0, 4], [4, 5], [5, 6], [6, 8], [9, 10],
+      // Torso
+      [11, 12], [11, 23], [12, 24], [23, 24],
+      // Left arm
+      [11, 13], [13, 15], [15, 17], [15, 19], [15, 21], [17, 19],
+      // Right arm
+      [12, 14], [14, 16], [16, 18], [16, 20], [16, 22], [18, 20],
+      // Left leg
+      [23, 25], [25, 27], [27, 29], [27, 31], [29, 31],
+      // Right leg
+      [24, 26], [26, 28], [28, 30], [28, 32], [30, 32]
+    ];
+
+    const JOINT_LANDMARK_MAP = {
+      "left_elbow": [13],
+      "right_elbow": [14],
+      "left_knee": [25],
+      "right_knee": [26],
+      "left_shoulder": [11],
+      "right_shoulder": [12],
+      "left_hip": [23],
+      "right_hip": [24],
+      "left_ankle": [27],
+      "right_ankle": [28],
+      "spine": [11, 12, 23, 24],
+      "torso": [11, 12, 23, 24],
+      "neck": [0, 11, 12],
+      "left_wrist": [15],
+      "right_wrist": [16]
+    };
+
+    function smoothLandmarks(rawLandmarks) {
+      if (!rawLandmarks || rawLandmarks.length === 0) {
+        prevLandmarks = null;
+        return rawLandmarks;
+      }
+      if (!prevLandmarks || prevLandmarks.length !== rawLandmarks.length) {
+        prevLandmarks = rawLandmarks.map(lm => ({ ...lm }));
+        return rawLandmarks;
+      }
+
+      const SMOOTH_ALPHA = 0.75;
+      const smoothed = rawLandmarks.map((lm, i) => {
+        const prev = prevLandmarks[i];
+        const vis = lm.visibility ?? 1.0;
+        const alpha = vis < 0.4 ? 0.35 : SMOOTH_ALPHA;
+        const sx = alpha * lm.x + (1 - alpha) * prev.x;
+        const sy = alpha * lm.y + (1 - alpha) * prev.y;
+        const sz = alpha * (lm.z || 0) + (1 - alpha) * (prev.z || 0);
+        return {
+          x: sx,
+          y: sy,
+          z: sz,
+          visibility: lm.visibility
+        };
+      });
+
+      prevLandmarks = smoothed.map(lm => ({ ...lm }));
+      return smoothed;
+    }
+
+    function calculateStability(landmarks) {
+      if (!landmarks || landmarks.length < 29) {
+        stabilityHistory = [];
+        return false;
+      }
+      const keyIndices = [11, 12, 23, 24, 25, 26];
+      let sumX = 0, sumY = 0, count = 0;
+      for (const idx of keyIndices) {
+        const lm = landmarks[idx];
+        if (lm && (lm.visibility ?? 1) >= 0.45) {
+          sumX += lm.x;
+          sumY += lm.y;
+          count++;
+        }
+      }
+
+      if (count < 3) {
+        stabilityHistory = [];
+        return false;
+      }
+
+      const center = { x: sumX / count, y: sumY / count };
+      stabilityHistory.push(center);
+      if (stabilityHistory.length > 5) {
+        stabilityHistory.shift();
+      }
+
+      if (stabilityHistory.length < 3) {
+        return true;
+      }
+
+      let totalDisp = 0;
+      for (let i = 1; i < stabilityHistory.length; i++) {
+        const dx = stabilityHistory[i].x - stabilityHistory[i - 1].x;
+        const dy = stabilityHistory[i].y - stabilityHistory[i - 1].y;
+        totalDisp += Math.hypot(dx, dy);
+      }
+      const avgVelocity = totalDisp / (stabilityHistory.length - 1);
+      const isStable = avgVelocity <= 0.015;
+
+      const stabDot = document.getElementById("hud-stability-dot");
+      const stabLabel = document.getElementById("hud-stability-label");
+      if (stabDot && stabLabel) {
+        if (isStable) {
+          stabDot.innerText = "🟢";
+          stabLabel.innerText = "Stable";
+        } else {
+          stabDot.innerText = "🟡";
+          stabLabel.innerText = "Movement Detected";
+        }
+      }
+      return isStable;
+    }
+
+    function updateBodyTrackingPill(state) {
+      const dot = document.getElementById("hud-tracking-dot");
+      const label = document.getElementById("hud-tracking-label");
+      const dbgState = document.getElementById("dbg-track-state");
+      if (dbgState) dbgState.innerText = state;
+
+      if (!dot || !label) return;
+      if (state === "GOOD_TRACKING") {
+        dot.innerText = "🟢";
+        label.innerText = "Body Detected";
+      } else if (state === "PARTIAL_BODY") {
+        dot.innerText = "🟡";
+        label.innerText = "Step Back / Full Body";
+      } else {
+        dot.innerText = "⚪";
+        label.innerText = "Detecting Body...";
+      }
+    }
+
     function drawSkeleton(ctx, landmarks, w, h) {
-      const connections = [[11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [11, 23], [12, 24], [23, 24], [23, 25], [24, 26], [25, 27], [26, 28]];
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = currentPoseScore >= 78 ? "#3D6A52" : "#C98267";
-      connections.forEach(([i, j]) => {
-        if (landmarks[i] && landmarks[j]) {
+      if (!landmarks || landmarks.length === 0) return;
+
+      let boneColor = "#C98267";
+      let nodeColor = "#E67E22";
+      if (lastPoseStatus === "CORRECT" || currentPoseScore >= 78) {
+        boneColor = "#2ECC71";
+        nodeColor = "#27AE60";
+      } else if (lastPoseStatus === "WRONG_POSE") {
+        boneColor = "#E74C3C";
+        nodeColor = "#C0392B";
+      }
+
+      ctx.save();
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = boneColor;
+
+      // Draw all connections
+      SKELETON_CONNECTIONS.forEach(([i, j]) => {
+        const a = landmarks[i];
+        const b = landmarks[j];
+        if (a && b && (a.visibility ?? 1) > 0.4 && (b.visibility ?? 1) > 0.4) {
           ctx.beginPath();
-          ctx.moveTo(landmarks[i].x * w, landmarks[i].y * h);
-          ctx.lineTo(landmarks[j].x * w, landmarks[j].y * h);
+          ctx.moveTo(a.x * w, a.y * h);
+          ctx.lineTo(b.x * w, b.y * h);
           ctx.stroke();
         }
       });
 
+      // Draw landmark nodes
       landmarks.forEach((lm) => {
-        if (lm.visibility > 0.5) {
+        if ((lm.visibility ?? 1) > 0.4) {
           ctx.beginPath();
           ctx.arc(lm.x * w, lm.y * h, 4, 0, 2 * Math.PI);
-          ctx.fillStyle = currentPoseScore >= 78 ? "#A8B19B" : "#B03A2E";
+          ctx.fillStyle = nodeColor;
           ctx.fill();
         }
       });
+
+      // Highlight targeted incorrect joints
+      if (lastIncorrectJoints && lastIncorrectJoints.length > 0) {
+        const incorrectIndices = new Set();
+        lastIncorrectJoints.forEach(jName => {
+          const key = String(jName).toLowerCase().replace(/\s+/g, '_');
+          if (JOINT_LANDMARK_MAP[key]) {
+            JOINT_LANDMARK_MAP[key].forEach(idx => incorrectIndices.add(idx));
+          }
+        });
+
+        const pulse = 4 + 3 * Math.sin(Date.now() / 160);
+        incorrectIndices.forEach(idx => {
+          const lm = landmarks[idx];
+          if (lm && (lm.visibility ?? 1) > 0.3) {
+            const x = lm.x * w;
+            const y = lm.y * h;
+            ctx.beginPath();
+            ctx.arc(x, y, 7 + pulse, 0, 2 * Math.PI);
+            ctx.strokeStyle = "rgba(231, 76, 60, 0.9)";
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = "#E74C3C";
+            ctx.shadowBlur = 8;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = "#E74C3C";
+            ctx.fill();
+          }
+        });
+      }
+
+      ctx.restore();
     }
 
     let lastSend = 0;
-    async function sendLandmarksToBackend(landmarksArray) {
+    async function sendLandmarksToBackend(landmarksArray, isStable) {
       const now = Date.now();
-      if (now - lastSend < 180) return;
+      if (now - lastSend < 160) return;
       lastSend = now;
 
-      const landmarkNames = ["NOSE", "LEFT_EYE_INNER", "LEFT_EYE", "LEFT_EYE_OUTER", "RIGHT_EYE_INNER", "RIGHT_EYE", "RIGHT_EYE_OUTER", "LEFT_EAR", "RIGHT_EAR", "MOUTH_LEFT", "MOUTH_RIGHT", "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_ELBOW", "RIGHT_ELBOW", "LEFT_WRIST", "RIGHT_WRIST", "LEFT_PINKY", "RIGHT_PINKY", "LEFT_INDEX", "RIGHT_INDEX", "LEFT_THUMB", "RIGHT_THUMB", "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"];
+      const landmarkNames = [
+        "NOSE", "LEFT_EYE_INNER", "LEFT_EYE", "LEFT_EYE_OUTER",
+        "RIGHT_EYE_INNER", "RIGHT_EYE", "RIGHT_EYE_OUTER",
+        "LEFT_EAR", "RIGHT_EAR", "MOUTH_LEFT", "MOUTH_RIGHT",
+        "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_ELBOW", "RIGHT_ELBOW",
+        "LEFT_WRIST", "RIGHT_WRIST", "LEFT_PINKY", "RIGHT_PINKY",
+        "LEFT_INDEX", "RIGHT_INDEX", "LEFT_THUMB", "RIGHT_THUMB",
+        "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE",
+        "LEFT_ANKLE", "RIGHT_ANKLE", "LEFT_HEEL", "RIGHT_HEEL",
+        "LEFT_FOOT_INDEX", "RIGHT_FOOT_INDEX"
+      ];
       const dict = {};
-      landmarksArray.forEach((lm, idx) => { if (landmarkNames[idx]) dict[landmarkNames[idx]] = { x: lm.x, y: lm.y, z: lm.z, visibility: lm.visibility }; });
+      landmarksArray.forEach((lm, idx) => {
+        if (landmarkNames[idx]) {
+          dict[landmarkNames[idx]] = {
+            x: lm.x,
+            y: lm.y,
+            z: lm.z || 0,
+            visibility: lm.visibility ?? 1.0
+          };
+        }
+      });
 
       const currentStep = currentSessionPlan?.roadmap[currentStepIndex];
       const poseId = currentStep?.target_pose_id || currentStep?.pose_id || 1;
@@ -2610,37 +3326,184 @@
         const res = await fetch("/api/analyze_posture", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ landmarks: dict, pose_id: poseId })
+          body: JSON.stringify({
+            landmarks: dict,
+            pose_id: poseId,
+            stability: isStable
+          })
         });
         const evalData = await res.json();
         if (evalData.status === "success") {
+          lastEvalData = evalData;
+          lastPoseStatus = evalData.pose_status || "WAITING";
+          lastIncorrectJoints = evalData.incorrect_joints || [];
+
           currentPoseScore = Math.round(evalData.overall_score || 0);
-          
-          // Smooth Score Number Update
           animateScoreNumber(currentPoseScore);
 
-          const isRight = evalData.is_correct_pose || currentPoseScore >= 78;
+          updateBodyTrackingPill(evalData.tracking_state || "GOOD_TRACKING");
+
           const rwBadge = document.getElementById("hud-right-wrong-badge");
-          if (isRight) {
-            rwBadge.innerText = "✓ RIGHT POSTURE";
-            rwBadge.className = "posture-eval-badge badge-correct";
-            document.getElementById("hud-status-badge").innerText = "🟢 Aligned";
-            document.getElementById("hud-status-badge").style.color = "var(--status-success)";
-          } else {
-            rwBadge.innerText = "⚠ ADJUST POSTURE";
-            rwBadge.className = "posture-eval-badge badge-adjust";
-            document.getElementById("hud-status-badge").innerText = "🟡 Adjust Alignment";
-            document.getElementById("hud-status-badge").style.color = "var(--status-warning)";
+          if (rwBadge) {
+            if (evalData.pose_status === "CORRECT") {
+              rwBadge.innerText = "✓ RIGHT POSTURE";
+              rwBadge.className = "posture-eval-badge badge-correct";
+            } else if (evalData.pose_status === "WRONG_POSE") {
+              rwBadge.innerText = `✗ WRONG POSE (${evalData.detected_pose || "Different Pose"})`;
+              rwBadge.className = "posture-eval-badge badge-wrong";
+            } else if (evalData.pose_status === "ADJUST") {
+              rwBadge.innerText = "⚠ ADJUST POSTURE";
+              rwBadge.className = "posture-eval-badge badge-adjust";
+            } else {
+              rwBadge.innerText = "⚪ STEP INTO FRAME";
+              rwBadge.className = "posture-eval-badge badge-waiting";
+            }
           }
 
           if (evalData.primary_feedback) {
-            document.getElementById("hud-feedback").innerText = evalData.primary_feedback;
+            const fbEl = document.getElementById("hud-feedback");
+            if (fbEl) fbEl.innerText = evalData.primary_feedback;
           }
+
+          // Real-time Vision Diagnostics Overlay updates
+          const dbgExp = document.getElementById("dbg-exp-pose");
+          if (dbgExp) dbgExp.innerText = evalData.expected_pose_name || currentStep?.name || "--";
+          const dbgDet = document.getElementById("dbg-det-pose");
+          if (dbgDet) dbgDet.innerText = `${evalData.detected_pose || "--"} (${Math.round(evalData.match_score || 0)}%)`;
+          const dbgMatch = document.getElementById("dbg-match");
+          if (dbgMatch) dbgMatch.innerText = evalData.pose_matched ? "YES" : "NO";
+          const dbgScore = document.getElementById("dbg-score");
+          if (dbgScore) dbgScore.innerText = `${currentPoseScore}%`;
+          const dbgStable = document.getElementById("dbg-stable");
+          if (dbgStable) dbgStable.innerText = isStable ? "YES" : "NO";
+          const dbgHold = document.getElementById("dbg-hold");
+          if (dbgHold) dbgHold.innerText = evalData.is_hold_valid && isStable ? "VALID" : "PAUSED";
+          const dbgDev = document.getElementById("dbg-dev-joints");
+          if (dbgDev) dbgDev.innerText = lastIncorrectJoints.length > 0 ? lastIncorrectJoints.join(", ") : "None";
 
           const poseName = currentStep?.name || "current pose";
           PoseEventDetector.processFrame(evalData, poseId, poseName);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Posture analysis network error:", e);
+      }
+    }
+
+    // ==========================================
+    // 10B. 50/50 DEMO & STUDIO SYNCHRONIZATION
+    // ==========================================
+    function getPoseSlug(name) {
+      if (!name) return "tadasana";
+      return name.toLowerCase()
+        .replace(/\s+/g, '_')
+        .replace(/[^a-z0-9_]/g, '')
+        .replace(/^step_\d+_/, '');
+    }
+
+    function formatJointName(joint) {
+      return (joint || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function updateDemoReference(step) {
+      if (!step) return;
+      const poseName = step.name || "Yoga Pose";
+      const poseId = step.target_pose_id || step.pose_id || 1;
+
+      const matchedPose = allPoses.find(p => p.id === poseId || p.name.toLowerCase() === poseName.toLowerCase());
+      const sanskrit = step.sanskrit_name || (matchedPose ? matchedPose.sanskrit_name : "") || "";
+      const breathing = step.breathing_cue || (matchedPose ? matchedPose.precautions : "") || "Inhale deeply, ground into feet, maintain smooth breath.";
+
+      const titleEl = document.getElementById("hud-pose-title");
+      if (titleEl) titleEl.innerText = poseName.toUpperCase();
+      const sanskritEl = document.getElementById("hud-pose-sanskrit");
+      if (sanskritEl) sanskritEl.innerText = sanskrit ? sanskrit : "";
+
+      const overlayName = document.getElementById("demo-overlay-name");
+      if (overlayName) overlayName.innerText = poseName;
+
+      const breathGuidance = document.getElementById("demo-breathing-guidance");
+      if (breathGuidance) breathGuidance.innerText = breathing;
+
+      const imgEl = document.getElementById("demo-pose-img");
+      if (imgEl) {
+        let figPath = (matchedPose && matchedPose.figure_path) ? matchedPose.figure_path : null;
+        if (figPath) {
+          if (!figPath.startsWith("/")) figPath = "/" + figPath;
+          imgEl.src = figPath;
+        } else {
+          const slug = getPoseSlug(poseName);
+          imgEl.src = `/assets/pose_figures/${slug}.svg`;
+        }
+        imgEl.alt = `${poseName} Demonstration Figure`;
+      }
+
+      // Populate Key Alignment Targets list dynamically
+      const alignContainer = document.getElementById("demo-alignment-list");
+      if (alignContainer) {
+        if (matchedPose && matchedPose.rules && matchedPose.rules.length > 0) {
+          alignContainer.innerHTML = matchedPose.rules.slice(0, 4).map(r => `
+            <div class="demo-rule-item">
+              <span>${formatJointName(r.joint)}</span>
+              <b>${Math.round(r.target_angle)}° (±${Math.round(r.tolerance)}°)</b>
+            </div>
+          `).join("");
+        } else {
+          alignContainer.innerHTML = `
+            <div class="demo-rule-item"><span>Left Knee</span><b>175° (Straight)</b></div>
+            <div class="demo-rule-item"><span>Right Knee</span><b>175° (Straight)</b></div>
+            <div class="demo-rule-item"><span>Spine / Torso</span><b>90° (Upright)</b></div>
+          `;
+        }
+      }
+    }
+
+    function handleDemoImageError(imgEl) {
+      if (!imgEl) return;
+      if (!imgEl.src.includes('tadasana.svg')) {
+        imgEl.src = '/assets/pose_figures/tadasana.svg';
+      } else {
+        imgEl.src = '/assets/logo.svg';
+      }
+    }
+
+    function toggleVisionDebug() {
+      const box = document.getElementById("vision-debug-box");
+      if (!box) return;
+      box.style.display = (box.style.display === "none" || !box.style.display) ? "block" : "none";
+    }
+
+    function setPracticeLayout(layout) {
+      const demoPanel = document.getElementById("practice-demo-panel");
+      const cameraPanel = document.getElementById("practice-camera-panel");
+      const grid = document.getElementById("practice-studio-grid");
+      const btnBoth = document.getElementById("tab-btn-both");
+      const btnCam = document.getElementById("tab-btn-camera");
+      const btnDemo = document.getElementById("tab-btn-demo");
+
+      [btnBoth, btnCam, btnDemo].forEach(b => b && b.classList.remove("active"));
+
+      if (layout === 'camera') {
+        if (btnCam) btnCam.classList.add("active");
+        if (demoPanel) demoPanel.style.display = "none";
+        if (cameraPanel) cameraPanel.style.display = "flex";
+        if (grid) grid.style.gridTemplateColumns = "1fr";
+      } else if (layout === 'demo') {
+        if (btnDemo) btnDemo.classList.add("active");
+        if (demoPanel) demoPanel.style.display = "flex";
+        if (cameraPanel) cameraPanel.style.display = "none";
+        if (grid) grid.style.gridTemplateColumns = "1fr";
+      } else {
+        if (btnBoth) btnBoth.classList.add("active");
+        if (demoPanel) demoPanel.style.display = "flex";
+        if (cameraPanel) cameraPanel.style.display = "flex";
+        if (grid) {
+          if (window.innerWidth <= 860) {
+            grid.style.gridTemplateColumns = "1fr";
+          } else {
+            grid.style.gridTemplateColumns = "minmax(340px, 1fr) minmax(380px, 1.15fr)";
+          }
+        }
+      }
     }
 
     function animateScoreNumber(targetScore) {
