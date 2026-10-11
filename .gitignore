@@ -46,3 +46,4 @@ $RECYCLE.BIN/
 # Temporary outputs & logs
 *.log
 scratch/
+tmp_chrome/
