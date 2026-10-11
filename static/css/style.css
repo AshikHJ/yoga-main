@@ -1,0 +1,85 @@
+/* ============================================================
+   KI.AI — Cinematic Enhancement Layer (additive)
+   Loaded AFTER inline styles in templates/index.html.
+   Only presentation + motion. No logic overrides.
+   Palette: charcoal #171619 / rose #F277B5 / sage / lavender.
+   ============================================================ */
+
+/* ---------- Accessibility: skip link + focus ---------- */
+.ki-skip-link:focus { top: 12px !important; }
+:focus-visible {
+  outline: 2px solid #F277B5;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---------- Ambient cinematic background ---------- */
+.ki-ambient .grain { display: none; }
+
+/* Keep content above ambient */
+header#editorial-navbar,
+main#main-container,
+footer.ki-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- View transitions (graceful, non-blocking) ---------- */
+.view-section { transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.view-section.active { animation: kiViewIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes kiViewIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Hero cinematic polish ---------- */
+.hero-visual-frame img {
+  transform: scale(1.02);
+  animation: kiHeroSettle 1.4s cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
+}
+@keyframes kiHeroSettle {
+  from { transform: scale(1.09); }
+  to { transform: scale(1.02); }
+}
+
+/* ---------- Cards: gentle elevation ---------- */
+.card:hover,
+.pillar-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
+  border-color: rgba(242, 119, 181, 0.35);
+}
+
+/* ---------- Practice studio refinement (visual only) ---------- */
+.practice-panel-card { animation: kiViewIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+#practice-camera-panel { animation-delay: 120ms; }
+.posture-eval-badge.badge-correct { animation: kiBadgePop 0.35s ease both; }
+@keyframes kiBadgePop {
+  from { transform: scale(0.92); }
+  to { transform: scale(1); }
+}
+#hud-score {
+  transition: color 0.25s ease;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Form controls on dark ---------- */
+select option { background: #2b292e; color: #f7f3f5; }
+input::placeholder { color: #7e7580; }
+
+/* ---------- Chart.js canvases ---------- */
+#chart-progress, #chart-poses { width: 100% !important; }
+
+/* ---------- Library image polish ---------- */
+.pose-card-img img,
+#library-grid .pose-card-img img { border-radius: 0; }
+
+/* ---------- Reduced motion: strict ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ki-ambient { display: none; }
+  .reveal { opacity: 1 !important; transform: none !important; transition: none; }
+  .hero-float-card { animation: none; }
+  .hold-progress-fill::after { animation: none; }
+  .view-section.active { animation: none; }
+  .hero-visual-frame img { animation: none; }
+}

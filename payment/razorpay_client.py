@@ -195,6 +195,28 @@ class RazorpayClient:
             logger.warning(f"Payment signature mismatch for order {order_id}")
         return is_valid
 
+    def verify_webhook_signature(self, raw_body: bytes, signature: str) -> bool:
+        """
+        Validates Razorpay asynchronous webhook signature using HMAC-SHA256.
+        Formula: HMAC-SHA256(raw_body, webhook_secret) == signature
+        """
+        if not signature:
+            # If in test mode with no secret configured, allow for test notifications
+            if self.is_test_mode and not self.webhook_secret:
+                return True
+            return False
+
+        secret = self.webhook_secret or (self.key_secret if self.is_test_mode else "")
+        if not secret:
+            return self.is_test_mode
+
+        expected_sig = hmac.new(
+            secret.encode("utf-8"),
+            raw_body,
+            hashlib.sha256
+        ).hexdigest()
+        return hmac.compare_digest(expected_sig, signature)
+
     def generate_test_signature(self, order_id: str, payment_id: str) -> str:
         """Helper to generate a valid test signature for client demo/test flows."""
         payload = f"{order_id}|{payment_id}".encode("utf-8")

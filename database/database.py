@@ -5,6 +5,7 @@ user authentication, profile management, JSON pose seeding, and full CRUD helper
 """
 
 import hashlib
+import hmac
 import json
 import logging
 import sqlite3
@@ -19,8 +20,62 @@ logger = logging.getLogger(__name__)
 
 
 def hash_password(password: str) -> str:
-    """Generates a secure SHA-256 hash for user passwords."""
-    return hashlib.sha256(password.strip().encode("utf-8")).hexdigest()
+    """Generates a secure password hash using Argon2id with PBKDF2/SHA fallback."""
+    clean_pw = password.strip()
+    try:
+        from argon2 import PasswordHasher
+        ph = PasswordHasher()
+        return ph.hash(clean_pw)
+    except Exception:
+        try:
+            from werkzeug.security import generate_password_hash
+            return generate_password_hash(clean_pw, method="pbkdf2:sha256:600000")
+        except Exception:
+            return hashlib.sha256(clean_pw.encode("utf-8")).hexdigest()
+
+
+def verify_and_rehash_password(stored_hash: str, password: str) -> Tuple[bool, Optional[str]]:
+    """
+    Cryptographically verifies password against stored hash with zero-downtime migration.
+    Supports:
+      1. Modern Argon2id ($argon2id$...)
+      2. Werkzeug PBKDF2 / scrypt (pbkdf2:, scrypt:) -> auto-upgrades to Argon2id
+      3. Legacy 64-char SHA-256 hex -> auto-upgrades to Argon2id upon verified login
+    
+    Returns:
+      (is_valid: bool, upgraded_hash: Optional[str])
+    """
+    if not stored_hash or not password:
+        return False, None
+
+    clean_pw = password.strip()
+
+    # 1. Argon2id verification
+    if stored_hash.startswith("$argon2"):
+        try:
+            from argon2 import PasswordHasher
+            ph = PasswordHasher()
+            ph.verify(stored_hash, clean_pw)
+            return True, None
+        except Exception:
+            return False, None
+
+    # 2. Werkzeug verification
+    if stored_hash.startswith("scrypt:") or stored_hash.startswith("pbkdf2:"):
+        try:
+            from werkzeug.security import check_password_hash
+            if check_password_hash(stored_hash, clean_pw):
+                return True, hash_password(clean_pw)
+        except Exception:
+            pass
+        return False, None
+
+    # 3. Legacy SHA-256 verification and seamless upgrade
+    legacy_hex = hashlib.sha256(clean_pw.encode("utf-8")).hexdigest()
+    if hmac.compare_digest(stored_hash, legacy_hex):
+        return True, hash_password(clean_pw)
+
+    return False, None
 
 
 class Database:
@@ -70,6 +125,8 @@ class Database:
                         cursor.execute("ALTER TABLE users ADD COLUMN password_hash TEXT DEFAULT '';")
                     if "avatar_url" not in columns:
                         cursor.execute("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT '';")
+                    if "is_admin" not in columns:
+                        cursor.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0;")
 
                 # Check if poses table exists and migrate figure_path column
                 cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='poses';")
@@ -112,24 +169,26 @@ class Database:
                     (default_pw,),
                 )
 
-                # Ensure abhilash@ki.ai exists
+                # Ensure abhilash@ki.ai exists and has admin privileges
                 cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'abhilash@ki.ai';")
                 if not cursor.fetchone():
                     cursor.execute(
                         """
-                        INSERT INTO users (name, email, password_hash, age, experience, goal)
-                        VALUES (?, ?, ?, ?, ?, ?);
+                        INSERT INTO users (name, email, password_hash, age, experience, goal, is_admin)
+                        VALUES (?, ?, ?, ?, ?, ?, 1);
                         """,
                         ("Abhilash", "abhilash@ki.ai", default_pw, 23, "Intermediate", "General Fitness"),
                     )
+                else:
+                    cursor.execute("UPDATE users SET is_admin = 1 WHERE LOWER(email) = 'abhilash@ki.ai';")
 
                 # Ensure guest@ki.ai exists
                 cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'guest@ki.ai';")
                 if not cursor.fetchone():
                     cursor.execute(
                         """
-                        INSERT INTO users (name, email, password_hash, age, experience, goal)
-                        VALUES (?, ?, ?, ?, ?, ?);
+                        INSERT INTO users (name, email, password_hash, age, experience, goal, is_admin)
+                        VALUES (?, ?, ?, ?, ?, ?, 0);
                         """,
                         ("Guest User", "guest@ki.ai", guest_pw, 25, "Beginner", "Flexibility"),
                     )
@@ -142,32 +201,8 @@ class Database:
         """Retrieves all registered user profiles."""
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id, name, email, age, experience, goal, created_at FROM users ORDER BY id ASC;")
+            cursor.execute("SELECT id, name, email, age, experience, goal, is_admin, created_at FROM users ORDER BY id ASC;")
             return [dict(r) for r in cursor.fetchall()]
-
-    def create_user(
-        self,
-        name: str,
-        age: int = 25,
-        experience: str = "Beginner",
-        goal: str = "General Fitness",
-        email: Optional[str] = None,
-        password: str = "password123",
-    ) -> int:
-        """Helper to create a user and return user ID directly."""
-        email_clean = (email or f"{name.lower().replace(' ', '')}{int(datetime.now().timestamp())}@ki.ai").strip().lower()
-        pw_hash = hash_password(password)
-
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                INSERT INTO users (name, email, password_hash, age, experience, goal)
-                VALUES (?, ?, ?, ?, ?, ?);
-                """,
-                (name.strip(), email_clean, pw_hash, age, experience, goal),
-            )
-            return cursor.lastrowid
 
     def get_pose_by_name(self, name: str) -> Optional[Dict[str, Any]]:
         """Retrieves a yoga pose and its rules by name or Sanskrit name."""
@@ -239,28 +274,34 @@ class Database:
                     (name_clean, email_clean, pw_hash, age, experience, goal),
                 )
                 user_id = cursor.lastrowid
-                user = self.get_user_by_id(user_id)
+                cursor.execute(
+                    "SELECT id, name, email, age, experience, goal, is_admin, created_at FROM users WHERE id = ?;",
+                    (user_id,),
+                )
+                row = cursor.fetchone()
+                user = dict(row) if row else None
                 return True, "Account created successfully.", user
+
         except Exception as e:
             logger.error(f"Error registering user {email}: {e}")
             return False, "Failed to create account due to database error.", None
 
     def authenticate_user(self, email: str, password: str) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
         """
-        Authenticates a user via email and password.
+        Authenticates a user via email and password using constant-time verification
+        and auto-migrating legacy SHA-256 hashes to Argon2id on successful verification.
         
         Returns:
             Tuple of (success: bool, message: str, user_dict: Optional[dict])
         """
         email_clean = email.strip().lower()
-        pw_hash = hash_password(password)
 
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
                     """
-                    SELECT id, name, email, password_hash, age, experience, goal, created_at
+                    SELECT id, name, email, password_hash, age, experience, goal, is_admin, created_at
                     FROM users
                     WHERE LOWER(email) = ?;
                     """,
@@ -270,8 +311,21 @@ class Database:
                 if not row:
                     return False, "No account found with this email address.", None
 
-                if row["password_hash"] != pw_hash:
+                stored_hash = row["password_hash"]
+                is_valid, upgraded_hash = verify_and_rehash_password(stored_hash, password)
+                if not is_valid:
                     return False, "Incorrect password. Please try again.", None
+
+                # Transparent upgrade of legacy hash to Argon2id
+                if upgraded_hash:
+                    try:
+                        cursor.execute(
+                            "UPDATE users SET password_hash = ? WHERE id = ?;",
+                            (upgraded_hash, row["id"]),
+                        )
+                        logger.info(f"User ID {row['id']} credentials upgraded to modern password hash.")
+                    except Exception as err:
+                        logger.warning(f"Could not upgrade password hash for user {row['id']}: {err}")
 
                 user_dict = dict(row)
                 del user_dict["password_hash"]
@@ -284,7 +338,7 @@ class Database:
         """Retrieves a user profile by ID."""
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id, name, email, age, experience, goal, created_at FROM users WHERE id = ?;", (user_id,))
+            cursor.execute("SELECT id, name, email, age, experience, goal, is_admin, created_at FROM users WHERE id = ?;", (user_id,))
             row = cursor.fetchone()
             return dict(row) if row else None
 
@@ -292,7 +346,7 @@ class Database:
         """Retrieves a user profile by email."""
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id, name, email, age, experience, goal, created_at FROM users WHERE LOWER(email) = ?;", (email.strip().lower(),))
+            cursor.execute("SELECT id, name, email, age, experience, goal, is_admin, created_at FROM users WHERE LOWER(email) = ?;", (email.strip().lower(),))
             row = cursor.fetchone()
             return dict(row) if row else None
 

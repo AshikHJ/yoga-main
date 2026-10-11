@@ -133,7 +133,12 @@ class SessionStateMachine:
         """
         valid = is_valid_frame if is_valid_frame is not None else (is_valid_posture if is_valid_posture is not None else False)
         now = time.time()
-        step_dt = delta_seconds if delta_seconds is not None else (dt if dt is not None else max(0.0, now - self._last_tick_time))
+        if delta_seconds is not None:
+            step_dt = delta_seconds
+        elif dt is not None:
+            step_dt = dt
+        else:
+            step_dt = min(max(0.0, now - self._last_tick_time), 1.0)
         self._last_tick_time = now
 
         if self._state in {SessionState.DETECTING, SessionState.READY}:

@@ -39,6 +39,9 @@ class CoachEngine:
         if self.state_machine.current_state in {SessionState.IDLE, SessionState.INTRO, SessionState.TRANSITION, SessionState.NEXT_POSE}:
             self.state_machine.transition_to(SessionState.PREPARING, reason=f"Loaded exercise: {exercise.get('name')}")
         self.voice_manager.on_pose_changed(exercise.get("name"))
+        if hasattr(self.voice_manager, "_recent_events"):
+            self.voice_manager._recent_events.clear()
+
 
     def evaluate_frame(
         self,
@@ -67,13 +70,16 @@ class CoachEngine:
 
         # Check body visibility
         if not is_body_visible:
+            self.stability_frames_count = 0
+            if self.state_machine.current_state == SessionState.HOLDING:
+                self.state_machine.transition_to(SessionState.PAUSED, reason="Body not visible during hold")
             speech_cue = self._debounce_speech(
                 "Please step back so your full body is visible to the camera.",
                 event_key="body_not_visible",
                 priority=Priority.NORMAL,
             )
             return {
-                "state": curr_state.value,
+                "state": self.state_machine.current_state.value,
                 "score": 0.0,
                 "is_aligned": False,
                 "pose_matched": False,
@@ -97,6 +103,7 @@ class CoachEngine:
         curr_state = self.state_machine.current_state
         if curr_state in {SessionState.DETECTING, SessionState.CORRECTING}:
             if not pose_matched and match_score > 40.0:
+                self.stability_frames_count = 0
                 self.state_machine.transition_to(SessionState.CORRECTING, reason="Wrong pose performed")
                 speech_cue = self._debounce_speech(
                     f"That looks like {detected_pose_name}. Let's get into {self.current_exercise.get('name')}.",
@@ -124,6 +131,7 @@ class CoachEngine:
                         priority=Priority.LOW,
                     )
             else:
+                self.stability_frames_count = 0
                 primary_feed = posture_eval.get("primary_feedback") or "Adjust your posture."
                 speech_cue = self._debounce_speech(
                     primary_feed,

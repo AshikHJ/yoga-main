@@ -5,7 +5,19 @@ Contains system paths, camera parameters, detection thresholds, scoring criteria
 centralized color themes, and user preferences.
 """
 
+import os
 from pathlib import Path
+
+# ==========================================
+# Environment & Server Configuration
+# ==========================================
+ENV = os.environ.get("ENV", "development").strip().lower()
+IS_PRODUCTION = ENV == "production"
+SECRET_KEY = os.environ.get("SECRET_KEY", "ki_ai_yoga_secret_key_change_in_production")
+DEMO_MODE = os.environ.get("KI_AI_DEMO_MODE", "true" if not IS_PRODUCTION else "false").strip().lower() in {"true", "1", "yes"}
+ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "")
+HOST = os.environ.get("HOST", "0.0.0.0")
+PORT = int(os.environ.get("PORT", 8080))
 
 # ==========================================
 # Paths Configuration
@@ -23,6 +35,7 @@ POSES_JSON_PATH = DATA_DIR / "poses.json"
 SURYA_JSON_PATH = DATA_DIR / "surya_namaskar.json"
 DB_PATH = DATABASE_DIR / "yoga.db"
 SCHEMA_PATH = DATABASE_DIR / "schema.sql"
+
 
 # Sub-asset directories
 IMAGES_DIR = ASSETS_DIR / "images"

@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
     experience TEXT NOT NULL DEFAULT 'Beginner',
     goal TEXT NOT NULL DEFAULT 'General Fitness',
     avatar_url TEXT,
+    is_admin INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

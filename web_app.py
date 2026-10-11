@@ -5,14 +5,16 @@ Serves full browser interface on port 8080 with real-time pose checking,
 Surya Yoga sequence, user authentication, and SQLite persistence.
 """
 
+import hmac
 import json
 import logging
 import os
 import socket
+import threading
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional, Tuple
 
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, render_template, request, send_from_directory, session
 from flask_cors import CORS
 
 from analysis.angle_calculator import AngleCalculator
@@ -34,6 +36,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+
+# Production Secret Key & Session Cookie Security
+app.secret_key = os.environ.get("SECRET_KEY", "ki_ai_production_secret_key_change_in_live")
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
 # Environment-configurable CORS
 allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "").strip()
@@ -71,11 +78,71 @@ db = Database()
 posture_checker = PostureChecker()
 recommender = PoseRecommender(db)
 session_planner = SessionPlanner(db)
-coach_engine = CoachEngine()
 conversational_coach = ConversationalCoach(db=db)
 voice_manager = get_voice_manager()
 razorpay_client = get_razorpay_client()
+
+# Thread-safe in-memory cache for catalog poses
+_poses_cache_lock = threading.Lock()
 all_poses_cache = db.get_all_poses()
+
+
+def get_cached_poses() -> List[Dict[str, Any]]:
+    """Returns the cached list of all yoga poses, reloading from DB if empty."""
+    global all_poses_cache
+    with _poses_cache_lock:
+        if not all_poses_cache:
+            all_poses_cache = db.get_all_poses()
+        return all_poses_cache
+
+
+def refresh_poses_cache() -> List[Dict[str, Any]]:
+    """Refreshes the in-memory poses cache directly from SQLite."""
+    global all_poses_cache
+    with _poses_cache_lock:
+        all_poses_cache = db.get_all_poses()
+        return all_poses_cache
+
+
+# Per-user isolated CoachEngine registry to prevent concurrent state crosstalk
+_coach_registry: Dict[int, CoachEngine] = {}
+_coach_registry_lock = threading.Lock()
+
+
+def get_coach_engine_for_user(user_id: int = 1) -> CoachEngine:
+    """Returns an isolated CoachEngine instance for the given user."""
+    with _coach_registry_lock:
+        if user_id not in _coach_registry:
+            _coach_registry[user_id] = CoachEngine()
+        return _coach_registry[user_id]
+
+
+# Backward-compatible global coach_engine reference for single-user desktop code
+coach_engine = get_coach_engine_for_user(1)
+
+
+def check_user_access(target_user_id: int) -> Tuple[bool, Optional[str]]:
+    """
+    Validates user authorization for user-specific resources (IDOR defense).
+    Returns (authorized: bool, error_message: Optional[str]).
+    """
+    sess_uid = session.get("user_id")
+    is_admin = session.get("is_admin", False)
+
+    if sess_uid is not None:
+        try:
+            if is_admin or int(sess_uid) == int(target_user_id):
+                return True, None
+        except (ValueError, TypeError):
+            pass
+        return False, "Access denied: Unauthorized access to requested user resource."
+
+    # If no active session, allow default demo users (ID 1 Abhilash, ID 2 Guest) only if demo mode is active
+    demo_allowed = os.environ.get("KI_AI_DEMO_MODE", "true").strip().lower() in {"true", "1", "yes"}
+    if demo_allowed and int(target_user_id) in (1, 2):
+        return True, None
+
+    return False, "Authentication required to access user resource."
 
 
 def get_local_ip() -> str:
@@ -98,7 +165,31 @@ def index():
 
 @app.route("/admin")
 def admin_console():
-    """Renders the KI.AI Admin Console & Posture Intelligence Operations Center."""
+    """Renders the KI.AI Admin Console (protected by authentication & admin authorization)."""
+    auth_header = request.headers.get("Authorization", "")
+    bearer_token = auth_header[7:].strip() if auth_header.startswith("Bearer ") else ""
+    admin_token = request.args.get("admin_token") or request.headers.get("X-Admin-Token") or bearer_token
+    configured_token = os.environ.get("ADMIN_TOKEN", "").strip()
+
+
+    is_authorized = False
+    if session.get("is_admin"):
+        is_authorized = True
+    elif configured_token and admin_token and hmac.compare_digest(admin_token, configured_token):
+        is_authorized = True
+    elif not configured_token:
+        sess_user_id = session.get("user_id")
+        if sess_user_id:
+            u = db.get_user_by_id(sess_user_id)
+            if u and u.get("is_admin"):
+                is_authorized = True
+
+    if not is_authorized:
+        return jsonify({
+            "status": "error",
+            "message": "Access denied: Administrative privileges required."
+        }), 403
+
     return render_template("admin.html")
 
 
@@ -111,7 +202,7 @@ def serve_assets(filename):
 @app.route("/api/poses", methods=["GET"])
 def get_poses():
     """Returns all yoga poses with rules."""
-    poses = db.get_all_poses()
+    poses = refresh_poses_cache()
     return jsonify(poses)
 
 
@@ -124,27 +215,46 @@ def get_surya_poses():
 
 @app.route("/api/login", methods=["POST"])
 def login():
-    """Authenticates user with email and password."""
-    data = request.json or {}
-    email = data.get("email", "")
-    password = data.get("password", "")
+    """Authenticates user with email and password with secure session binding."""
+    data = request.get_json(silent=True) or {}
+    email = str(data.get("email", "")).strip()
+    password = str(data.get("password", "")).strip()
+
+    if not email or not password:
+        return jsonify({"status": "error", "message": "Email and password are required."}), 400
 
     success, msg, user = db.authenticate_user(email, password)
     if success and user:
+        session["user_id"] = user["id"]
+        session["user_email"] = user["email"]
+        session["is_admin"] = bool(user.get("is_admin", 0))
         return jsonify({"status": "success", "message": msg, "user": user})
     return jsonify({"status": "error", "message": msg}), 401
 
 
+@app.route("/api/logout", methods=["POST", "GET"])
+def logout():
+    """Clears active session on logout."""
+    session.clear()
+    return jsonify({"status": "success", "message": "Logged out successfully."})
+
+
 @app.route("/api/register", methods=["POST"])
 def register():
-    """Registers a new user profile."""
-    data = request.json or {}
-    name = data.get("name", "")
-    email = data.get("email", "")
-    password = data.get("password", "")
-    age = int(data.get("age", 25))
-    experience = data.get("experience", "Beginner")
-    goal = data.get("goal", "General Fitness")
+    """Registers a new user profile with input validation."""
+    data = request.get_json(silent=True) or {}
+    name = str(data.get("name", "")).strip()
+    email = str(data.get("email", "")).strip()
+    password = str(data.get("password", "")).strip()
+    try:
+        age = int(data.get("age", 25))
+    except (ValueError, TypeError):
+        age = 25
+    experience = str(data.get("experience", "Beginner")).strip()
+    goal = str(data.get("goal", "General Fitness")).strip()
+
+    if not name or not email or not password:
+        return jsonify({"status": "error", "message": "Full name, email, and password are required."}), 400
 
     success, msg, user = db.register_user(
         name=name,
@@ -155,7 +265,10 @@ def register():
         goal=goal,
     )
 
-    if success:
+    if success and user:
+        session["user_id"] = user["id"]
+        session["user_email"] = user["email"]
+        session["is_admin"] = bool(user.get("is_admin", 0))
         return jsonify({"status": "success", "message": msg, "user": user})
     return jsonify({"status": "error", "message": msg}), 400
 
@@ -347,15 +460,26 @@ def analyze_posture():
 
 @app.route("/api/save_session", methods=["POST"])
 def save_session():
-    """Saves completed practice session into SQLite."""
-    data = request.json or {}
-    user_id = data.get("user_id", 1)
-    pose_id = data.get("pose_id", 1)
-    duration = int(data.get("duration", 0))
-    avg_score = float(data.get("average_score", 0.0))
-    final_score = float(data.get("final_score", 0.0))
-    hold_duration = int(data.get("hold_duration", 0))
-    corrections_count = int(data.get("corrections_count", 0))
+    """Saves completed practice session into SQLite with validation and IDOR protection."""
+    data = request.get_json(silent=True) or {}
+    try:
+        user_id = int(data.get("user_id", 1))
+        pose_id = int(data.get("pose_id", 1))
+        duration = max(0, int(data.get("duration", 0)))
+        avg_score = max(0.0, min(100.0, float(data.get("average_score", 0.0))))
+        final_score = max(0.0, min(100.0, float(data.get("final_score", 0.0))))
+        hold_duration = max(0, int(data.get("hold_duration", 0)))
+        corrections_count = max(0, int(data.get("corrections_count", 0)))
+    except (ValueError, TypeError) as e:
+        return jsonify({"status": "error", "message": f"Invalid numeric parameters: {e}"}), 400
+
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": f"User ID {user_id} does not exist."}), 404
 
     session_id = db.save_practice_session(
         user_id=user_id,
@@ -372,7 +496,15 @@ def save_session():
 
 @app.route("/api/history/<int:user_id>", methods=["GET"])
 def get_history(user_id):
-    """Returns practice history for user."""
+    """Returns practice history for user (IDOR protected)."""
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": f"User ID {user_id} not found."}), 404
+
     pose_filter = request.args.get("pose")
     min_score = request.args.get("min_score", type=float)
     history = db.get_all_practice_history(user_id, pose_filter=pose_filter, min_score=min_score)
@@ -381,7 +513,15 @@ def get_history(user_id):
 
 @app.route("/api/stats/<int:user_id>", methods=["GET"])
 def get_stats(user_id):
-    """Returns lifetime metrics and progress breakdown."""
+    """Returns lifetime metrics and progress breakdown (IDOR protected)."""
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": f"User ID {user_id} not found."}), 404
+
     stats = db.get_user_stats(user_id)
     progression = db.get_analytics_score_progression(user_id)
     pose_breakdown = db.get_pose_performance_breakdown(user_id)
@@ -394,15 +534,32 @@ def get_stats(user_id):
 
 @app.route("/api/recommendations/<int:user_id>", methods=["GET"])
 def get_recommendations(user_id):
-    """Returns personalized recommendation feed."""
+    """Returns personalized recommendation feed (IDOR protected)."""
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": f"User ID {user_id} not found."}), 404
+
     recs = recommender.get_recommendations(user_id)
     return jsonify(recs)
+
 
 
 @app.route("/api/programs", methods=["GET"])
 def get_programs():
     """Returns all 3 learning programs (Foundation, Progress, Mastery) and unlock requirements."""
-    user_id = request.args.get("user_id", default=1, type=int)
+    try:
+        user_id = int(request.args.get("user_id", default=1))
+    except (ValueError, TypeError):
+        user_id = 1
+
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
     unlock_info = session_planner.evaluate_program_unlock(user_id)
     
     programs = [
@@ -446,7 +603,15 @@ def get_programs():
 @app.route("/api/program/<level>", methods=["GET"])
 def get_program_by_level(level):
     """Returns detailed overview for specific level ('beginner', 'intermediate', 'advanced')."""
-    user_id = request.args.get("user_id", default=1, type=int)
+    try:
+        user_id = int(request.args.get("user_id", default=1))
+    except (ValueError, TypeError):
+        user_id = 1
+
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
     level_capitalized = level.capitalize()
     session_plan = session_planner.generate_session(user_id=user_id, level=level_capitalized)
     return jsonify({"status": "success", "program": session_plan})
@@ -454,8 +619,15 @@ def get_program_by_level(level):
 
 @app.route("/api/daily-session/<int:user_id>", methods=["GET"])
 def get_daily_session(user_id):
-    """Generates today's personalized AI-guided yoga practice session."""
-    duration = request.args.get("duration", default=20, type=int)
+    """Generates today's personalized AI-guided yoga practice session (IDOR protected)."""
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    try:
+        duration = int(request.args.get("duration", default=20))
+    except (ValueError, TypeError):
+        duration = 20
     goal = request.args.get("goal", default="General Fitness", type=str)
     level = request.args.get("level", default="Beginner", type=str)
     focus = request.args.get("focus", default=None, type=str)
@@ -472,12 +644,21 @@ def get_daily_session(user_id):
 
 @app.route("/api/session/start", methods=["POST"])
 def start_session():
-    """Initializes a new guided AI practice session state."""
-    data = request.json or {}
-    user_id = data.get("user_id", 1)
-    duration = int(data.get("duration", 20))
-    goal = data.get("goal", "General Fitness")
-    level = data.get("level", "Beginner")
+    """Initializes a new guided AI practice session state with isolated per-user coach."""
+    data = request.get_json(silent=True) or {}
+    try:
+        user_id = int(data.get("user_id", 1))
+        duration = int(data.get("duration", 20))
+    except (ValueError, TypeError):
+        user_id = 1
+        duration = 20
+
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    goal = str(data.get("goal", "General Fitness"))
+    level = str(data.get("level", "Beginner"))
     focus = data.get("focus")
 
     session_plan = session_planner.generate_session(
@@ -492,7 +673,8 @@ def start_session():
 
     exercises = session_plan.get("exercises", [])
     if exercises:
-        coach_engine.load_exercise(exercises[0])
+        engine = get_coach_engine_for_user(user_id)
+        engine.load_exercise(exercises[0])
         voice_manager.set_context(session_id=plan_id, pose_id=exercises[0].get("name"))
 
     return jsonify({
@@ -506,16 +688,28 @@ def start_session():
 @app.route("/api/session/complete", methods=["POST"])
 def complete_session():
     """Saves completed multi-exercise AI guided session."""
-    data = request.json or {}
-    user_id = data.get("user_id", 1)
-    duration_total = int(data.get("total_duration_seconds", 1200))
-    avg_accuracy = float(data.get("average_accuracy", 88.0))
-    completed_exercises = int(data.get("completed_exercises", 8))
-    total_exercises = int(data.get("total_exercises", completed_exercises))
-    program_level = data.get("program_level", "Beginner")
-    session_plan_id = data.get("session_plan_id", f"plan_{user_id}")
-    best_pose = data.get("best_pose", "")
-    weakest_joint = data.get("weakest_joint", "")
+    data = request.get_json(silent=True) or {}
+    try:
+        user_id = int(data.get("user_id", 1))
+        duration_total = max(0, int(data.get("total_duration_seconds", 1200)))
+        avg_accuracy = max(0.0, min(100.0, float(data.get("average_accuracy", 88.0))))
+        completed_exercises = max(0, int(data.get("completed_exercises", 8)))
+        total_exercises = max(completed_exercises, int(data.get("total_exercises", completed_exercises)))
+    except (ValueError, TypeError) as e:
+        return jsonify({"status": "error", "message": f"Invalid parameter: {e}"}), 400
+
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": f"User ID {user_id} not found."}), 404
+
+    program_level = str(data.get("program_level", "Beginner"))[:32]
+    session_plan_id = str(data.get("session_plan_id", f"plan_{user_id}"))[:64]
+    best_pose = str(data.get("best_pose", ""))[:64]
+    weakest_joint = str(data.get("weakest_joint", ""))[:64]
 
     # Stop voice coaching when session completes
     voice_manager.on_session_completed()
@@ -563,6 +757,14 @@ def complete_session():
 @app.route("/api/progress/<int:user_id>", methods=["GET"])
 def get_user_progress(user_id):
     """Returns detailed user wellness progress, program unlock readiness, and streaks."""
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": f"User ID {user_id} not found."}), 404
+
     stats = db.get_user_stats(user_id)
     unlock_info = session_planner.evaluate_program_unlock(user_id)
     progression = db.get_analytics_score_progression(user_id)
@@ -580,6 +782,14 @@ def get_user_progress(user_id):
 @app.route("/api/user/preferences/<int:user_id>", methods=["GET"])
 def get_user_preferences(user_id):
     """Retrieves practice preferences for user."""
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": f"User ID {user_id} not found."}), 404
+
     prefs = db.get_user_preferences(user_id)
     return jsonify({"status": "success", "preferences": prefs})
 
@@ -587,13 +797,28 @@ def get_user_preferences(user_id):
 @app.route("/api/user/preferences", methods=["POST"])
 def update_user_preferences():
     """Updates practice preferences for user."""
-    data = request.json or {}
-    user_id = data.get("user_id", 1)
+    data = request.get_json(silent=True) or {}
+    try:
+        user_id = int(data.get("user_id", 1))
+    except (ValueError, TypeError):
+        user_id = 1
+
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    duration_mins = data.get("duration_minutes")
+    if duration_mins is not None:
+        try:
+            duration_mins = max(5, min(120, int(duration_mins)))
+        except (ValueError, TypeError):
+            duration_mins = 20
+
     updated = db.set_user_preferences(
         user_id=user_id,
         goal=data.get("goal"),
         level=data.get("level"),
-        duration_minutes=data.get("duration_minutes"),
+        duration_minutes=duration_mins,
         focus_area=data.get("focus_area"),
         voice_enabled=data.get("voice_enabled"),
         voice_speed=data.get("voice_speed"),
@@ -605,10 +830,20 @@ def update_user_preferences():
 @app.route("/api/coach/message", methods=["POST"])
 def coach_message():
     """Processes interactive voice/chat dialogue with AI Yoga Coach."""
-    data = request.json or {}
-    user_id = data.get("user_id", 1)
-    message = data.get("message", "")
+    data = request.get_json(silent=True) or {}
+    try:
+        user_id = int(data.get("user_id", 1))
+    except (ValueError, TypeError):
+        user_id = 1
+
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
+    message = str(data.get("message", "")).strip()[:1000]
     context = data.get("context", {})
+    if not isinstance(context, dict):
+        context = {}
 
     # Save user message
     db.save_coach_conversation(user_id=user_id, role="user", message=message, context=context)
@@ -635,8 +870,13 @@ def coach_message():
 @app.route("/api/coach/history/<int:user_id>", methods=["GET"])
 def get_coach_history(user_id):
     """Returns recent dialogue turns with AI Yoga Coach."""
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "error", "message": auth_err}), 403
+
     history = db.get_recent_coach_conversations(user_id, limit=20)
     return jsonify({"status": "success", "history": history})
+
 
 
 @app.route("/api/session/evaluate_frame", methods=["POST"])
@@ -644,31 +884,47 @@ def session_evaluate_frame():
     """
     Evaluates camera landmarks against current exercise in session,
     manages hold validation timer, and returns state & speech cue.
+    Uses per-user coach engine to isolate practice state across concurrent users.
     """
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     landmarks_raw = data.get("landmarks", {})
     exercise = data.get("exercise")
+    try:
+        user_id = int(data.get("user_id", 1))
+    except (ValueError, TypeError):
+        user_id = 1
 
-    if exercise:
-        if not coach_engine.current_exercise or coach_engine.current_exercise.get("name") != exercise.get("name"):
-            coach_engine.load_exercise(exercise)
+    engine = get_coach_engine_for_user(user_id)
 
-    if not landmarks_raw:
+    if exercise and isinstance(exercise, dict):
+        if not engine.current_exercise or engine.current_exercise.get("name") != exercise.get("name"):
+            engine.load_exercise(exercise)
+
+    if not landmarks_raw or not isinstance(landmarks_raw, dict):
         return jsonify({"status": "error", "message": "No landmarks provided"}), 400
 
     landmarks = {}
     total_visible = 0
     for name, lm in landmarks_raw.items():
-        vis = float(lm.get("visibility", 0.9))
+        if not isinstance(lm, dict):
+            continue
+        try:
+            vis = float(lm.get("visibility", 0.9))
+            x = float(lm.get("x", 0.0))
+            y = float(lm.get("y", 0.0))
+            z = float(lm.get("z", 0.0))
+        except (ValueError, TypeError):
+            continue
+
         if vis >= 0.5:
             total_visible += 1
         landmarks[name] = {
-            "x": float(lm.get("x", 0.0)),
-            "y": float(lm.get("y", 0.0)),
-            "z": float(lm.get("z", 0.0)),
+            "x": x,
+            "y": y,
+            "z": z,
             "visibility": vis,
-            "px": int(lm.get("x", 0.0) * 640),
-            "py": int(lm.get("y", 0.0) * 480),
+            "px": int(x * 640),
+            "py": int(y * 480),
         }
 
     # Tracking & Body Visibility Validation
@@ -691,20 +947,21 @@ def session_evaluate_frame():
         visibility_message = ""
 
     target_pose = None
-    if exercise and exercise.get("target_pose_id"):
+    if exercise and isinstance(exercise, dict) and exercise.get("target_pose_id"):
         t_id = exercise.get("target_pose_id")
         try:
             target_pose = db.get_pose_by_id(int(t_id))
         except Exception:
             target_pose = None
 
+    poses_list = get_cached_poses()
     actual_angles = AngleCalculator.extract_all_angles(landmarks)
     detected_name, match_score, matched_pose = PoseClassifier.identify_pose(
-        actual_angles, all_poses_cache, confidence_threshold=55.0, expected_pose=target_pose
+        actual_angles, poses_list, confidence_threshold=55.0, expected_pose=target_pose
     )
 
     if not target_pose:
-        target_pose = matched_pose or (all_poses_cache[0] if all_poses_cache else None)
+        target_pose = matched_pose or (poses_list[0] if poses_list else None)
 
     posture_result = posture_checker.check_posture(
         target_pose or {},
@@ -712,7 +969,7 @@ def session_evaluate_frame():
         is_body_visible=is_body_visible,
         visibility_message=visibility_message,
     )
-    frame_eval = coach_engine.evaluate_frame(
+    frame_eval = engine.evaluate_frame(
         detected_pose_name=detected_name,
         match_score=match_score,
         posture_eval=posture_result,
@@ -807,7 +1064,7 @@ def voice_status():
 @app.route("/api/voice/speak", methods=["POST"])
 def voice_speak():
     """Queues a validated speech request."""
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     text = data.get("text", "")
     priority_str = data.get("priority", "NORMAL").upper()
     priority = getattr(Priority, priority_str, Priority.NORMAL)
@@ -856,17 +1113,31 @@ def create_payment_order():
     In demo/test mode: generates a verified test order with transparent test token.
     In live mode: communicates directly with Razorpay Orders API.
     """
-    data = request.json or {}
-    user_id = data.get("user_id", 1)
-    plan_type = data.get("plan_type", "PRO_MONTHLY")
-    
+    data = request.get_json(silent=True) or {}
+    try:
+        user_id = int(data.get("user_id", 1))
+    except (ValueError, TypeError):
+        user_id = 1
+
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "failed", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "failed", "message": f"User ID {user_id} not found."}), 404
+
+    plan_type = str(data.get("plan_type", "PRO_MONTHLY")).strip()
+    if plan_type not in razorpay_client.PLAN_PRICING:
+        plan_type = "PRO_MONTHLY"
+
     order = razorpay_client.create_order(
         plan_type=plan_type,
         user_id=user_id,
-        user_email=data.get("email", ""),
-        user_name=data.get("name", "")
+        user_email=str(data.get("email", user.get("email", ""))),
+        user_name=str(data.get("name", user.get("name", ""))),
     )
-    
+
     if order.get("status") == "success":
         # Record pending order in database
         db.create_payment(
@@ -874,7 +1145,7 @@ def create_payment_order():
             order_id=order["order_id"],
             amount=order["amount"],
             currency=order.get("currency", "INR"),
-            provider="razorpay"
+            provider="razorpay",
         )
         return jsonify(order)
     return jsonify({"status": "failed", "message": "Failed to generate payment order"}), 400
@@ -885,30 +1156,54 @@ def verify_payment():
     """
     Server-side cryptographic verification of Razorpay payment signature.
     Prevents client-side spoofing; activates Pro subscription only upon valid HMAC match.
+    Idempotent: prevents duplicate activations for already captured orders.
     """
-    data = request.json or {}
-    user_id = data.get("user_id", 1)
-    order_id = data.get("order_id", "").strip()
-    payment_id = data.get("payment_id", "").strip()
-    signature = data.get("signature", "").strip()
-    plan_type = data.get("plan_type", "PRO_MONTHLY")
-    
+    data = request.get_json(silent=True) or {}
+    try:
+        user_id = int(data.get("user_id", 1))
+    except (ValueError, TypeError):
+        user_id = 1
+
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "failed", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "failed", "message": f"User ID {user_id} not found."}), 404
+
+    order_id = str(data.get("order_id", "")).strip()
+    payment_id = str(data.get("payment_id", "")).strip()
+    signature = str(data.get("signature", "")).strip()
+    plan_type = str(data.get("plan_type", "PRO_MONTHLY")).strip()
+
     if not order_id or not payment_id or not signature:
         return jsonify({
-            "status": "failed", 
-            "message": "Missing required verification parameters (order_id, payment_id, signature)"
+            "status": "failed",
+            "message": "Missing required verification parameters (order_id, payment_id, signature)",
         }), 400
+
+    # Idempotency check: check if order was already captured
+    existing_payment = db.get_payment_by_order_id(order_id)
+    if existing_payment and existing_payment.get("status") == "captured":
+        active_sub = db.get_active_subscription(user_id)
+        return jsonify({
+            "status": "success",
+            "message": "Payment already verified and Pro subscription active.",
+            "is_pro": True,
+            "subscription": active_sub,
+        })
 
     # Strict server-side HMAC-SHA256 signature verification
     is_valid = razorpay_client.verify_payment_signature(order_id, payment_id, signature)
-    
+
     if is_valid:
         # Mark payment as captured in database
         db.update_payment_status(order_id, status="captured", payment_id=payment_id, signature=signature)
-        
+
         # Calculate duration based on plan
         duration_days = 365 if "ANNUAL" in plan_type else 30
-        
+
         # Activate Pro subscription in database
         db.create_subscription(
             user_id=user_id,
@@ -917,16 +1212,16 @@ def verify_payment():
             provider="razorpay",
             provider_customer_id=f"cust_{user_id}",
             provider_subscription_id=payment_id,
-            duration_days=duration_days
+            duration_days=duration_days,
         )
-        
+
         active_sub = db.get_active_subscription(user_id)
         logger.info(f"Pro subscription successfully activated for user {user_id} via order {order_id}")
         return jsonify({
             "status": "success",
             "message": "Payment verified and Pro subscription activated!",
             "is_pro": True,
-            "subscription": active_sub
+            "subscription": active_sub,
         })
     else:
         # Mark payment as failed in database
@@ -934,17 +1229,25 @@ def verify_payment():
         logger.warning(f"Payment verification failed for order {order_id}")
         return jsonify({
             "status": "failed",
-            "message": "Payment signature verification failed. Your account was not charged."
+            "message": "Payment signature verification failed. Your account was not charged.",
         }), 400
 
 
 @app.route("/api/payment/webhook", methods=["POST"])
 def payment_webhook():
     """Handles incoming Razorpay asynchronous webhook notifications."""
-    event_data = request.json or {}
+    raw_body = request.get_data()
+    webhook_sig = request.headers.get("X-Razorpay-Signature", "")
+
+    # Cryptographically verify webhook signature
+    if not razorpay_client.verify_webhook_signature(raw_body, webhook_sig):
+        logger.warning("Rejected invalid Razorpay webhook signature")
+        return jsonify({"status": "failed", "message": "Invalid webhook signature"}), 400
+
+    event_data = request.get_json(silent=True) or {}
     event_type = event_data.get("event")
     logger.info(f"Received Razorpay webhook event: {event_type}")
-    
+
     if event_type == "payment.captured":
         payload = event_data.get("payload", {}).get("payment", {}).get("entity", {})
         order_id = payload.get("order_id")
@@ -963,26 +1266,46 @@ def payment_webhook():
 @app.route("/api/subscription/<int:user_id>", methods=["GET"])
 def get_user_subscription(user_id):
     """Retrieves user subscription and Pro entitlement status."""
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "failed", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "failed", "message": f"User ID {user_id} not found."}), 404
+
     sub = db.get_active_subscription(user_id)
     is_pro = db.is_user_pro(user_id)
     return jsonify({
         "status": "success",
         "is_pro": is_pro,
-        "subscription": sub
+        "subscription": sub,
     })
 
 
 @app.route("/api/subscription/cancel", methods=["POST"])
 def cancel_user_subscription():
     """Cancels active recurring user subscription."""
-    data = request.json or {}
-    user_id = data.get("user_id", 1)
+    data = request.get_json(silent=True) or {}
+    try:
+        user_id = int(data.get("user_id", 1))
+    except (ValueError, TypeError):
+        user_id = 1
+
+    auth_ok, auth_err = check_user_access(user_id)
+    if not auth_ok:
+        return jsonify({"status": "failed", "message": auth_err}), 403
+
+    user = db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "failed", "message": f"User ID {user_id} not found."}), 404
+
     sub = db.get_active_subscription(user_id)
     if sub and sub.get("id"):
         db.cancel_subscription(sub["id"])
         return jsonify({
-            "status": "success", 
-            "message": "Subscription cancelled. Your Pro access remains active until the end of your billing cycle."
+            "status": "success",
+            "message": "Subscription cancelled. Your Pro access remains active until the end of your billing cycle.",
         })
     return jsonify({"status": "failed", "message": "No active subscription found to cancel"}), 404
 
