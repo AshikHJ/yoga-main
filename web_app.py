@@ -33,7 +33,7 @@ from coach.conversation import ConversationalCoach
 from coach.state_machine import SessionState, SessionStateMachine
 from voice.voice_manager import CoachingEvent, Priority, VoiceManager, VoiceState, get_voice_manager
 from payment.razorpay_client import get_razorpay_client
-from payment.entitlements import EntitlementService, require_pro
+from payment.entitlements import EntitlementService
 from coach.kiki import KikiService, KikiCharacterState, determine_kiki_state
 from coach.session_controller import PracticeSessionController, SessionLifecycleState
 
@@ -1945,11 +1945,10 @@ def get_user_entitlements_by_id(user_id):
 
 
 @app.route("/api/pro/advanced-analytics/<int:user_id>", methods=["GET"])
-@require_pro(lambda: db, feature_name="advanced_analytics")
 def get_pro_advanced_analytics(user_id):
     """
-    Pro-only endpoint providing advanced biomechanical analytics.
-    Enforces server-side Pro entitlement check; rejects Free tier with HTTP 403.
+    Advanced biomechanical analytics. KI.AI is a free application, so the
+    former Pro entitlement gate was removed; standard auth still applies.
     """
     auth_ok, auth_err = check_user_access(user_id)
     if not auth_ok:

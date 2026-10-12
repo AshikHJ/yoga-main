@@ -146,8 +146,6 @@ header#editorial-navbar.scrolled { background: rgba(16, 15, 17, 0.94); box-shado
   padding: 6px 6px 6px 14px; border-radius: var(--radius-pill); font-size: 12.5px;
   font-weight: 600; color: var(--text); border: 1px solid var(--border);
 }
-.badge-pro { background: var(--pink); color: #171619; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 10px; letter-spacing: 0.5px; }
-.badge-free { background: var(--sage); color: #171619; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 10px; letter-spacing: 0.5px; }
 .mobile-menu-btn { display: none; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 9px 13px; font-size: 17px; color: var(--text); cursor: pointer; min-height: 44px; }
 #mobile-drawer { display: none; background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px 20px; flex-direction: column; gap: 4px; }
 #mobile-drawer.open { display: flex; }
@@ -347,68 +345,919 @@ canvas#skeleton-canvas { position: absolute; inset: 0; width: 100%; height: 100%
 .hold-progress-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent); transform: translateX(-100%); animation: kiShimmer 2.4s ease-in-out infinite; }
 @keyframes kiShimmer { 60%,100% { transform: translateX(100%); } }
 
-/* ============ IMMERSIVE FULL-SCREEN PRACTICE ============
-   Camera fills the viewport; reference panel floats right;
-   top bar + feedback stay readable without covering the body. */
-#view-practice.active { max-width: none; }
-#view-practice .practice-shell { display: flex; flex-direction: column; gap: 12px; }
-.fs-topbar {
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  background: var(--surface); border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg); padding: 10px 16px;
+/* ============================================================
+   KI.AI — FULL-SCREEN NEON-GREEN TRACKING HUD SYSTEM
+   Palette: Neon Green #39FF14 / Dark Glass rgba(8,14,10,0.85) / Thin White Frame
+   ============================================================ */
+
+/* Global lock when Practice Studio is active */
+body.practice-mode-active {
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100vh !important;
+  width: 100vw !important;
 }
-.fs-topbar .fs-pose { min-width: 0; flex: 1 1 220px; }
-.fs-topbar .fs-pose h2 { font-size: 20px; font-weight: 800; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fs-timer { font-family: var(--font-display); font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--teal-light); white-space: nowrap; }
-.fs-timer.paused { color: var(--status-warning); }
-.fs-seq { flex: 2 1 200px; min-width: 140px; }
-.fs-seq-track { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
-.fs-seq-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--teal), var(--pink)); transition: width 0.4s var(--transition-smooth); }
-.fs-seq-label { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
-.fs-controls { display: flex; gap: 8px; flex-wrap: wrap; }
-.fs-btn { background: rgba(245,241,243,0.06); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 8px 12px; font-size: 12px; font-weight: 700; cursor: pointer; min-height: 40px; font-family: var(--font-sans); }
-.fs-btn:hover { background: rgba(245,241,243,0.12); border-color: var(--border-accent); }
-.fs-btn.active { background: var(--pink-soft); border-color: var(--border-accent); color: var(--pink-light); }
-.fs-stage { position: relative; display: block; border-radius: var(--radius-lg); overflow: hidden; background: #0e0d0f; border: 1px solid var(--border-subtle); min-height: min(76vh, 720px); grid-template-columns: none; }
-.fs-stage .camera-panel-card { background: transparent; border: none; border-radius: 0; box-shadow: none; }
-.fs-stage .camera-viewport-card { aspect-ratio: auto; height: min(76vh, 720px); min-height: 420px; box-shadow: none; }
-.fs-stage video#webcam-video, .fs-stage canvas#skeleton-canvas { object-fit: contain; }
-.fs-stage.fit-cover video#webcam-video, .fs-stage.fit-cover canvas#skeleton-canvas { object-fit: cover; }
-/* Floating reference panel (desktop): right side, never covers centre */
-.fs-ref {
-  position: absolute; top: 14px; right: 14px; z-index: 35;
-  width: min(300px, 30%); max-height: calc(100% - 28px); overflow-y: auto;
-  background: rgba(22, 20, 22, 0.92); backdrop-filter: blur(12px);
-  border: 1px solid var(--border); border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  transition: transform 0.3s var(--transition-smooth), opacity 0.3s ease;
+body.practice-mode-active #editorial-navbar,
+body.practice-mode-active footer.ki-footer,
+body.practice-mode-active #kiki-root {
+  display: none !important;
 }
-.fs-ref.minimized { transform: translateX(calc(100% - 46px)); }
-.fs-ref.minimized .fs-ref-body { display: none; }
-.fs-ref-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border-subtle); position: sticky; top: 0; background: rgba(22,20,22,0.96); }
-.fs-ref-head .fs-ref-name { flex: 1; font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fs-ref-body img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: #1b1a1d; }
-.fs-ref-body .fs-cues { padding: 10px 12px; font-size: 12px; color: var(--muted); line-height: 1.55; }
-.fs-ref-body .fs-cues li { margin-bottom: 5px; }
-.fs-ref-body .fs-cues ul { margin: 0; padding-left: 16px; }
-.fs-feedback {
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  background: var(--surface); border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg); padding: 12px 18px;
+
+/* Fullscreen Practice Section */
+#view-practice.active {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 9999 !important;
+  background: #040805 !important;
+  overflow: hidden !important;
 }
-.fs-feedback .hud-feedback-text { flex: 1 1 260px; min-height: 0; font-size: 15px; }
-.fs-hold { display: flex; align-items: center; gap: 10px; }
-.fs-hold-track { width: 150px; height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
-@media (max-width: 860px) {
-  .fs-stage { min-height: 52vh; }
-  .fs-stage .camera-viewport-card { height: 52vh; min-height: 320px; }
-  .fs-ref { position: static; width: 100%; max-height: none; margin-top: 10px; }
-  .fs-ref.minimized { transform: none; }
-  .fs-ref.minimized .fs-ref-body { display: none; }
-  .practice-mobile-tabs { display: none; }
+
+.hud-fullscreen-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #fff;
+  user-select: none;
 }
-#view-practice:fullscreen { background: #0e0d0f; padding: 12px; overflow-y: auto; }
-#view-practice:fullscreen .fs-stage .camera-viewport-card { height: calc(100vh - 230px); min-height: 0; }
+
+/* 1. Camera & Canvas Stage (Behind all HUD layers) */
+.hud-camera-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: #040805;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hud-camera-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hud-camera-stage .camera-media-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hud-camera-stage video#webcam-video {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scaleX(-1);
+  background: #040805;
+}
+
+.hud-camera-stage canvas#skeleton-canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scaleX(-1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Toggle fill screen mode */
+.hud-camera-stage.fit-cover video#webcam-video,
+.hud-camera-stage.fit-cover canvas#skeleton-canvas {
+  object-fit: cover !important;
+}
+
+/* Restrained Scanline Sci-Fi Layer */
+.hud-scanline-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.24) 50%);
+  background-size: 100% 4px;
+  opacity: 0.65;
+}
+
+/* 2. Thin White Screen Frame & Neon Corner Brackets */
+.hud-screen-frame {
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hud-corner-bracket {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: #39FF14;
+  border-style: solid;
+  border-width: 0;
+  filter: drop-shadow(0 0 6px rgba(57, 255, 20, 0.6));
+}
+.hud-corner-bracket.top-left {
+  top: -1px; left: -1px;
+  border-top-width: 2.5px; border-left-width: 2.5px;
+}
+.hud-corner-bracket.top-right {
+  top: -1px; right: -1px;
+  border-top-width: 2.5px; border-right-width: 2.5px;
+}
+.hud-corner-bracket.bottom-left {
+  bottom: -1px; left: -1px;
+  border-bottom-width: 2.5px; border-left-width: 2.5px;
+}
+.hud-corner-bracket.bottom-right {
+  bottom: -1px; right: -1px;
+  border-bottom-width: 2.5px; border-right-width: 2.5px;
+}
+
+/* 3. Top-Left Overlay (Brand, Pose title, tracking pill, session step) */
+.hud-top-left {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.hud-system-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  color: #39FF14;
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+  font-family: 'Space Grotesk', monospace;
+}
+
+.hud-tag-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #39FF14;
+  box-shadow: 0 0 8px #39FF14;
+  animation: hudPulse 2s ease-in-out infinite;
+}
+
+.hud-pose-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hud-pose-name {
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #FFFFFF;
+  margin: 0;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.hud-pose-sanskrit {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  font-style: italic;
+  font-family: serif;
+  letter-spacing: 0.5px;
+}
+
+.hud-status-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.hud-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  background: rgba(8, 14, 10, 0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(57, 255, 20, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.hud-tracking-pill {
+  color: #39FF14;
+}
+.hud-tracking-pill.tracking-warning {
+  color: #FFD700;
+  border-color: rgba(255, 215, 0, 0.4);
+}
+.hud-tracking-pill.tracking-lost {
+  color: #FF3B30;
+  border-color: rgba(255, 59, 48, 0.4);
+}
+
+.hud-pill-dot {
+  font-size: 10px;
+}
+
+.hud-step-pill {
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 4. Top-Right Overlay (Giant Timer, Action Controls) */
+.hud-top-right {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.hud-timer-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background: rgba(8, 14, 10, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(57, 255, 20, 0.35);
+  border-radius: 8px;
+  padding: 8px 18px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(57, 255, 20, 0.08);
+}
+
+.hud-timer-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+
+.hud-digital-timer {
+  font-family: 'Space Grotesk', ui-monospace, monospace;
+  font-size: clamp(28px, 3.2vw, 36px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #39FF14;
+  letter-spacing: 2px;
+  line-height: 1.1;
+  text-shadow: 0 0 14px rgba(57, 255, 20, 0.6);
+}
+
+.hud-digital-timer.paused {
+  color: #FFD700;
+  text-shadow: 0 0 14px rgba(255, 215, 0, 0.6);
+  animation: hudBlink 1.2s ease-in-out infinite;
+}
+
+.hud-controls-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.hud-control-btn {
+  background: rgba(8, 14, 10, 0.82);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(57, 255, 20, 0.3);
+  color: #FFFFFF;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  font-family: 'Space Grotesk', monospace;
+  transition: all 0.2s ease;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.hud-control-btn:hover {
+  background: rgba(57, 255, 20, 0.15);
+  border-color: #39FF14;
+  color: #39FF14;
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.3);
+}
+
+.hud-control-btn.active {
+  background: rgba(57, 255, 20, 0.2);
+  border-color: #39FF14;
+  color: #39FF14;
+}
+
+.hud-control-exit {
+  border-color: rgba(255, 59, 48, 0.45);
+  color: #FF3B30;
+}
+.hud-control-exit:hover {
+  background: rgba(255, 59, 48, 0.2);
+  border-color: #FF3B30;
+  color: #FFFFFF;
+  box-shadow: 0 0 12px rgba(255, 59, 48, 0.4);
+}
+
+/* 5. Floating Demonstration Card in Upper-Left */
+.hud-floating-demo-card {
+  position: absolute;
+  top: 130px;
+  left: 24px;
+  width: min(310px, 28vw);
+  max-height: calc(100vh - 250px);
+  z-index: 28;
+  background: rgba(8, 14, 10, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(57, 255, 20, 0.35);
+  border-radius: 10px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), inset 0 0 1px rgba(57, 255, 20, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+}
+
+.hud-floating-demo-card.minimized {
+  width: 240px;
+}
+.hud-floating-demo-card.minimized .hud-demo-body {
+  display: none;
+}
+
+.hud-demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(12, 20, 15, 0.95);
+  border-bottom: 1px solid rgba(57, 255, 20, 0.25);
+}
+
+.hud-demo-header-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #39FF14;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-demo-icon {
+  font-size: 12px;
+}
+
+.hud-demo-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-demo-guide-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+.hud-demo-guide-btn:hover {
+  background: rgba(57, 255, 20, 0.15);
+  border-color: #39FF14;
+  color: #39FF14;
+}
+
+.hud-demo-toggle-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.hud-demo-toggle-btn:hover {
+  border-color: #39FF14;
+  color: #39FF14;
+}
+
+.hud-demo-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.hud-demo-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.hud-demo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hud-demo-img-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(8, 14, 10, 0.85);
+  border: 1px solid rgba(57, 255, 20, 0.4);
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #39FF14;
+  letter-spacing: 0.5px;
+}
+
+.hud-demo-targets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hud-demo-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+
+.hud-targets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.demo-rule-item,
+.hud-target-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  border-left: 2px solid #39FF14;
+  color: rgba(255, 255, 255, 0.9);
+}
+.demo-rule-item b,
+.hud-target-row b {
+  color: #39FF14;
+  font-family: monospace;
+}
+
+.hud-demo-breathing {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(57, 255, 20, 0.06);
+  border: 1px solid rgba(57, 255, 20, 0.2);
+  border-radius: 6px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.hud-breath-icon {
+  font-size: 14px;
+}
+
+/* 6. Right Edge Real-Time Posture Assessment Card */
+.hud-feedback-panel {
+  position: absolute;
+  top: 130px;
+  right: 24px;
+  width: min(320px, 29vw);
+  z-index: 28;
+  background: rgba(8, 14, 10, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(57, 255, 20, 0.35);
+  border-radius: 10px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), inset 0 0 1px rgba(57, 255, 20, 0.3);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.hud-feedback-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-live-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #39FF14;
+  text-transform: uppercase;
+}
+
+.hud-score-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  background: rgba(57, 255, 20, 0.12);
+  border: 1px solid rgba(57, 255, 20, 0.4);
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+.hud-score-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #39FF14;
+  font-family: 'Space Grotesk', monospace;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+}
+
+.hud-score-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 1px;
+}
+
+.hud-posture-badge-wrap {
+  width: 100%;
+}
+
+.hud-feedback-panel .posture-eval-badge {
+  position: static;
+  width: 100%;
+  text-align: center;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  display: block;
+}
+
+.hud-feedback-panel .badge-correct {
+  background: rgba(57, 255, 20, 0.18) !important;
+  color: #39FF14 !important;
+  border: 1px solid #39FF14 !important;
+  box-shadow: 0 0 14px rgba(57, 255, 20, 0.35) !important;
+}
+
+.hud-feedback-panel .badge-adjust {
+  background: rgba(255, 215, 0, 0.18) !important;
+  color: #FFD700 !important;
+  border: 1px solid #FFD700 !important;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.35) !important;
+}
+
+.hud-feedback-panel .badge-wrong {
+  background: rgba(255, 59, 48, 0.18) !important;
+  color: #FF3B30 !important;
+  border: 1px solid #FF3B30 !important;
+  box-shadow: 0 0 14px rgba(255, 59, 48, 0.35) !important;
+}
+
+.hud-feedback-panel .badge-waiting {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.hud-coaching-box {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hud-coach-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+}
+
+.hud-feedback-body {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #FFFFFF;
+  font-weight: 500;
+  min-height: 42px;
+}
+
+/* 7. Bottom Edge Dock (Hold Progress, Sequence, Audio Wave) */
+.hud-bottom-dock {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  z-index: 30;
+  background: rgba(8, 14, 10, 0.9);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(57, 255, 20, 0.35);
+  border-radius: 10px;
+  padding: 12px 20px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7), inset 0 0 1px rgba(57, 255, 20, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.hud-dock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hud-dock-hold-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hud-dock-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #39FF14;
+  text-transform: uppercase;
+}
+
+.hud-dock-timer {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 18px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 1px;
+}
+
+.hud-dock-seq-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hud-dock-seq-text {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+}
+
+.hud-dock-next-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #39FF14;
+}
+
+.hud-dock-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hud-dock-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #2ECC71, #39FF14, #8FF2E2);
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.7);
+  border-radius: 4px;
+  transition: width 0.35s ease;
+  position: relative;
+}
+.hud-dock-progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+  animation: hudShimmer 2.2s infinite;
+}
+
+.hud-dock-footnote {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hud-dock-voice-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-mini-mute-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 7px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+.hud-mini-mute-btn:hover {
+  border-color: #39FF14;
+  color: #39FF14;
+}
+
+/* Transition Screen (Between Poses) */
+.hud-transition-screen {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 8, 5, 0.92);
+  backdrop-filter: blur(14px);
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.hud-transition-kicker {
+  color: #39FF14;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+}
+
+.hud-transition-score {
+  font-size: clamp(38px, 6vw, 64px);
+  font-weight: 900;
+  color: #FFFFFF;
+  margin: 10px 0;
+}
+
+.hud-transition-msg {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 440px;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.hud-transition-next {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
+}
+.hud-transition-next b {
+  color: #39FF14;
+}
+
+.hud-transition-countdown {
+  font-size: clamp(56px, 9vw, 96px);
+  font-weight: 900;
+  color: #39FF14;
+  margin-top: 14px;
+  text-shadow: 0 0 24px rgba(57, 255, 20, 0.7);
+}
+
+/* Animations */
+@keyframes hudPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+@keyframes hudBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes hudShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .hud-floating-demo-card {
+    width: 260px;
+    top: auto;
+    bottom: 120px;
+    left: 16px;
+  }
+  .hud-feedback-panel {
+    width: 270px;
+    top: auto;
+    bottom: 120px;
+    right: 16px;
+  }
+  .hud-top-left {
+    top: 16px;
+    left: 16px;
+  }
+  .hud-top-right {
+    top: 16px;
+    right: 16px;
+  }
+  .hud-bottom-dock {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    padding: 10px 14px;
+  }
+}
+
+@media (max-width: 680px) {
+  .hud-floating-demo-card {
+    display: none;
+  }
+  .hud-feedback-panel {
+    position: static;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .hud-digital-timer {
+    font-size: 24px;
+  }
+}
 
 /* Progress timeline */
 .timeline { display: flex; flex-direction: column; gap: 0; margin: 8px 0 28px; }
@@ -419,11 +1268,7 @@ canvas#skeleton-canvas { position: absolute; inset: 0; width: 100%; height: 100%
 .empty-state { text-align: center; padding: 44px 28px; border: 1.5px dashed var(--border); border-radius: var(--radius-lg); color: var(--muted); }
 .empty-state .big { font-size: 44px; margin-bottom: 10px; }
 
-/* Pricing */
-.pricing-header { text-align: center; max-width: 680px; margin: 20px auto 44px; }
-.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; max-width: 920px; margin: 0 auto; }
-.pricing-card { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 36px; display: flex; flex-direction: column; position: relative; }
-.pricing-card.featured { background: linear-gradient(160deg, #2e2a30, #232126); border: 1.5px solid var(--pink); box-shadow: 0 18px 50px rgba(242,119,181,0.16); }
+/* (Pricing styles removed with the subscription UI — app is free.) */
 .plan-badge { position: absolute; top: -13px; right: 28px; background: var(--pink); color: #171619; font-size: 11px; font-weight: 800; letter-spacing: 1px; padding: 4px 13px; border-radius: var(--radius-pill); text-transform: uppercase; }
 .plan-price { font-size: 46px; font-weight: 800; font-family: var(--font-display); color: var(--text); margin: 14px 0 6px; line-height: 1; }
 .plan-features { list-style: none; margin: 24px 0 30px; display: flex; flex-direction: column; gap: 13px; font-size: 14px; }
@@ -583,12 +1428,10 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       <button id="nav-btn-library" onclick="switchView('library')">Pose Library</button>
       <button id="nav-btn-programs" onclick="switchView('programs')">Programs</button>
       <button id="nav-btn-progress" onclick="switchView('progress')">Progress</button>
-      <button id="nav-btn-pricing" onclick="switchView('pricing')">Pricing</button>
     </nav>
     <div class="nav-actions">
       <div class="user-status-pill" title="Account">
         <span id="nav-user-name">Guest</span>
-        <span id="nav-plan-badge" class="badge-free">FREE</span>
       </div>
       <button id="btn-nav-auth" class="btn btn-teal" style="padding:8px 16px;min-height:40px;font-size:12.5px;" onclick="Auth.open()" title="Sign in to KI.AI">Sign in</button>
       <button id="btn-nav-logout" class="btn btn-secondary" style="display:none;padding:8px 14px;min-height:40px;font-size:12.5px;" onclick="Auth.logout()" title="Sign out">Sign out</button>
@@ -602,7 +1445,6 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     <button onclick="switchView('library'); toggleMobileMenu();">Pose Library</button>
     <button onclick="switchView('programs'); toggleMobileMenu();">Programs</button>
     <button onclick="switchView('progress'); toggleMobileMenu();">Progress</button>
-    <button onclick="switchView('pricing'); toggleMobileMenu();">Subscription &amp; Pro</button>
     <button onclick="openPreferencesModal(); toggleMobileMenu();">Practice Preferences</button>
     <button id="drawer-auth-btn" onclick="Auth.open(); toggleMobileMenu();">Sign in</button>
     <button id="drawer-logout-btn" style="display:none;" onclick="Auth.logout(); toggleMobileMenu();">Sign out</button>
@@ -876,113 +1718,40 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     </div>
   </section>
 
-  <!-- ============ PRACTICE STUDIO ============ -->
-  <section id="view-practice" class="view-section">
-    <div class="practice-shell">
-    <div class="practice-header-bar fs-topbar">
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <span class="hud-step-badge" id="hud-step-num">01/08</span>
-        <div class="fs-pose">
-          <h2 id="hud-pose-title">TADASANA (MOUNTAIN POSE)</h2>
-          <div style="font-size:13px;color:var(--muted);font-style:italic;" id="hud-pose-sanskrit">Tādāsana</div>
-        </div>
-      </div>
-      <div class="fs-seq">
-        <div class="fs-seq-label" id="fs-seq-label">POSE 1 OF 8</div>
-        <div class="fs-seq-track"><div class="fs-seq-fill" id="fs-seq-fill"></div></div>
-      </div>
-      <div class="fs-timer" id="fs-timer" title="Remaining hold time">00:20</div>
-      <div class="practice-mobile-tabs" id="practice-mobile-tabs">
-        <button id="tab-btn-both" class="tab-btn active" onclick="setPracticeLayout('both')">Split View</button>
-        <button id="tab-btn-camera" class="tab-btn" onclick="setPracticeLayout('camera')">Camera</button>
-        <button id="tab-btn-demo" class="tab-btn" onclick="setPracticeLayout('demo')">Watch Demo</button>
-      </div>
-      <div class="fs-controls">
-        <button id="btn-pause-resume" class="fs-btn" onclick="togglePausePractice()" title="Pause or resume the hold timer">⏸ Pause</button>
-        <button id="btn-fit" class="fs-btn" onclick="toggleCameraFit()" title="Toggle camera fit: contain shows your full body, cover fills the screen">⛶ Fit: Full body</button>
-        <button id="btn-fullscreen" class="fs-btn" onclick="togglePracticeFullscreen()" title="Toggle browser fullscreen">⛶ Fullscreen</button>
-        <button id="btn-hud-vision-debug" class="btn btn-secondary" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="toggleVisionDebug()" title="Toggle vision diagnostics">🔍 Vision Debug</button>
-        <button id="btn-hud-stop-voice" class="btn btn-secondary" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="window.VoiceManager.toggleMute()" title="Mute/Unmute coach speech">🔈 Mute</button>
-        <button id="btn-hud-stop-camera" class="btn btn-danger" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="CameraManager.stopCamera()" title="Stop camera hardware">🛑 Stop Camera</button>
-        <button class="btn btn-secondary" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="skipCurrentExercise()">Skip Pose ⏭</button>
-        <button class="btn btn-secondary" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="completeFullSession()">End Practice ⏹</button>
-      </div>
-    </div>
+  <!-- ============ PRACTICE STUDIO : FULL-SCREEN NEON HUD ============ -->
+  <section id="view-practice" class="view-section practice-fullscreen-mode">
+    <div class="hud-fullscreen-container" id="practice-fullscreen-root">
 
-    <div class="fs-stage" id="practice-studio-grid">
-      <div class="practice-panel-card demo-panel fs-ref" id="practice-demo-panel">
-        <div class="fs-ref-head">
-          <span class="fs-ref-name" id="demo-overlay-name-head">Reference</span>
-          <button class="fs-btn" id="btn-ref-min" onclick="toggleRefPanel()" title="Minimize or expand the reference panel" style="min-height:32px;padding:4px 10px;">−</button>
-        </div>
-        <div class="fs-ref-body">
-        <div class="panel-header"><span class="panel-eyebrow">WATCH &amp; FOLLOW</span><span class="panel-sub">Correct Alignment Reference</span></div>
-        <div style="padding:10px 20px 0;display:flex;justify-content:flex-end;">
-          <button class="btn btn-secondary" style="padding:6px 14px;font-size:11.5px;min-height:36px;" onclick="openPoseDetailsForCurrentStep()" title="Open step-by-step guide for this pose">📖 Pose guide</button>
-        </div>
-        <div class="demo-visual-card">
-          <img id="demo-pose-img" src="/assets/pose_figures/tadasana.svg" alt="Reference demonstration of the correct yoga pose form" class="demo-pose-image" onerror="handleDemoImageError(this)">
-          <div class="demo-overlay-pill"><span id="demo-overlay-name">Tadasana</span></div>
-        </div>
-        <div class="demo-alignment-section">
-          <div class="section-title-micro">KEY ALIGNMENT TARGETS</div>
-          <div id="demo-alignment-list" class="demo-rules-list">
-            <div class="demo-rule-item"><span>Left Knee</span><b>175° (Straight)</b></div>
-            <div class="demo-rule-item"><span>Right Knee</span><b>175° (Straight)</b></div>
-            <div class="demo-rule-item"><span>Spine / Torso</span><b>90° (Upright)</b></div>
-          </div>
-        </div>
-        <div class="demo-breathing-bar"><span>💨</span><span id="demo-breathing-guidance">Inhale deeply through nose, expand ribcage. Maintain soft gaze forward.</span></div>
-        </div>
-      </div>
-
-      <div class="practice-panel-card camera-panel" id="practice-camera-panel">
-        <div class="demo-visual-card">
-          <img id="demo-pose-img" src="/assets/pose_figures/tadasana.svg" alt="Reference demonstration of the correct yoga pose form" class="demo-pose-image" onerror="handleDemoImageError(this)">
-          <div class="demo-overlay-pill"><span id="demo-overlay-name">Tadasana</span></div>
-        </div>
-        <div class="demo-alignment-section">
-          <div class="section-title-micro">KEY ALIGNMENT TARGETS</div>
-          <div id="demo-alignment-list" class="demo-rules-list">
-            <div class="demo-rule-item"><span>Left Knee</span><b>175° (Straight)</b></div>
-            <div class="demo-rule-item"><span>Right Knee</span><b>175° (Straight)</b></div>
-            <div class="demo-rule-item"><span>Spine / Torso</span><b>90° (Upright)</b></div>
-          </div>
-        </div>
-        <div class="demo-breathing-bar"><span>💨</span><span id="demo-breathing-guidance">Inhale deeply through nose, expand ribcage. Maintain soft gaze forward.</span></div>
-      </div>
-
-      <div class="practice-panel-card camera-panel" id="practice-camera-panel">
-        <div class="panel-header">
-          <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:10px;">
-            <div><span class="panel-eyebrow">YOUR PRACTICE</span><br><span class="panel-sub">Real-Time AI Biomechanical Tracking</span></div>
-            <div class="live-score-pill"><span class="score-label">MATCH</span><span class="score-val" id="hud-score">--%</span></div>
-          </div>
-        </div>
-        <div class="camera-viewport-card" id="camera-card">
+      <!-- 1. FULL-SCREEN LIVE CAMERA & SKELETON CANVAS STAGE (Behind all HUD layers) -->
+      <div class="hud-camera-stage" id="practice-studio-grid">
+        <div class="hud-camera-viewport" id="camera-card">
           <div class="camera-media-wrap" id="camera-media-wrap">
             <video id="webcam-video" autoplay playsinline muted></video>
             <canvas id="skeleton-canvas"></canvas>
+            <!-- Scanline sci-fi overlay -->
+            <div class="hud-scanline-overlay" aria-hidden="true"></div>
           </div>
-          <div class="camera-status-pill"><span id="hud-camera-dot" style="font-size:10px;">●</span><span id="hud-camera-status-label">Camera active</span></div>
-          <div class="body-tracking-pill" id="hud-tracking-pill"><span id="hud-tracking-dot">⚪</span><span id="hud-tracking-label">Detecting Body...</span></div>
-          <div class="stability-pill" id="hud-stability-pill"><span id="hud-stability-dot">🟡</span><span id="hud-stability-label">Calibrating</span></div>
-          <div id="hud-right-wrong-badge" class="posture-eval-badge badge-waiting" role="status" aria-live="polite">⚪ STEP INTO FRAME</div>
+
+          <!-- Camera Inactive / Placeholder Overlay -->
           <div id="camera-placeholder" class="camera-placeholder-overlay" style="display:none;">
-            <div style="font-size:42px;margin-bottom:12px;">📷</div>
-            <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">Camera Inactive</div>
-            <p id="camera-placeholder-msg" style="font-size:13px;color:var(--muted);max-width:320px;margin-bottom:20px;">Camera is paused or stopped for your privacy.</p>
-            <button class="btn btn-terracotta" onclick="CameraManager.startCamera()">Resume Camera</button>
+            <div style="font-size:48px;margin-bottom:12px;filter:drop-shadow(0 0 10px #39FF14);">📷</div>
+            <div style="font-size:18px;font-weight:800;letter-spacing:1px;color:#fff;margin-bottom:8px;">CAMERA INACTIVE</div>
+            <p id="camera-placeholder-msg" style="font-size:13px;color:rgba(255,255,255,0.7);max-width:340px;margin-bottom:20px;line-height:1.5;">Camera is paused or stopped for your privacy.</p>
+            <button class="hud-control-btn" style="border-color:#39FF14;color:#39FF14;" onclick="CameraManager.startCamera()">RESUME CAMERA</button>
           </div>
-          <div id="transition-overlay">
-            <div style="color:var(--pink);font-size:13px;font-weight:800;letter-spacing:2px;">OUTSTANDING HOLD!</div>
-            <div style="font-size:54px;font-weight:900;margin:8px 0;" id="trans-score-display">Score: 92%</div>
-            <div style="font-size:15px;color:var(--muted);margin-bottom:20px;" id="trans-feedback-text">Excellent knee alignment!</div>
-            <div style="font-size:14px;">Next: <b id="trans-next-name" style="color:var(--pink);">Vrikshasana</b></div>
-            <div style="font-size:72px;font-weight:900;color:var(--pink);margin-top:12px;" id="trans-countdown-num">3</div>
+
+          <!-- Transition Countdown Screen Between Poses -->
+          <div id="transition-overlay" class="hud-transition-screen">
+            <div class="hud-transition-kicker">POSTURE COMPLETE // ADVANCING</div>
+            <div class="hud-transition-score" id="trans-score-display">Score: 92%</div>
+            <div class="hud-transition-msg" id="trans-feedback-text">Excellent knee alignment!</div>
+            <div class="hud-transition-next">NEXT POSTURE: <b id="trans-next-name">Vrikshasana</b></div>
+            <div class="hud-transition-countdown" id="trans-countdown-num">3</div>
           </div>
+
+          <!-- Vision Diagnostics Box -->
           <div id="vision-debug-box" class="vision-debug-box" style="display:none;">
-            <div class="debug-title"><span>VISION DIAGNOSTICS</span><button onclick="toggleVisionDebug()" style="background:none;border:none;color:#fff;cursor:pointer;">✕</button></div>
+            <div class="debug-title"><span>VISION DIAGNOSTICS</span><button onclick="toggleVisionDebug()" style="background:none;border:none;color:#39FF14;cursor:pointer;">✕</button></div>
             <div class="dbg-line"><span>MediaPipe:</span> <b id="dbg-mp-state">READY</b></div>
             <div class="dbg-line"><span>Camera:</span> <b id="dbg-cam-res">--</b></div>
             <div class="dbg-line"><span>FPS:</span> <b id="dbg-fps">0</b></div>
@@ -994,38 +1763,158 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
             <div class="dbg-line"><span>Alignment:</span> <b id="dbg-score">0%</b></div>
             <div class="dbg-line"><span>Stable:</span> <b id="dbg-stable">NO</b></div>
             <div class="dbg-line"><span>Hold Valid:</span> <b id="dbg-hold">NO</b></div>
-            <div class="dbg-line"><span>Deviations:</span> <span id="dbg-dev-joints" style="color:#F277B5;">None</span></div>
+            <div class="dbg-line"><span>Deviations:</span> <span id="dbg-dev-joints" style="color:#FF3B30;">None</span></div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="practice-bottom-bar card">
-      <div class="bottom-hold-section">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--muted);">VALID HOLD PROGRESS</div>
-          <div style="font-size:20px;font-weight:800;color:var(--text);font-family:monospace;" id="hud-hold-display">00:00 / 00:20</div>
+      <!-- 2. THIN WHITE SCREEN FRAMING BORDER & NEON CORNER BRACKETS -->
+      <div class="hud-screen-frame" aria-hidden="true">
+        <div class="hud-corner-bracket top-left"></div>
+        <div class="hud-corner-bracket top-right"></div>
+        <div class="hud-corner-bracket bottom-left"></div>
+        <div class="hud-corner-bracket bottom-right"></div>
+      </div>
+
+      <!-- 3. TOP-LEFT OVERLAY : BRAND, POSE TITLE, SANSKRIT, TRACKING PILL, SESSION STEP -->
+      <div class="hud-top-left">
+        <div class="hud-system-tag">
+          <span class="hud-tag-dot"></span>
+          <span>KI.AI // LIVE POSE TRACKING</span>
         </div>
-        <div class="hold-progress-track"><div id="hud-hold-progress-bar" class="hold-progress-fill"></div></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);gap:8px;flex-wrap:wrap;">
+        <div class="hud-pose-info">
+          <h1 class="hud-pose-name" id="hud-pose-title">TADASANA (MOUNTAIN POSE)</h1>
+          <div class="hud-pose-sanskrit" id="hud-pose-sanskrit">Tādāsana</div>
+        </div>
+        <div class="hud-status-pills-row">
+          <div class="hud-pill hud-tracking-pill" id="hud-tracking-pill">
+            <span class="hud-pill-dot" id="hud-tracking-dot">●</span>
+            <span id="hud-tracking-label">BODY TRACKING: ACTIVE</span>
+          </div>
+          <div class="hud-pill hud-step-pill">
+            <span class="hud-step-tag" id="hud-step-num">SESSION: 01 / 08</span>
+          </div>
+          <div class="hud-pill hud-stability-pill" id="hud-stability-pill" style="display:none;">
+            <span id="hud-stability-dot">🟡</span>
+            <span id="hud-stability-label">Calibrating</span>
+          </div>
+          <div class="hud-pill hud-camera-pill" style="display:none;">
+            <span id="hud-camera-dot">●</span>
+            <span id="hud-camera-status-label">Camera active</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. TOP-RIGHT OVERLAY : GIANT DIGITAL TIMER & ACTION CONTROLS -->
+      <div class="hud-top-right">
+        <div class="hud-timer-wrap">
+          <div class="hud-timer-label">HOLD TIME REMAINING</div>
+          <div class="hud-digital-timer" id="fs-timer" title="Remaining hold time">00:20</div>
+        </div>
+        <div class="hud-controls-cluster">
+          <button id="btn-pause-resume" class="hud-control-btn" onclick="togglePausePractice()" title="Pause or resume the hold timer">⏸ PAUSE</button>
+          <button id="btn-fit" class="hud-control-btn" onclick="toggleCameraFit()" title="Toggle camera fit: contain shows your full body, cover fills the screen">⛶ FIT: FULL BODY</button>
+          <button id="btn-hud-stop-voice" class="hud-control-btn" onclick="window.VoiceManager.toggleMute()" title="Mute/Unmute coach speech">🔈 MUTE</button>
+          <button class="hud-control-btn" onclick="skipCurrentExercise()" title="Skip pose">⏭ SKIP</button>
+          <button class="hud-control-btn hud-control-exit" onclick="exitPracticeStudio()" title="Exit practice to home view">✕ EXIT</button>
+          <!-- Additional controls preserved for compatibility -->
+          <button id="btn-fullscreen" class="hud-control-btn" onclick="togglePracticeFullscreen()" title="Toggle browser fullscreen" style="display:none;">⛶ FULLSCREEN</button>
+          <button id="btn-hud-vision-debug" class="hud-control-btn" onclick="toggleVisionDebug()" title="Toggle vision diagnostics">🔍 DEBUG</button>
+          <button id="btn-hud-stop-camera" style="display:none;" onclick="CameraManager.stopCamera()">🛑 STOP</button>
+        </div>
+      </div>
+
+      <!-- 5. FLOATING DEMONSTRATION CARD (UPPER-LEFT, COLLAPSIBLE) -->
+      <div class="hud-floating-demo-card" id="practice-demo-panel">
+        <div class="hud-demo-header">
+          <div class="hud-demo-header-title">
+            <span class="hud-demo-icon">◈</span>
+            <span id="demo-overlay-name-head">ALIGNMENT REFERENCE</span>
+          </div>
+          <div class="hud-demo-header-actions">
+            <button class="hud-demo-guide-btn" onclick="openPoseDetailsForCurrentStep()" title="Open step-by-step guide">📖 GUIDE</button>
+            <button class="hud-demo-toggle-btn" id="btn-ref-min" onclick="toggleRefPanel()" title="Minimize or expand reference">−</button>
+          </div>
+        </div>
+        <div class="hud-demo-body" id="practice-demo-body">
+          <div class="hud-demo-image-wrap">
+            <img id="demo-pose-img" src="/assets/pose_figures/tadasana.svg" alt="Reference demonstration" class="hud-demo-img" onerror="handleDemoImageError(this)">
+            <div class="hud-demo-img-badge">
+              <span id="demo-overlay-name">Tadasana</span>
+            </div>
+          </div>
+          <div class="hud-demo-targets">
+            <div class="hud-demo-section-label">KEY ALIGNMENT TARGETS</div>
+            <div id="demo-alignment-list" class="hud-targets-list">
+              <div class="hud-target-row"><span>Left Knee</span><b>175° (Straight)</b></div>
+              <div class="hud-target-row"><span>Right Knee</span><b>175° (Straight)</b></div>
+              <div class="hud-target-row"><span>Spine / Torso</span><b>90° (Upright)</b></div>
+            </div>
+          </div>
+          <div class="hud-demo-breathing">
+            <span class="hud-breath-icon">💨</span>
+            <span id="demo-breathing-guidance">Inhale deeply through nose, expand ribcage. Maintain soft gaze forward.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. RIGHT-EDGE REAL-TIME POSTURE ASSESSMENT CARD -->
+      <div class="hud-feedback-panel" id="practice-camera-panel">
+        <div class="hud-feedback-header">
+          <span class="hud-live-tag">● LIVE ASSESSMENT</span>
+          <div class="hud-score-pill">
+            <span class="hud-score-val" id="hud-score">--%</span>
+            <span class="hud-score-label">MATCH</span>
+          </div>
+        </div>
+        <div class="hud-posture-badge-wrap">
+          <div id="hud-right-wrong-badge" class="posture-eval-badge badge-waiting" role="status" aria-live="polite">⚪ STEP INTO FRAME</div>
+        </div>
+        <div class="hud-coaching-box">
+          <div class="hud-coach-label">
+            <span>AI COACH FEEDBACK</span>
+            <div id="audio-wave-box" class="audio-wave-container" style="display:none;">
+              <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+            </div>
+          </div>
+          <div id="hud-feedback" class="hud-feedback-body" role="status" aria-live="polite">Step into camera view to begin alignment check.</div>
+        </div>
+      </div>
+
+      <!-- 7. BOTTOM HUD DOCK : HOLD PROGRESS, SEQUENCE, UPCOMING POSE -->
+      <div class="hud-bottom-dock">
+        <div class="hud-dock-row">
+          <div class="hud-dock-hold-info">
+            <span class="hud-dock-label">VALID HOLD PROGRESS</span>
+            <span class="hud-dock-timer" id="hud-hold-display">00:00 / 00:20</span>
+          </div>
+          <div class="hud-dock-seq-info">
+            <span class="hud-dock-seq-text" id="fs-seq-label">POSE 1 OF 8</span>
+            <span class="hud-dock-next-text" id="hud-next-upcoming">Next: Vrikshasana</span>
+          </div>
+        </div>
+        <div class="hud-dock-progress-track">
+          <div id="hud-hold-progress-bar" class="hud-dock-progress-fill"></div>
+          <!-- Hidden compatibility elements -->
+          <div id="fs-seq-fill" style="display:none;"></div>
+          <span id="hud-align-label" style="display:none;"></span>
+        </div>
+        <div class="hud-dock-footnote">
           <span id="hud-hold-status">Timer advances only when posture ≥ 78% &amp; stable</span>
-          <span id="hud-next-upcoming" style="color:var(--pink-light);font-weight:600;">Next: Vrikshasana</span>
-        </div>
-      </div>
-      <div class="bottom-feedback-section">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:11px;font-weight:800;color:var(--pink);letter-spacing:1px;">AI COACH INSTRUCTION</span>
-            <div id="audio-wave-box" class="audio-wave-container" style="display:none;"><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span></div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <span id="hud-voice-pill" style="font-size:10px;padding:2px 8px;border-radius:12px;background:var(--surface-3);color:var(--text);font-weight:700;border:1px solid var(--border);">IDLE</span>
-            <button id="hud-card-mute-btn" onclick="window.VoiceManager.toggleMute()" title="Mute/Unmute coach speech" style="background:none;border:1px solid var(--border);color:var(--text);font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;cursor:pointer;">🔈 MUTE</button>
+          <div class="hud-dock-voice-status">
+            <span id="hud-voice-pill">IDLE</span>
+            <button id="hud-card-mute-btn" onclick="window.VoiceManager.toggleMute()" title="Mute coach" class="hud-mini-mute-btn">🔈 MUTE</button>
           </div>
         </div>
-        <div id="hud-feedback" class="hud-feedback-text" role="status" aria-live="polite">Step into camera view to begin alignment check.</div>
       </div>
-    </div>
+
+      <!-- Hidden compatibility elements for tabs -->
+      <div id="practice-mobile-tabs" style="display:none;">
+        <button id="tab-btn-both">Split View</button>
+        <button id="tab-btn-camera">Camera</button>
+        <button id="tab-btn-demo">Watch Demo</button>
+      </div>
+
     </div>
   </section>
 
@@ -1187,7 +2076,6 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       <button onclick="switchView('library')">Pose Library</button>
       <button onclick="switchView('programs')">Programs</button>
       <button onclick="switchView('progress')">Progress</button>
-      <button onclick="switchView('pricing')">Pricing</button>
     </div>
     <div style="font-size:12px;color:var(--dim);">© 2026 KI.AI • Private on-device posture intelligence</div>
   </div>
@@ -1389,7 +2277,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       var busy = false;
       var pendingNotice = null;
 
-      var PROTECTED_VIEWS = { practice: 1, 'session-intro': 1, programs: 1, progress: 1, pricing: 1, preferences: 1, 'session-complete': 1 };
+      var PROTECTED_VIEWS = { practice: 1, 'session-intro': 1, programs: 1, progress: 1, preferences: 1, 'session-complete': 1 };
       var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
       function $(id) { return document.getElementById(id); }
@@ -1490,7 +2378,6 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           if (window.VoiceManager) window.VoiceManager.stop(false);
         } catch (e) {}
         updateChrome();
-        PaymentManagerUpdatePro(false);
         if (window.Kiki) Kiki.refresh();
         var active = document.querySelector('.view-section.active');
         if (notice) pendingNotice = notice;
@@ -1502,12 +2389,6 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           KI.toast(pendingNotice, 'error');
           pendingNotice = null;
         }
-      }
-
-      function PaymentManagerUpdatePro(isPro) {
-        try {
-          if (typeof PaymentManager !== 'undefined') PaymentManager.updateProUI(!!isPro);
-        } catch (e) {}
       }
 
       function handleForbidden() {
@@ -1818,15 +2699,24 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
                   const isStable = calculateStability(smoothed);
                   lastIsStable = isStable;
 
-                  const visibleCount = smoothed.filter(lm => (lm.visibility ?? 1) >= 0.5).length;
+                  const visibleCount = smoothed.filter(lm => (lm.visibility ?? 1) >= 0.4).length;
                   const dbgCount = document.getElementById("dbg-lm-count");
                   if (dbgCount) dbgCount.innerText = `${visibleCount}/33`;
 
-                  drawSkeleton(this.canvasCtx, smoothed, this.canvasElement.width, this.canvasElement.height);
-                  sendLandmarksToBackend(smoothed, isStable);
+                  if (visibleCount >= 6) {
+                    drawSkeleton(this.canvasCtx, smoothed, this.canvasElement.width, this.canvasElement.height);
+                    sendLandmarksToBackend(smoothed, isStable);
+                  } else {
+                    lastIsStable = false;
+                    this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
+                    updateBodyTrackingPill("NO_PERSON");
+                    updateHudAlignment(null);
+                  }
                 } else {
                   lastIsStable = false;
+                  this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
                   updateBodyTrackingPill("NO_PERSON");
+                  updateHudAlignment(null);
                 }
               }
             });
@@ -1936,6 +2826,9 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
             dot.classList.remove("camera-active-pulse");
             label.innerText = "Camera off";
             if (placeholder && currentSessionPlan) placeholder.style.display = "flex";
+            // Camera off means no assessment is possible: invalidate HUD.
+            updateBodyTrackingPill("NO_PERSON");
+            updateHudAlignment(null);
           }
         }
       }
@@ -2354,123 +3247,9 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       }
     };
 
-    // ==========================================
-    // 5. PAYMENT & SUBSCRIPTION MANAGER
-    // ==========================================
-    const PaymentManager = {
-      pendingOrder: null,
-
-      async startSubscriptionFlow(planType = "PRO_MONTHLY") {
-        if (!currentUser) { Auth.open('Please sign in to upgrade to Pro.'); return; }
-        const btn = document.getElementById("btn-upgrade-pro");
-        if (btn) btn.innerText = "Creating Order...";
-
-        try {
-          const orderData = await KI.api("/api/payment/create-order", {
-            method: "POST",
-            body: {
-              user_id: currentUser.id,
-              plan_type: planType,
-              email: currentUser.email,
-              name: currentUser.name
-            }
-          });
-          if (btn) btn.innerText = "UPGRADE TO PRO →";
-
-          if (orderData.status === "success") {
-            this.pendingOrder = orderData;
-            this.showCheckoutModal(orderData);
-          } else {
-            KI.toast("Unable to initiate subscription order: " + (orderData.message || "Unknown error"), "error");
-          }
-        } catch (e) {
-          if (btn) btn.innerText = "UPGRADE TO PRO →";
-          KI.toast(e.message || "Could not contact the payment service.", "error");
-        }
-      },
-
-      showCheckoutModal(orderData) {
-        document.getElementById("checkout-plan-name").innerText = orderData.plan_name || "KI.AI Pro";
-        const amt = (orderData.amount / 100).toFixed(2);
-        document.getElementById("checkout-amount").innerText = `₹${amt}`;
-        document.getElementById("payment-status-message").style.display = "none";
-        document.getElementById("btn-submit-payment").innerText = `Pay ₹${amt} (Verify Signature)`;
-        document.getElementById("btn-submit-payment").disabled = false;
-        document.getElementById("modal-payment-checkout").style.display = "flex";
-      },
-
-      closeCheckoutModal() {
-        document.getElementById("modal-payment-checkout").style.display = "none";
-      },
-
-      async simulateTestPaymentSuccess() {
-        if (!this.pendingOrder) return;
-
-        const btn = document.getElementById("btn-submit-payment");
-        const msg = document.getElementById("payment-status-message");
-        btn.innerText = "Verifying HMAC Signature...";
-        btn.disabled = true;
-
-        const paymentId = "pay_test_" + Math.random().toString(36).substring(2, 10);
-        // Signature formatted for verification
-        const signature = `test_sig_${this.pendingOrder.order_id}_${paymentId}`;
-
-        try {
-          const verifyData = await KI.api("/api/payment/verify", {
-            method: "POST",
-            body: {
-              user_id: currentUser.id,
-              order_id: this.pendingOrder.order_id,
-              payment_id: paymentId,
-              signature: signature,
-              plan_type: this.pendingOrder.plan_type
-            }
-          });
-          if (verifyData.status === "success") {
-            msg.style.display = "block";
-            msg.style.background = "rgba(61, 106, 82, 0.15)";
-            msg.style.color = "var(--status-success)";
-            msg.innerText = "✓ Payment verified! Pro subscription activated.";
-
-            currentUser.is_pro = true;
-            this.updateProUI(true);
-            if (window.Kiki) Kiki.refresh();
-
-            setTimeout(() => {
-              this.closeCheckoutModal();
-              switchView("home");
-            }, 1200);
-          } else {
-            msg.style.display = "block";
-            msg.style.background = "rgba(176, 58, 46, 0.15)";
-            msg.style.color = "var(--status-error)";
-            msg.innerText = "Verification failed: " + (verifyData.message || "Invalid signature");
-            btn.innerText = "Retry Payment";
-            btn.disabled = false;
-          }
-        } catch (e) {
-          msg.style.display = "block";
-          msg.style.background = "rgba(176, 58, 46, 0.15)";
-          msg.style.color = "var(--status-error)";
-          msg.innerText = e.message || "Verification error.";
-          btn.innerText = "Retry Payment";
-          btn.disabled = false;
-        }
-      },
-
-      updateProUI(isPro) {
-        const badge = document.getElementById("nav-plan-badge");
-        if (badge) {
-          if (isPro) {
-            badge.innerText = "PRO";
-            badge.className = "badge-pro";
-          } else {
-            badge.innerText = "FREE";
-            badge.className = "badge-free";
-          }
-        }
-      }
-    };
+    // 5. SUBSCRIPTIONS REMOVED — KI.AI is a free yoga application.
+    // There is no pricing page, no upgrade flow, and no Pro gating.
+    // (Server-side enforcement was removed alongside; see web_app.py.)
 
     // ==========================================
     // 6. INITIALIZATION & NAVIGATION LIFECYCLE
@@ -2501,19 +3280,10 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       if (el) el.innerText = `${greeting}, ${who.toUpperCase()} 👋`;
     }
 
+    // No subscription tiers: every signed-in user has full access.
+    // Kept as a named hook so boot/auth flows stay untouched.
     async function checkSubscriptionStatus() {
-      if (!currentUser) return;
-      try {
-        const data = await KI.api(`/api/subscription/${currentUser.id}`);
-        if (data.status === "success") {
-          currentUser.is_pro = data.is_pro;
-          PaymentManager.updateProUI(data.is_pro);
-          // Kiki visibility follows this backend-confirmed entitlement only.
-          if (window.Kiki) Kiki.refresh();
-        }
-      } catch (e) {
-        // 401/403 auto-redirects via KI.api; other errors leave the FREE badge.
-      }
+      if (window.Kiki) Kiki.refresh();
     }
 
     function switchView(viewName) {
@@ -2524,6 +3294,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       }
       // Camera Privacy Rule: STOP camera immediately if leaving practice view
       if (viewName !== 'practice') {
+        document.body.classList.remove('practice-mode-active');
         CameraManager.stopCamera();
         if (window.VoiceManager) {
           window.VoiceManager.stop(false);
@@ -2535,6 +3306,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
         practicePaused = false;
         if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
       } else {
+        document.body.classList.add('practice-mode-active');
         resetPracticeControls();
       }
 
@@ -2548,9 +3320,25 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       if (navBtn) navBtn.classList.add("active");
 
       document.body.dataset.view = viewName;
+      // Lock page scroll while the fixed practice viewport is active;
+      // leaving practice restores the normal layout automatically.
+      document.body.style.overflow = (viewName === 'practice') ? 'hidden' : '';
       if (window.Kiki) Kiki.onViewChange(viewName);
       if (viewName === "progress") renderCharts();
       window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function exitPracticeStudio() {
+      document.body.classList.remove('practice-mode-active');
+      CameraManager.stopCamera();
+      if (window.VoiceManager) {
+        window.VoiceManager.stop(false);
+      }
+      clearInterval(holdTimerInterval);
+      holdTimerInterval = null;
+      practicePaused = false;
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      switchView('home');
     }
 
     function toggleMobileMenu() {
@@ -2725,7 +3513,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       const poseId = step.target_pose_id || step.pose_id || step.name;
       window.VoiceManager.setContext(poseId, currentSessionPlan.id || 1);
 
-      document.getElementById("hud-step-num").innerText = `${String(index + 1).padStart(2, '0')}/${String(currentSessionPlan.roadmap.length).padStart(2, '0')}`;
+      document.getElementById("hud-step-num").innerText = `SESSION: ${String(index + 1).padStart(2, '0')} / ${String(currentSessionPlan.roadmap.length).padStart(2, '0')}`;
       
       const nextStep = currentSessionPlan.roadmap[index + 1];
       const nextUpcoming = document.getElementById("hud-next-upcoming");
@@ -3094,39 +3882,133 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     function updateBodyTrackingPill(state) {
       const dot = document.getElementById("hud-tracking-dot");
       const label = document.getElementById("hud-tracking-label");
+      const pill = document.getElementById("hud-tracking-pill");
       const dbgState = document.getElementById("dbg-track-state");
       if (dbgState) dbgState.innerText = state;
 
       if (!dot || !label) return;
+      if (pill) pill.classList.remove("tracking-warning", "tracking-lost");
       if (state === "GOOD_TRACKING") {
-        dot.innerText = "🟢";
-        label.innerText = "Body Detected";
+        dot.innerText = "●";
+        dot.style.color = "#39FF14";
+        label.innerText = "BODY TRACKING: ACTIVE";
       } else if (state === "PARTIAL_BODY") {
-        dot.innerText = "🟡";
-        label.innerText = "Step Back / Full Body";
+        dot.innerText = "●";
+        dot.style.color = "#FFD700";
+        label.innerText = "BODY TRACKING: STEP BACK";
+        if (pill) pill.classList.add("tracking-warning");
       } else {
-        dot.innerText = "⚪";
-        label.innerText = "Detecting Body...";
+        dot.innerText = "●";
+        dot.style.color = "#FF3B30";
+        label.innerText = "BODY TRACKING: SEARCHING";
+        if (pill) pill.classList.add("tracking-lost");
+      }
+    }
+
+    // ALIGNMENT readout mirrors the genuine backend pose_status only.
+    function updateHudAlignment(evalData) {
+      const el = document.getElementById("hud-align-label");
+      if (!el) return;
+      el.classList.remove("align-good", "align-warn", "align-bad", "align-off");
+      if (!evalData || !evalData.is_body_visible) {
+        el.innerText = "ALIGNMENT: OFFLINE";
+        el.classList.add("align-off");
+      } else if (evalData.pose_status === "CORRECT") {
+        el.innerText = "ALIGNMENT: GOOD";
+        el.classList.add("align-good");
+      } else if (evalData.pose_status === "ADJUST") {
+        el.innerText = "ALIGNMENT: ADJUST";
+        el.classList.add("align-warn");
+      } else if (evalData.pose_status === "WRONG_POSE") {
+        el.innerText = "ALIGNMENT: WRONG POSE";
+        el.classList.add("align-bad");
+      } else {
+        el.innerText = "ALIGNMENT: STANDBY";
+        el.classList.add("align-off");
       }
     }
 
     function drawSkeleton(ctx, landmarks, w, h) {
       if (!landmarks || landmarks.length === 0) return;
 
-      let boneColor = "#C98267";
-      let nodeColor = "#E67E22";
-      if (lastPoseStatus === "CORRECT" || currentPoseScore >= 78) {
-        boneColor = "#2ECC71";
-        nodeColor = "#27AE60";
-      } else if (lastPoseStatus === "WRONG_POSE") {
-        boneColor = "#E74C3C";
-        nodeColor = "#C0392B";
+      const visPts = landmarks.filter((lm) => lm && (lm.visibility ?? 1) >= 0.4);
+      if (visPts.length < 6) {
+        // Body occluded or stepping out of view: clean suppression
+        return;
       }
 
       ctx.save();
+
+      // 1. DYNAMIC BOUNDING BOX AROUND DETECTED PERSON WITH SCI-FI CORNER BRACKETS
+      let x0 = 1, y0 = 1, x1 = 0, y1 = 0;
+      visPts.forEach((lm) => {
+        if (lm.x < x0) x0 = lm.x;
+        if (lm.y < y0) y0 = lm.y;
+        if (lm.x > x1) x1 = lm.x;
+        if (lm.y > y1) y1 = lm.y;
+      });
+
+      const padX = Math.max((x1 - x0) * 0.12, 0.03);
+      const padY = Math.max((y1 - y0) * 0.10, 0.03);
+      const bx = Math.max(0, (x0 - padX) * w);
+      const by = Math.max(0, (y0 - padY) * h);
+      const bw = Math.min(w - bx, (x1 - x0 + padX * 2) * w);
+      const bh = Math.min(h - by, (y1 - y0 + padY * 2) * h);
+
+      if (bw > 30 && bh > 30) {
+        // Fine dashed tracking box
+        ctx.strokeStyle = "rgba(57, 255, 20, 0.22)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.strokeRect(bx, by, bw, bh);
+        ctx.setLineDash([]);
+
+        // Sci-fi corner brackets in vivid neon green
+        const bLen = Math.min(24, bw * 0.2, bh * 0.2);
+        ctx.strokeStyle = "#39FF14";
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = "#39FF14";
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        // Top-Left bracket
+        ctx.moveTo(bx, by + bLen); ctx.lineTo(bx, by); ctx.lineTo(bx + bLen, by);
+        // Top-Right bracket
+        ctx.moveTo(bx + bw - bLen, by); ctx.lineTo(bx + bw, by); ctx.lineTo(bx + bw, by + bLen);
+        // Bottom-Left bracket
+        ctx.moveTo(bx, by + bh - bLen); ctx.lineTo(bx, by + bh); ctx.lineTo(bx + bLen, by + bh);
+        // Bottom-Right bracket
+        ctx.moveTo(bx + bw - bLen, by + bh); ctx.lineTo(bx + bw, by + bh); ctx.lineTo(bx + bw, by + bh - bLen);
+        ctx.stroke();
+
+        // Technical Monospaced Label
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#39FF14";
+        ctx.font = "10px 'Space Grotesk', monospace";
+        const conf = Math.round((visPts.length / landmarks.length) * 100);
+        const tagText = `[ TRACKED // BODY_CONF: ${conf}% ]`;
+        const tagY = by > 16 ? by - 6 : by + 14;
+        ctx.fillText(tagText, bx + 4, tagY);
+      }
+
+      // 2. GLOWING NEON SKELETON CONNECTIONS
+      let boneColor = "#39FF14";
+      let nodeColor = "#39FF14";
+      let glowColor = "#39FF14";
+      if (lastPoseStatus === "WRONG_POSE") {
+        boneColor = "#FF3B30";
+        nodeColor = "#FF3B30";
+        glowColor = "#FF3B30";
+      } else if (lastPoseStatus === "ADJUST") {
+        boneColor = "#FFD700";
+        nodeColor = "#FFD700";
+        glowColor = "#FFD700";
+      }
+
       ctx.lineWidth = 3.5;
       ctx.lineCap = "round";
       ctx.strokeStyle = boneColor;
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = 10;
 
       // Draw all connections
       SKELETON_CONNECTIONS.forEach(([i, j]) => {
@@ -3144,13 +4026,15 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       landmarks.forEach((lm) => {
         if ((lm.visibility ?? 1) > 0.4) {
           ctx.beginPath();
-          ctx.arc(lm.x * w, lm.y * h, 4, 0, 2 * Math.PI);
+          ctx.arc(lm.x * w, lm.y * h, 3.5, 0, 2 * Math.PI);
           ctx.fillStyle = nodeColor;
+          ctx.shadowColor = glowColor;
+          ctx.shadowBlur = 8;
           ctx.fill();
         }
       });
 
-      // Highlight targeted incorrect joints
+      // 3. HIGHLIGHT TARGETED INCORRECT JOINTS WITH PULSING RINGS
       if (lastIncorrectJoints && lastIncorrectJoints.length > 0) {
         const incorrectIndices = new Set();
         lastIncorrectJoints.forEach(jName => {
@@ -3160,23 +4044,26 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           }
         });
 
-        const pulse = 4 + 3 * Math.sin(Date.now() / 160);
+        const pulse = 6 + 4 * Math.sin(Date.now() / 150);
         incorrectIndices.forEach(idx => {
           const lm = landmarks[idx];
           if (lm && (lm.visibility ?? 1) > 0.3) {
             const x = lm.x * w;
             const y = lm.y * h;
+            // Pulsing warning ring
             ctx.beginPath();
-            ctx.arc(x, y, 7 + pulse, 0, 2 * Math.PI);
-            ctx.strokeStyle = "rgba(231, 76, 60, 0.9)";
+            ctx.arc(x, y, 9 + pulse, 0, 2 * Math.PI);
+            ctx.strokeStyle = "rgba(255, 59, 48, 0.95)";
             ctx.lineWidth = 2.5;
-            ctx.shadowColor = "#E74C3C";
-            ctx.shadowBlur = 8;
+            ctx.shadowColor = "#FF3B30";
+            ctx.shadowBlur = 12;
             ctx.stroke();
 
+            // High-contrast center alert dot
             ctx.beginPath();
-            ctx.arc(x, y, 5, 0, 2 * Math.PI);
-            ctx.fillStyle = "#E74C3C";
+            ctx.arc(x, y, 4.5, 0, 2 * Math.PI);
+            ctx.fillStyle = "#FF3B30";
+            ctx.shadowBlur = 6;
             ctx.fill();
           }
         });
@@ -3248,6 +4135,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           }
 
           updateBodyTrackingPill(evalData.tracking_state || "GOOD_TRACKING");
+          updateHudAlignment(evalData);
 
           const rwBadge = document.getElementById("hud-right-wrong-badge");
           if (rwBadge) {
@@ -3327,7 +4215,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       if (sanskritEl) sanskritEl.innerText = sanskrit ? sanskrit : "";
 
       const overlayName = document.getElementById("demo-overlay-name");
-      if (overlayName) overlayName.innerText = poseName;
+      if (overlayName) overlayName.innerText = `POSE: ${poseName.toUpperCase()}`;
       const overlayHead = document.getElementById("demo-overlay-name-head");
       if (overlayHead) overlayHead.innerText = poseName;
 
@@ -3409,7 +4297,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     function updatePauseBtn() {
       const btn = document.getElementById("btn-pause-resume");
       const timer = document.getElementById("fs-timer");
-      if (btn) btn.innerHTML = practicePaused ? "▶ Resume" : "⏸ Pause";
+      if (btn) btn.innerHTML = practicePaused ? "▶ RESUME" : "⏸ PAUSE";
       if (timer) timer.classList.toggle("paused", practicePaused);
     }
 
@@ -3445,6 +4333,12 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       const minBtn = document.getElementById("btn-ref-min");
       if (panel) panel.classList.remove("minimized");
       if (minBtn) minBtn.innerText = "−";
+      // Sync HUD labels to reality on entry: no ACTIVE/GOOD claims until
+      // the camera is actually streaming and assessments arrive.
+      if (!(window.CameraManager && CameraManager.isCameraActive && CameraManager.isCameraActive())) {
+        updateBodyTrackingPill("NO_PERSON");
+        updateHudAlignment(null);
+      }
     }
 
     function toggleCameraFit() {
@@ -3453,11 +4347,11 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       const btn = document.getElementById("btn-fit");
       if (stage) stage.classList.toggle("fit-cover", cameraFitCover);
       if (btn) {
-        btn.innerText = cameraFitCover ? "⛶ Fit: Fill screen" : "⛶ Fit: Full body";
+        btn.innerText = cameraFitCover ? "⛶ FIT: FILL SCREEN" : "⛶ FIT: FULL BODY";
         btn.classList.toggle("active", cameraFitCover);
         btn.title = cameraFitCover
           ? "Cover fills the screen but may crop edges — switch back if limbs are cut off"
-          : "Contain shows your full body — safest for assessment";
+          : "Contain shows your full body — safest for posture assessment";
       }
     }
 
@@ -3486,8 +4380,12 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     function updateSeqProgress() {
       const total = (currentSessionPlan && currentSessionPlan.roadmap) ? currentSessionPlan.roadmap.length : 0;
       const label = document.getElementById("fs-seq-label");
+      const stepNum = document.getElementById("hud-step-num");
       const fill = document.getElementById("fs-seq-fill");
-      if (label) label.innerText = total ? `POSE ${Math.min(currentStepIndex + 1, total)} OF ${total}` : "POSE – OF –";
+      const current = Math.min(currentStepIndex + 1, total || 1);
+      const str = total ? `SESSION: ${String(current).padStart(2, '0')} / ${String(total).padStart(2, '0')}` : "SESSION: 01 / 08";
+      if (label) label.innerText = str;
+      if (stepNum) stepNum.innerText = str;
       if (fill) fill.style.width = total ? `${Math.round((currentStepIndex / total) * 100)}%` : "0%";
     }
 
