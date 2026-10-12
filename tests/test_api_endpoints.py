@@ -14,8 +14,11 @@ import json
 import os
 import secrets
 import pytest
+from config import settings
 from web_app import app, db, get_coach_engine_for_user, get_cached_poses, refresh_poses_cache
+from coach.state_machine import SessionState
 from payment.razorpay_client import get_razorpay_client
+
 
 
 @pytest.fixture
@@ -139,13 +142,13 @@ class TestAuthenticationAndAdminRoutes:
         assert admin_resp.status_code == 403
 
     def test_admin_route_admin_session_allowed(self, client):
-        # Log in as admin user (abhilash@ki.ai, is_admin=1)
-        login_resp = client.post(
-            "/api/login",
-            data=json.dumps({"email": "abhilash@ki.ai", "password": "password123"}),
-            content_type="application/json",
-        )
-        assert login_resp.status_code == 200
+        admin_user = db.get_user_by_email("ashiacharaya@gmail.com")
+        assert admin_user is not None
+        assert admin_user["is_admin"] == 1
+
+        with client.session_transaction() as sess:
+            sess["user_id"] = admin_user["id"]
+            sess["is_admin"] = True
 
         # Admin access must succeed (200 OK)
         admin_resp = client.get("/admin")
@@ -216,11 +219,10 @@ class TestInputValidationAndRobustness:
 
     def test_nonexistent_user_returns_404(self, client):
         # When authenticated as admin, accessing non-existent user returns 404
-        client.post(
-            "/api/login",
-            data=json.dumps({"email": "abhilash@ki.ai", "password": "password123"}),
-            content_type="application/json",
-        )
+        admin_user = db.get_user_by_email("ashiacharaya@gmail.com")
+        with client.session_transaction() as sess:
+            sess["user_id"] = admin_user["id"]
+            sess["is_admin"] = True
         resp = client.get("/api/history/88888")
         assert resp.status_code == 404
 
@@ -275,11 +277,10 @@ class TestPaymentAndWebhookSecurity:
 
     def test_create_order_nonexistent_user_returns_404(self, client):
         # Log in as admin to bypass IDOR check, but supply non-existent user ID
-        client.post(
-            "/api/login",
-            data=json.dumps({"email": "abhilash@ki.ai", "password": "password123"}),
-            content_type="application/json",
-        )
+        admin_user = db.get_user_by_email("ashiacharaya@gmail.com")
+        with client.session_transaction() as sess:
+            sess["user_id"] = admin_user["id"]
+            sess["is_admin"] = True
         resp = client.post(
             "/api/payment/create-order",
             data=json.dumps({"user_id": 99999, "plan_type": "PRO_MONTHLY"}),
@@ -376,3 +377,223 @@ class TestCoachEngineAndPoseCaching:
         # Refresh cache executes cleanly
         refreshed = refresh_poses_cache()
         assert len(refreshed) == len(poses)
+
+    def test_monotonic_hold_timer_does_not_advance_on_duplicate_frame(self):
+        engine = get_coach_engine_for_user(99)
+        engine.load_exercise({"name": "Tadasana", "hold_seconds": 10.0})
+        engine.state_machine.transition_to(SessionState.HOLDING)
+
+        # First frame evaluation with delta_seconds=0.0 (simulating duplicate frame/packet)
+        initial_hold = engine.state_machine.current_hold_seconds
+        res = engine.evaluate_frame(
+            detected_pose_name="Tadasana",
+            match_score=95.0,
+            posture_eval={"overall_score": 92.0},
+            is_body_visible=True,
+            dt=0.0,
+        )
+        assert engine.state_machine.current_hold_seconds == initial_hold
+        assert res["hold_seconds"] == initial_hold
+
+    def test_complete_session_real_values_persisted(self, client):
+        resp = client.post(
+            "/api/session/complete",
+            data=json.dumps({
+                "user_id": 1,
+                "total_duration_seconds": 360,
+                "average_accuracy": 87.5,
+                "completed_exercises": 5,
+                "total_exercises": 6,
+                "program_level": "Intermediate",
+                "best_pose": "Warrior I",
+                "weakest_joint": "left_knee",
+                "pose_id": 2,
+                "hold_duration": 180,
+                "corrections_count": 3,
+            }),
+            content_type="application/json",
+        )
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["status"] == "success"
+        assert data["summary"]["duration_minutes"] == 6.0
+        assert data["summary"]["average_accuracy"] == 87.5
+        assert data["summary"]["completed_exercises"] == 5
+
+        # Verify real values were stored in DB
+        with db.get_connection() as conn:
+            row = conn.execute(
+                "SELECT duration, average_score, hold_duration, corrections_count FROM practice_sessions WHERE user_id = 1 ORDER BY id DESC LIMIT 1;"
+            ).fetchone()
+            assert row is not None
+            assert row["duration"] == 360
+            assert row["average_score"] == 87.5
+            assert row["hold_duration"] == 180
+            assert row["corrections_count"] == 3
+
+    def test_beta_signup_valid_and_invalid(self, client):
+        # Invalid email rejected
+        resp_invalid = client.post(
+            "/api/beta/signup",
+            data=json.dumps({"email": "notanemail", "program": "karate"}),
+            content_type="application/json",
+        )
+        assert resp_invalid.status_code == 400
+
+        # Valid email accepted
+        resp_valid = client.post(
+            "/api/beta/signup",
+            data=json.dumps({"email": "sensei@ki.ai", "program": "karate"}),
+            content_type="application/json",
+        )
+        assert resp_valid.status_code == 201
+        assert resp_valid.get_json()["status"] == "success"
+
+        # Duplicate email idempotent
+        resp_dup = client.post(
+            "/api/beta/signup",
+            data=json.dumps({"email": "sensei@ki.ai", "program": "karate"}),
+            content_type="application/json",
+        )
+        assert resp_dup.status_code == 201
+
+
+class TestGoogleOAuthAuthentication:
+    """Verifies Google OAuth 2.0 flow, CSRF defense, and database account linking."""
+
+    def test_google_oauth_unconfigured_returns_helpful_instructions(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "GOOGLE_CLIENT_ID", "")
+        resp = client.get("/api/auth/google")
+        assert resp.status_code == 503
+        data = resp.get_json()
+        assert data["status"] == "error"
+        assert "GOOGLE_CLIENT_ID" in data["message"]
+        assert "setup_instructions" in data
+
+    def test_google_oauth_redirect_generates_csrf_state_and_google_url(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "GOOGLE_CLIENT_ID", "mock_client_id.apps.googleusercontent.com")
+        resp = client.get("/api/auth/google")
+        assert resp.status_code == 302
+        location = resp.headers.get("Location")
+        assert location.startswith("https://accounts.google.com/o/oauth2/v2/auth")
+        assert "mock_client_id" in location
+        assert "redirect_uri=" in location
+        assert "state=" in location
+
+        # Verify state is stored in session
+        with client.session_transaction() as sess:
+            assert "oauth_state" in sess
+            assert len(sess["oauth_state"]) > 16
+
+    def test_google_oauth_callback_csrf_state_mismatch_rejected(self, client):
+        with client.session_transaction() as sess:
+            sess["oauth_state"] = "legitimate_state_123"
+
+        resp = client.get("/api/auth/google/callback?code=mock_code&state=forged_state_456")
+        assert resp.status_code == 302
+        location = resp.headers.get("Location")
+        assert "auth_error" in location
+        assert "state+mismatch" in location or "state%20mismatch" in location or "verification" in location
+
+    def test_google_oauth_callback_success_provisions_new_user(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "GOOGLE_CLIENT_ID", "mock_client_id")
+        monkeypatch.setattr(settings, "GOOGLE_CLIENT_SECRET", "mock_secret")
+
+        mock_google_email = "yogini.new@example.com"
+        mock_google_sub = "google_sub_10928374"
+
+        # Mock token response
+        class MockTokenResp:
+            status_code = 200
+            def json(self):
+                return {"access_token": "mock_google_access_token"}
+
+        # Mock userinfo response
+        class MockUserInfoResp:
+            status_code = 200
+            def json(self):
+                return {
+                    "sub": mock_google_sub,
+                    "email": mock_google_email,
+                    "name": "Yogini Devi",
+                    "picture": "https://example.com/avatar.jpg",
+                }
+
+        def mock_post(url, *args, **kwargs):
+            if "oauth2.googleapis.com/token" in url:
+                return MockTokenResp()
+            raise ValueError(f"Unexpected POST url: {url}")
+
+        def mock_get(url, *args, **kwargs):
+            if "googleapis.com/oauth2/v3/userinfo" in url:
+                return MockUserInfoResp()
+            raise ValueError(f"Unexpected GET url: {url}")
+
+        import requests
+        monkeypatch.setattr(requests, "post", mock_post)
+        monkeypatch.setattr(requests, "get", mock_get)
+
+        with client.session_transaction() as sess:
+            sess["oauth_state"] = "valid_state_789"
+
+        resp = client.get("/api/auth/google/callback?code=mock_auth_code&state=valid_state_789")
+        assert resp.status_code == 302
+        assert resp.headers.get("Location") == "/?google_auth=success"
+
+        # Verify session is logged in and GET /api/me returns new user
+        resp_me = client.get("/api/me")
+        assert resp_me.status_code == 200
+        me_data = resp_me.get_json()
+        assert me_data["authenticated"] is True
+        assert me_data["user"]["email"] == mock_google_email
+        assert me_data["user"]["name"] == "Yogini Devi"
+        assert me_data["user"]["is_admin"] == 0
+
+        # Cleanup created user
+        with db.get_connection() as conn:
+            conn.execute("DELETE FROM users WHERE email = ?;", (mock_google_email,))
+
+    def test_google_oauth_links_existing_admin_and_preserves_privileges(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "GOOGLE_CLIENT_ID", "mock_client_id")
+        monkeypatch.setattr(settings, "GOOGLE_CLIENT_SECRET", "mock_secret")
+
+        mock_sub = "admin_google_sub_test"
+
+        class MockTokenResp:
+            status_code = 200
+            def json(self):
+                return {"access_token": "mock_token"}
+
+        class MockUserInfoResp:
+            status_code = 200
+            def json(self):
+                return {
+                    "sub": mock_sub,
+                    "email": "ashiacharaya@gmail.com",
+                    "name": "Ashik Admin",
+                    "picture": "https://example.com/ashik.jpg",
+                }
+
+        import requests
+        monkeypatch.setattr(requests, "post", lambda url, *a, **kw: MockTokenResp())
+        monkeypatch.setattr(requests, "get", lambda url, *a, **kw: MockUserInfoResp())
+
+        try:
+            with client.session_transaction() as sess:
+                sess["oauth_state"] = "state_admin"
+
+            resp = client.get("/api/auth/google/callback?code=code_admin&state=state_admin")
+            assert resp.status_code == 302
+            assert resp.headers.get("Location") == "/?google_auth=success"
+
+            # Verify ashiacharaya preserves is_admin = 1
+            resp_me = client.get("/api/me")
+            me_data = resp_me.get_json()
+            assert me_data["authenticated"] is True
+            assert me_data["user"]["email"] == "ashiacharaya@gmail.com"
+            assert me_data["user"]["is_admin"] == 1
+        finally:
+            with db.get_connection() as conn:
+                conn.execute("UPDATE users SET google_id = '' WHERE email = 'ashiacharaya@gmail.com';")
+
+

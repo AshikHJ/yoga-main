@@ -179,17 +179,36 @@ class ConversationalCoach:
             }
 
         # ==========================================
-        # 7. GENERAL YOGA INSTRUCTION & ENCOURAGEMENT
+        # 7. GENERAL YOGA INSTRUCTION & GEMINI / GROUNDED KNOWLEDGE
         # ==========================================
-        default_resp = (
-            f"I'm here with you. During {current_pose}, focus on lengthening your spine, "
-            f"relaxing your shoulders down your back, and taking slow, deliberate breaths. "
-            f"Let me know if you want to skip or need an easier variation."
-        )
-        return {
-            "response": default_resp,
-            "speak_text": f"Focus on slow, steady breaths and grounding your stance in {current_pose}.",
-            "action": "COACH_ENCOURAGEMENT",
-            "intent": "general_guidance",
-            "safety_alert": False,
-        }
+        try:
+            from coach.kiki import KikiService
+            kiki_svc = KikiService(db=self.db)
+            kiki_resp = kiki_svc.process_query(
+                user_message=user_message,
+                user_id=user_id,
+                message=user_message,
+            )
+            return {
+                "response": kiki_resp.get("response", ""),
+                "speak_text": kiki_resp.get("speak_text", ""),
+                "action": kiki_resp.get("action", "COACH_ENCOURAGEMENT"),
+                "intent": kiki_resp.get("intent", "general_guidance"),
+                "safety_alert": kiki_resp.get("safety_alert", False),
+                "ai_provider": kiki_resp.get("ai_provider"),
+            }
+        except Exception as e:
+            logger.warning(f"Error consulting KikiService from ConversationalCoach: {e}")
+            default_resp = (
+                f"I'm here with you. During {current_pose}, focus on lengthening your spine, "
+                f"relaxing your shoulders down your back, and taking slow, deliberate breaths. "
+                f"Let me know if you want to skip or need an easier variation."
+            )
+            return {
+                "response": default_resp,
+                "speak_text": f"Focus on slow, steady breaths and grounding your stance in {current_pose}.",
+                "action": "COACH_ENCOURAGEMENT",
+                "intent": "general_guidance",
+                "safety_alert": False,
+            }
+

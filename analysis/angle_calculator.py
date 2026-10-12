@@ -151,9 +151,21 @@ class AngleCalculator:
 
         def get_coords(name: str) -> Optional[Tuple[float, float, float]]:
             lm = landmarks.get(name)
-            if lm and "x" in lm and "y" in lm:
-                return (lm["x"], lm["y"], lm.get("z", 0.0))
-            return None
+            if not lm or not isinstance(lm, dict) or "x" not in lm or "y" not in lm:
+                return None
+            try:
+                x = float(lm["x"])
+                y = float(lm["y"])
+                z = float(lm.get("z", 0.0))
+                vis = float(lm.get("visibility", 1.0))
+            except (ValueError, TypeError):
+                return None
+
+            if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+                return None
+            if vis < 0.35:  # Occluded or low-confidence keypoint
+                return None
+            return (x, y, z)
 
         # Keypoints
         l_shoulder = get_coords("LEFT_SHOULDER")

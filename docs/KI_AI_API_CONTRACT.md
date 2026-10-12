@@ -143,6 +143,24 @@ Retrieves currently authenticated session user info.
   }
   ```
 
+#### `GET /api/auth/google`
+Initiates Google OAuth 2.0 authorization code flow.
+- **Auth:** Public.
+- **Behavior:** Generates a cryptographically random CSRF `state` parameter, persists it in the Flask session, and redirects browser to `https://accounts.google.com/o/oauth2/v2/auth`.
+- **Error Response (503):** If `GOOGLE_CLIENT_ID` is not configured on the server, returns setup instructions.
+
+#### `GET /api/auth/google/callback`
+Handles OAuth 2.0 redirect callback from Google.
+- **Auth:** Public with CSRF validation.
+- **Query Parameters:** `code` (authorization code), `state` (CSRF token).
+- **Behavior:**
+  1. Validates `state` against `session['oauth_state']` to prevent CSRF.
+  2. Exchanges `code` for Google access tokens via `https://oauth2.googleapis.com/token`.
+  3. Fetches user profile from `https://www.googleapis.com/oauth2/v3/userinfo`.
+  4. Links existing account or provisions a new user in SQLite via `db.get_or_create_google_user`.
+  5. Sets server-side session `session['user_id'] = user['id']`.
+  6. Redirects browser to `/?google_auth=success` (or `/?auth_error=...` on failure).
+
 ---
 
 ### 2.2 Administrative Console
@@ -365,6 +383,59 @@ Real-time frame evaluation for active guided exercise. Evaluates landmarks again
   }
   ```
 
+#### `GET /api/session/current`
+Retrieves live state snapshot of active practice session (re-synchronizing browser after page reload or camera re-connection).
+- **Auth:** Public / Session (`?user_id=1`).
+- **Success Response (200):**
+  ```json
+  {
+    "status": "success",
+    "active": true,
+    "step_index": 0,
+    "session": {
+      "session_id": "104",
+      "session_state": "HOLDING",
+      "is_paused": false,
+      "camera_active": true,
+      "current_pose": {
+        "id": 1,
+        "name": "Mountain Pose (Tadasana)",
+        "hold_seconds": 4.5,
+        "remaining_seconds": 15.5,
+        "target_seconds": 20.0
+      },
+      "next_pose": {
+        "id": 2,
+        "name": "Tree Pose (Vrikshasana)"
+      },
+      "sequence_progress": {
+        "current_index": 0,
+        "total_poses": 5,
+        "completed_poses": 0,
+        "percent_complete": 0.0
+      }
+    }
+  }
+  ```
+
+#### `POST /api/session/next` | `POST /api/session/skip`
+Advances the practice sequence to the next scheduled asana.
+- **Auth:** Public / Session.
+- **Request Body (JSON):** `{"user_id": 1}`.
+- **Success Response (200):** Updated session snapshot with `step_index` advanced.
+
+#### `POST /api/session/pause` | `POST /api/session/resume`
+Freezes or resumes the hold timer countdown without discarding accumulated hold seconds.
+- **Auth:** Public / Session.
+- **Request Body (JSON):** `{"user_id": 1, "reason": "Water break"}`.
+- **Success Response (200):** Updated session snapshot with `is_paused: true/false`.
+
+#### `POST /api/session/camera_error`
+Notifies the backend that the webcam stream was lost or disconnected, safely freezing the hold countdown with a tracking warning.
+- **Auth:** Public / Session.
+- **Request Body (JSON):** `{"user_id": 1, "error": "Camera frame timeout"}`.
+- **Success Response (200):** `{"status": "success", "tracking_warning": "Camera frame timeout"}`.
+
 #### `POST /api/session/complete`
 Finalizes and logs a completed multi-exercise guided session.
 - **Auth:** IDOR protected.
@@ -429,7 +500,62 @@ Mutes/unmutes voice feedback while preserving critical safety announcements.
 
 ---
 
-### 2.8 Subscription & Payment Processing (Razorpay)
+### 2.8 Kiki AI Companion & Conversational Intelligence
+
+#### `POST /api/kiki/chat`
+Conversational dialogue with Kiki, grounded in live posture assessment, joint deviations, and classical yoga wisdom. Integrates Google Gemini LLM via REST with seamless fallback to verified classical database knowledge base.
+- **Auth:** Public / Session.
+- **Request Body (JSON):**
+  ```json
+  {
+    "user_id": 1,
+    "message": "Why is my posture score low?",
+    "history": [
+      { "role": "user", "message": "I am in Warrior II" },
+      { "role": "model", "message": "Keep your front knee stacked over your ankle." }
+    ]
+  }
+  ```
+- **Success Response (200):**
+  ```json
+  {
+    "status": "success",
+    "reply": "Your current posture accuracy is 68%. The main adjustment is your front knee, currently at 135° instead of 90°. Bend your front knee deeper toward 90 degrees.",
+    "speak_text": "Your main adjustment is your front knee, off by 45 degrees. Follow the visual cue to align it.",
+    "voice_gender": "female",
+    "character_state": "adjust_pose",
+    "kiki_state": "adjust_pose",
+    "safety_alert": false,
+    "action": "EXPLAIN_SCORE",
+    "intent": "score_explanation"
+  }
+  ```
+
+#### `GET /api/kiki/state`
+Returns Kiki's active 9-state character enum (`idle`, `listening`, `thinking`, `confused`, `incorrect_pose`, `adjust_pose`, `correct_pose`, `celebrating`, `error`) alongside current pose guide and live speech cues.
+- **Auth:** Public / Session (`?user_id=1`).
+- **Success Response (200):**
+  ```json
+  {
+    "status": "success",
+    "character_state": "correct_pose",
+    "kiki_state": "correct_pose",
+    "has_active_pose": true,
+    "pose_name": "Warrior II",
+    "speech_cue": "Halfway there. Maintain steady breath."
+  }
+  ```
+
+#### `GET /api/kiki/guide/<int:pose_id>`
+Retrieves verified classical alignment rules, benefits, precautions, and target joint angle tolerances for a specific asana.
+- **Auth:** Public.
+- **Success Response (200):** Comprehensive pose rule dictionary with target angles and tolerances.
+
+---
+
+### 2.9 100% Free Access Model & Entitlements
+
+KI.AI is an open, completely free yoga intelligence application. All features (all 24 classical asanas, Surya Namaskar, personalized sequences, deep Kiki companion coaching, and advanced biomechanical analytics) are fully unlocked for all authenticated practitioners without paywalls or subscription restrictions.
 
 #### `GET /api/payment/config`
 Retrieves public gateway configuration. **Strictly never exposes secret key.**
@@ -543,3 +669,203 @@ Cancels active auto-renewing Pro subscription.
     "message": "Subscription cancelled. Your Pro access remains active until the end of your billing cycle."
   }
   ```
+
+---
+
+### 8. Beta Programs & Waitlist
+
+#### `POST /api/beta/signup`
+Enrolls interest in upcoming specialized AI modules (e.g., Karate AI / Martial Arts) without altering core user tables.
+- **Auth:** Public / Anonymous.
+- **Request Body (JSON):**
+  ```json
+  {
+    "email": "practitioner@example.com",
+    "program": "karate"
+  }
+  ```
+- **Success Response (201):**
+  ```json
+  {
+    "status": "success",
+    "message": "Successfully joined the karate beta waitlist!"
+  }
+  ```
+- **Error Response (400):** Invalid email format.
+
+---
+
+### 9. Centralized Entitlements & Pro Feature Gates
+
+#### `GET /api/user/entitlements`
+Returns authoritative feature entitlements for currently authenticated session user.
+- **Auth:** Active session (or default demo user in demo mode).
+- **Success Response (200):**
+  ```json
+  {
+    "status": "success",
+    "user_id": 1,
+    "is_pro": true,
+    "is_admin": true,
+    "plan": "PRO",
+    "subscription_status": "ACTIVE",
+    "expires_at": "2027-10-11 10:47:30",
+    "subscription_id": 83,
+    "features": {
+      "basic_poses": true,
+      "standard_session": true,
+      "general_kiki": true,
+      "pro_poses": true,
+      "advanced_analytics": true,
+      "kiki_deep_coaching": true,
+      "unlimited_sessions": true,
+      "custom_routines": true,
+      "posture_breakdown": true
+    }
+  }
+  ```
+
+#### `GET /api/entitlements/<int:user_id>`
+Returns authoritative feature entitlements for specified user ID.
+- **Auth:** IDOR protected (requires self or admin).
+- **Success Response (200):** Returns same payload shape as above.
+- **Error Response (403):** Access denied.
+- **Error Response (404):** Target user not found.
+
+#### `GET /api/pro/advanced-analytics/<int:user_id>`
+Pro-tier endpoint returning in-depth biomechanical stability scores, mobility index, bilateral symmetry ratios, and practice streaks.
+- **Auth:** Server-side Pro entitlement gate (`@require_pro`).
+- **Success Response (200):**
+  ```json
+  {
+    "status": "success",
+    "user_id": 1,
+    "is_pro": true,
+    "advanced_analytics": {
+      "mobility_index": 88.5,
+      "bilateral_symmetry_ratio": 0.94,
+      "consistency_streak_days": 3,
+      "joint_stability_scores": {
+        "knees": 91.0,
+        "hips": 84.5,
+        "shoulders": 89.0,
+        "spine": 86.0
+      },
+      "history_summary": [...]
+    }
+  }
+  ```
+- **Error Response (403):**
+  ```json
+  {
+    "status": "forbidden",
+    "code": "PRO_ENTITLEMENT_REQUIRED",
+    "message": "This feature requires an active KI.AI Pro subscription.",
+    "feature": "advanced_analytics",
+    "upgrade_url": "/#pricing",
+    "current_plan": "FREE"
+  }
+  ```
+
+---
+
+### 10. Kiki AI Companion & Real-Time Coaching
+
+#### `GET /api/kiki/state?user_id=<int:user_id>`
+Retrieves Kiki AI Companion's real-time character state, active pose guide, and latest verified biomechanical assessment.
+- **Auth:** Public / Practitioner session.
+- **Character States (9 Canonical States):**
+  - `idle`: Camera resting or practitioner out of frame.
+  - `listening`: Actively listening for voice commands or questions.
+  - `thinking`: Processing user inquiry or generating tailored alignment cue.
+  - `confused`: Body partially occluded, out-of-frame limbs, or low landmark confidence (< 0.35 visibility).
+  - `incorrect_pose`: Mismatched pose detected or major alignment deviation.
+  - `adjust_pose`: Minor joint adjustments needed to achieve target angle range.
+  - `correct_pose`: Proper alignment confirmed (holding posture).
+  - `celebrating`: Target hold duration achieved or session completed.
+  - `error`: Vision pipeline or camera hardware exception.
+- **Success Response (200):**
+  ```json
+  {
+    "status": "success",
+    "kiki_state": "adjust_pose",
+    "character_state": "adjust_pose",
+    "coaching_message": "Bend your front knee deeper toward 90 degrees.",
+    "hold_metrics": {
+      "hold_seconds": 6.2,
+      "target_seconds": 20.0,
+      "is_aligned": false
+    },
+    "kiki": {
+      "character_state": "adjust_pose",
+      "has_active_pose": true,
+      "pose_name": "Warrior II",
+      "assessment": {
+        "overall_score": 72.0,
+        "status_state": "adjust",
+        "is_aligned": false,
+        "hold_seconds": 6.2,
+        "target_seconds": 20.0,
+        "measured_joints": [
+          {
+            "joint_name": "left_knee",
+            "actual_angle": 125.0,
+            "target_angle": 90.0,
+            "deviation": 35.0,
+            "status_code": "WARNING",
+            "feedback_message": "Bend your front knee deeper toward 90 degrees"
+          }
+        ]
+      }
+    }
+  }
+  ```
+
+#### `POST /api/kiki/chat`
+Conversational dialogue interface with grounded biomechanical session context, safety guardrails, and persistent history logging.
+- **Auth:** IDOR protected.
+- **Request Body (JSON):**
+  ```json
+  {
+    "user_id": 1,
+    "message": "Why is my posture score low?"
+  }
+  ```
+- **Safety Guardrail Behavior:**
+  - Queries mentioning pain, injury, strain, tears, sharp aches, or sprains trigger an immediate safety alert:
+  ```json
+  {
+    "status": "success",
+    "kiki_state": "confused",
+    "reply": "Please stop the movement immediately. If you are experiencing pain or sharp discomfort, release the pose gently and rest in Child's pose (Balasana). KI.AI provides computer-vision fitness guidance and is not a substitute for medical advice from a doctor or healthcare professional.",
+    "action": "PAUSE_AND_REST"
+  }
+  ```
+- **Biomechanical Explanation Behavior:**
+  - Explains scores truthfully using actual measured joint angles and deviations from live session data without hallucinating models.
+
+#### `GET /api/kiki/guide/<int:pose_id>`
+Retrieves verified classical pose rules, instructions, target angles, benefits, and anatomical precautions.
+- **Auth:** Public.
+- **Success Response (200):**
+  ```json
+  {
+    "status": "success",
+    "id": 1,
+    "name": "Tadasana",
+    "sanskrit_name": "Mountain Pose",
+    "category": "Standing",
+    "difficulty": "Beginner",
+    "rules": [
+      {
+        "joint_name": "torso_vertical",
+        "target_angle": 90.0,
+        "tolerance": 15.0,
+        "feedback": "Keep torso aligned vertically over hips"
+      }
+    ],
+    "benefits": ["Improves posture", "Strengthens thighs and ankles"],
+    "precautions": "Avoid if experiencing dizziness or low blood pressure."
+  }
+  ```
+- **Error Response (404):** Pose ID not found.

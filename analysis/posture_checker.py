@@ -148,6 +148,7 @@ class PostureChecker:
                 "overall_score": 0.0,
                 "score_level": "INCORRECT",
                 "level_info": settings.SCORE_LEVELS["INCORRECT"],
+                "status_state": "insufficient_data",
                 "joint_results": [],
                 "incorrect_joints": [],
                 "critical_incorrect_joints": [],
@@ -156,6 +157,7 @@ class PostureChecker:
                 "structured_feedback": [],
                 "is_body_visible": False,
                 "is_valid": False,
+                "accuracy_valid": False,
             }
 
         # Check both direct and mirrored orientation, choosing the best match
@@ -188,12 +190,30 @@ class PostureChecker:
             is_body_visible=True,
         )
 
+        # Determine posture status_state (correct, adjust, incorrect, insufficient_data)
+        total_rules = len(rules)
+        detected_count = sum(1 for j in joint_results if j.get("status_code") != "NOT_DETECTED")
+        warning_count = sum(1 for j in joint_results if j.get("status_code") == "WARNING")
+        incorrect_count = sum(1 for j in joint_results if j.get("status_code") == "INCORRECT")
+
+        if total_rules == 0 or (detected_count / total_rules) < 0.5:
+            status_state = "insufficient_data"
+        elif incorrect_count > 0:
+            status_state = "incorrect"
+        elif warning_count > 0:
+            status_state = "adjust"
+        elif overall_score >= settings.SCORE_GOOD_THRESHOLD:
+            status_state = "correct"
+        else:
+            status_state = "adjust" if overall_score >= 60.0 else "incorrect"
+
         return {
             "pose_id": pose_id,
             "pose_name": pose_name,
             "overall_score": overall_score,
             "score_level": level_key,
             "level_info": level_info,
+            "status_state": status_state,
             "joint_results": joint_results,
             "incorrect_joints": incorrect_joints,
             "critical_incorrect_joints": critical_incorrect_joints,
@@ -201,5 +221,6 @@ class PostureChecker:
             "all_feedback": all_feedback,
             "structured_feedback": structured_feedback,
             "is_body_visible": True,
-            "is_valid": True,
+            "is_valid": status_state != "insufficient_data",
+            "accuracy_valid": status_state != "insufficient_data",
         }

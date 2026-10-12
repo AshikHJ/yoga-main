@@ -9,6 +9,20 @@ import os
 from pathlib import Path
 
 # ==========================================
+# Paths Configuration
+# ==========================================
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load local environment variables from .env if present
+try:
+    from dotenv import load_dotenv
+    _env_path = BASE_DIR / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path)
+except Exception:
+    pass
+
+# ==========================================
 # Environment & Server Configuration
 # ==========================================
 ENV = os.environ.get("ENV", "development").strip().lower()
@@ -20,9 +34,18 @@ HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", 8080))
 
 # ==========================================
-# Paths Configuration
+# Google OAuth 2.0 Configuration
 # ==========================================
-BASE_DIR = Path(__file__).resolve().parent.parent
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI", "http://localhost:8080/api/auth/google/callback").strip()
+
+# ==========================================
+# Google Gemini AI Companion Configuration
+# ==========================================
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", os.environ.get("GOOGLE_API_KEY", "")).strip()
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash").strip()
+
 CONFIG_DIR = BASE_DIR / "config"
 DATA_DIR = BASE_DIR / "data"
 DATABASE_DIR = BASE_DIR / "database"

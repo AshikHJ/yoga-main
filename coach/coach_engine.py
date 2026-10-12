@@ -25,6 +25,7 @@ class CoachEngine:
         self.current_exercise: Optional[Dict[str, Any]] = None
         self.stability_frames_count = 0
         self.consecutive_invalid_frames = 0
+        self.latest_assessment: Optional[Dict[str, Any]] = None
 
     def load_exercise(self, exercise: Dict[str, Any]):
         """Initializes state machine for a new roadmap exercise."""
@@ -78,7 +79,7 @@ class CoachEngine:
                 event_key="body_not_visible",
                 priority=Priority.NORMAL,
             )
-            return {
+            eval_result = {
                 "state": self.state_machine.current_state.value,
                 "score": 0.0,
                 "is_aligned": False,
@@ -89,6 +90,14 @@ class CoachEngine:
                 "status_label": "Body Not Fully Visible",
                 "status_code": "NOT_VISIBLE",
             }
+            return self._record_assessment(
+                eval_result=eval_result,
+                posture_eval=posture_eval,
+                detected_pose_name=detected_pose_name,
+                match_score=match_score,
+                is_body_visible=False,
+                pose_matched=False,
+            )
 
         # 1. State: PREPARING -> DETECTING
         if curr_state == SessionState.PREPARING:
@@ -110,7 +119,7 @@ class CoachEngine:
                     event_key=f"wrong_pose:{detected_clean}",
                     priority=Priority.HIGH,
                 )
-                return {
+                eval_result = {
                     "state": self.state_machine.current_state.value,
                     "score": round(overall_score, 1),
                     "is_aligned": False,
@@ -121,6 +130,14 @@ class CoachEngine:
                     "status_label": f"Expected: {self.current_exercise.get('name')}",
                     "status_code": "WRONG_POSE",
                 }
+                return self._record_assessment(
+                    eval_result=eval_result,
+                    posture_eval=posture_eval,
+                    detected_pose_name=detected_pose_name,
+                    match_score=match_score,
+                    is_body_visible=is_body_visible,
+                    pose_matched=False,
+                )
             elif pose_matched and is_aligned:
                 self.stability_frames_count += 1
                 if self.stability_frames_count >= 3:
@@ -150,7 +167,7 @@ class CoachEngine:
                 event_key=f"completed:{expected_name}",
                 priority=Priority.NORMAL,
             )
-            return {
+            eval_result = {
                 "state": self.state_machine.current_state.value,
                 "score": round(overall_score, 1),
                 "is_aligned": True,
@@ -161,6 +178,14 @@ class CoachEngine:
                 "status_label": "Pose Completed! 🎉",
                 "status_code": "COMPLETED",
             }
+            return self._record_assessment(
+                eval_result=eval_result,
+                posture_eval=posture_eval,
+                detected_pose_name=detected_pose_name,
+                match_score=match_score,
+                is_body_visible=is_body_visible,
+                pose_matched=True,
+            )
 
         # Handle speech cues during hold
         remaining = self.state_machine.target_hold_seconds - self.state_machine.current_hold_seconds
@@ -191,7 +216,7 @@ class CoachEngine:
                 priority=Priority.HIGH,
             )
 
-        return {
+        eval_result = {
             "state": self.state_machine.current_state.value,
             "score": round(overall_score, 1),
             "is_aligned": is_aligned,
@@ -202,6 +227,35 @@ class CoachEngine:
             "status_label": "Holding Posture" if timer_result.get("status") == "HOLD_TICKING" else ("Paused — Adjust" if timer_result.get("status") in {"HOLD_PAUSED", "HOLD_PAUSED_AWAITING_CORRECTION"} else "Detecting Pose"),
             "status_code": timer_result.get("status"),
         }
+        return self._record_assessment(
+            eval_result=eval_result,
+            posture_eval=posture_eval,
+            detected_pose_name=detected_pose_name,
+            match_score=match_score,
+            is_body_visible=is_body_visible,
+            pose_matched=pose_matched,
+        )
+
+    def _record_assessment(
+        self,
+        eval_result: Dict[str, Any],
+        posture_eval: Dict[str, Any],
+        detected_pose_name: str,
+        match_score: float,
+        is_body_visible: bool,
+        pose_matched: bool,
+    ) -> Dict[str, Any]:
+        """Saves latest frame assessment metrics for Kiki companion access."""
+        self.latest_assessment = {
+            "frame_eval": eval_result,
+            "posture_result": posture_eval,
+            "detected_pose_name": detected_pose_name,
+            "match_score": match_score,
+            "is_body_visible": is_body_visible,
+            "pose_matched": pose_matched,
+            "timestamp": time.time(),
+        }
+        return eval_result
 
     def _debounce_speech(
         self,

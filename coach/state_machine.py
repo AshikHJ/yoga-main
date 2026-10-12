@@ -59,10 +59,10 @@ class SessionStateMachine:
 
     def __init__(self, initial_state: SessionState = SessionState.IDLE):
         self._state = initial_state
-        self._state_start_time = time.time()
+        self._state_start_time = time.monotonic()
         self._current_hold_seconds = 0.0
         self._target_hold_seconds = 20.0
-        self._last_tick_time = time.time()
+        self._last_tick_time = time.monotonic()
         self._history: List[Dict[str, Any]] = []
         self._payload: Dict[str, Any] = {}
 
@@ -83,7 +83,7 @@ class SessionStateMachine:
 
     def reset_hold_timer(self):
         self._current_hold_seconds = 0.0
-        self._last_tick_time = time.time()
+        self._last_tick_time = time.monotonic()
 
     def can_transition_to(self, new_state: SessionState) -> bool:
         """Checks if transition from current state to new_state is permissible."""
@@ -96,13 +96,14 @@ class SessionStateMachine:
             logger.warning(f"Invalid state transition attempted: {self._state.value} -> {new_state.value} ({reason})")
             return False
 
-        now = time.time()
+        now = time.monotonic()
+        wall_now = time.time()
         old_state = self._state
         self._history.append({
             "from_state": old_state.value,
             "to_state": new_state.value,
-            "timestamp": now,
-            "duration_in_prev_state": now - self._state_start_time,
+            "timestamp": wall_now,
+            "duration_in_prev_state": max(0.0, now - self._state_start_time),
             "reason": reason,
         })
 
@@ -130,16 +131,18 @@ class SessionStateMachine:
         Intelligent Hold Timer:
         ONLY advances elapsed hold time if in HOLDING state and posture is valid (score >= threshold).
         Automatically requests PAUSED state if posture degrades, or resumes if in PAUSED state and corrected.
+        Uses monotonic timing to prevent clock adjustments or duplicate frames from distorting elapsed hold.
         """
         valid = is_valid_frame if is_valid_frame is not None else (is_valid_posture if is_valid_posture is not None else False)
-        now = time.time()
+        now = time.monotonic()
         if delta_seconds is not None:
-            step_dt = delta_seconds
+            step_dt = max(0.0, float(delta_seconds))
         elif dt is not None:
-            step_dt = dt
+            step_dt = max(0.0, float(dt))
         else:
             step_dt = min(max(0.0, now - self._last_tick_time), 1.0)
         self._last_tick_time = now
+
 
         if self._state in {SessionState.DETECTING, SessionState.READY}:
             if valid:
@@ -210,6 +213,7 @@ class SessionStateMachine:
             "hold_seconds": self.current_hold_seconds,
             "target_seconds": self._target_hold_seconds,
             "progress_ratio": min(1.0, self._current_hold_seconds / max(1.0, self._target_hold_seconds)),
-            "time_in_state": time.time() - self._state_start_time,
+            "time_in_state": max(0.0, time.monotonic() - self._state_start_time),
             "payload": self._payload,
+
         }

@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS users (
     goal TEXT NOT NULL DEFAULT 'General Fitness',
     avatar_url TEXT,
     is_admin INTEGER DEFAULT 0,
+    google_id TEXT,
+    auth_provider TEXT DEFAULT 'local',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

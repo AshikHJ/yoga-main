@@ -82,4 +82,114 @@ input::placeholder { color: #7e7580; }
   .hold-progress-fill::after { animation: none; }
   .view-section.active { animation: none; }
   .hero-visual-frame img { animation: none; }
+  .kiki-idle-bob, .kiki-celebrate-bounce, .kiki-listening-ring, .kiki-blink { animation: none !important; }
+}
+
+/* ============================================================
+   KIKI — Pro yoga companion (lightweight CSS/SVG, no 3D engine)
+   Launcher is compact and docks bottom-right; the panel is
+   collapsible and never covers the camera viewport.
+   ============================================================ */
+#kiki-launcher {
+  position: fixed; right: 18px; bottom: 18px; z-index: 600;
+  width: 62px; height: 62px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff, #dfe4ea);
+  border: 2px solid rgba(242, 119, 181, 0.55);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.5), 0 0 18px rgba(45, 122, 110, 0.35);
+  cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+}
+#kiki-launcher:hover { transform: translateY(-3px) scale(1.04); }
+#kiki-launcher:focus-visible { outline: 2px solid #F277B5; outline-offset: 3px; }
+#kiki-launcher .kiki-lock {
+  position: absolute; right: -4px; bottom: -4px; width: 24px; height: 24px;
+  border-radius: 50%; background: #2b292e; border: 1.5px solid var(--pink, #F277B5);
+  display: flex; align-items: center; justify-content: center; font-size: 12px;
+}
+#kiki-launcher.kiki-locked { border-color: rgba(247, 243, 245, 0.25); box-shadow: 0 8px 26px rgba(0, 0, 0, 0.5); }
+#kiki-launcher .kiki-ping {
+  position: absolute; top: -3px; right: -3px; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--pink, #F277B5); border: 2px solid #171619; display: none;
+}
+#kiki-launcher.has-news .kiki-ping { display: block; }
+
+/* Kiki face (SVG): parts toggled via [data-state] on the svg root */
+.kiki-face .kiki-eyes-happy, .kiki-face .kiki-eyes-sad, .kiki-face .kiki-eyes-flat,
+.kiki-face .kiki-mouth-smile, .kiki-face .kiki-mouth-frown, .kiki-face .kiki-mouth-flat,
+.kiki-face .kiki-mouth-open, .kiki-face .kiki-brows-worry, .kiki-face .kiki-stars,
+.kiki-face .kiki-qmark { display: none; }
+.kiki-face[data-state="correct_pose"] .kiki-eyes-happy, .kiki-face[data-state="celebrating"] .kiki-eyes-happy { display: block; }
+.kiki-face[data-state="correct_pose"] .kiki-mouth-smile, .kiki-face[data-state="celebrating"] .kiki-mouth-open { display: block; }
+.kiki-face[data-state="celebrating"] .kiki-stars { display: block; }
+.kiki-face[data-state="incorrect_pose"] .kiki-eyes-sad, .kiki-face[data-state="adjust_pose"] .kiki-eyes-sad { display: block; }
+.kiki-face[data-state="incorrect_pose"] .kiki-mouth-frown, .kiki-face[data-state="adjust_pose"] .kiki-mouth-flat { display: block; }
+.kiki-face[data-state="incorrect_pose"] .kiki-brows-worry, .kiki-face[data-state="adjust_pose"] .kiki-brows-worry { display: block; }
+.kiki-face[data-state="confused"] .kiki-qmark { display: block; }
+.kiki-face[data-state="confused"] .kiki-mouth-flat { display: block; }
+.kiki-face[data-state="error"] .kiki-eyes-flat { display: block; }
+.kiki-face[data-state="error"] .kiki-mouth-flat { display: block; }
+.kiki-face[data-state="thinking"] .kiki-eyes-think { display: block; }
+.kiki-face[data-state="thinking"] .kiki-eyes-open, .kiki-face[data-state="thinking"] .kiki-mouth-smile { display: none; }
+.kiki-face[data-state="thinking"] .kiki-mouth-flat { display: block; }
+.kiki-face[data-state="idle"] .kiki-eyes-open, .kiki-face[data-state="listening"] .kiki-eyes-open { display: block; }
+.kiki-face[data-state="idle"] .kiki-mouth-smile, .kiki-face[data-state="listening"] .kiki-mouth-smile { display: block; }
+.kiki-face[data-state="speaking"] .kiki-eyes-open { display: block; }
+.kiki-face[data-state="speaking"] .kiki-mouth-open { display: block; animation: kikiTalk 0.5s ease-in-out infinite; }
+@keyframes kikiTalk { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.55); } }
+.kiki-face[data-state="speaking"] .kiki-mouth-open { transform-box: fill-box; transform-origin: center; }
+#kiki-speak-toggle, #kiki-speak-stop {
+  background: rgba(245,241,243,0.06); border: 1px solid rgba(245,241,243,0.14);
+  color: var(--text, #F7F3F5); font-size: 14px; border-radius: 10px;
+  min-width: 36px; min-height: 36px; cursor: pointer; padding: 4px 8px;
+}
+#kiki-speak-toggle:hover, #kiki-speak-stop:hover { background: rgba(245,241,243,0.12); }
+#kiki-speak-toggle.kiki-off { opacity: 0.55; }
+.kiki-blink { transform-box: fill-box; transform-origin: center; animation: kikiBlink 4.6s ease-in-out infinite; }
+@keyframes kikiBlink { 0%, 93%, 100% { transform: scaleY(1); } 95.5% { transform: scaleY(0.08); } }
+.kiki-idle-bob { animation: kikiBob 3.6s ease-in-out infinite; }
+@keyframes kikiBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.kiki-face[data-state="celebrating"] .kiki-idle-bob { animation: kikiBounce 0.7s ease-in-out 5; }
+@keyframes kikiBounce { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-9px) scale(1.03); } }
+.kiki-face[data-state="listening"] .kiki-idle-bob { animation: kikiBob 1.6s ease-in-out infinite; }
+.kiki-listening-ring { display: none; }
+.kiki-face[data-state="listening"] .kiki-listening-ring { display: block; animation: kikiRing 1.4s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes kikiRing { from { transform: scale(0.92); opacity: 0.9; } to { transform: scale(1.12); opacity: 0; } }
+.kiki-face[data-state="thinking"] .kiki-eyes-think { animation: kikiGlance 1.2s ease-in-out infinite; }
+@keyframes kikiGlance { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
+
+/* Kiki panel */
+#kiki-panel {
+  position: fixed; right: 18px; bottom: 92px; z-index: 600;
+  width: min(350px, calc(100vw - 36px)); max-height: min(520px, calc(100vh - 130px));
+  display: none; flex-direction: column; overflow: hidden;
+  background: var(--surface-2, #2b292e); border: 1px solid rgba(242, 119, 181, 0.35);
+  border-radius: 20px; box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+}
+#kiki-panel.open { display: flex; animation: kiViewIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.kiki-panel-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid rgba(247, 243, 245, 0.08); }
+.kiki-panel-head .kiki-title { font-weight: 800; font-size: 14px; }
+.kiki-pro-flag { font-size: 10px; font-weight: 800; letter-spacing: 1px; background: var(--pink, #F277B5); color: #171619; border-radius: 9999px; padding: 3px 10px; }
+.kiki-pro-flag.locked { background: transparent; border: 1px solid rgba(247, 243, 245, 0.3); color: var(--muted, #B7AEB8); }
+#kiki-panel-close { margin-left: auto; background: none; border: none; color: var(--text, #F7F3F5); font-size: 18px; cursor: pointer; padding: 6px; }
+#kiki-messages { padding: 12px 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 120px; max-height: 300px; }
+.kiki-msg { font-size: 13px; line-height: 1.55; background: rgba(247, 243, 245, 0.06); border: 1px solid rgba(247, 243, 245, 0.09); border-radius: 12px; padding: 10px 12px; }
+.kiki-msg b { color: var(--pink-light, #FFADD4); }
+.kiki-msg.user { align-self: flex-end; background: rgba(45, 122, 110, 0.22); border-color: rgba(45, 122, 110, 0.5); }
+.kiki-msg .kiki-angle-table { width: 100%; font-size: 12px; margin-top: 6px; border-collapse: collapse; }
+.kiki-msg .kiki-angle-table td { padding: 3px 2px; border-top: 1px solid rgba(247, 243, 245, 0.08); }
+.kiki-chips { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 14px 10px; }
+.kiki-chips button { background: rgba(242, 119, 181, 0.1); border: 1px solid rgba(242, 119, 181, 0.4); color: var(--text, #F7F3F5); font-size: 12px; font-weight: 600; border-radius: 9999px; padding: 7px 12px; cursor: pointer; font-family: inherit; }
+.kiki-chips button:hover { background: rgba(242, 119, 181, 0.2); }
+.kiki-chips button:disabled { opacity: 0.45; cursor: not-allowed; }
+#kiki-form { display: flex; gap: 8px; padding: 10px 14px 14px; }
+#kiki-input { flex: 1; background: var(--surface-3, #353237); border: 1px solid rgba(247, 243, 245, 0.14); border-radius: 12px; padding: 10px 12px; font-size: 13px; color: var(--text, #F7F3F5); font-family: inherit; min-height: 42px; }
+#kiki-send { background: var(--pink, #F277B5); color: #171619; font-weight: 800; border: none; border-radius: 12px; padding: 0 16px; cursor: pointer; min-height: 42px; }
+#kiki-send:disabled { opacity: 0.5; cursor: wait; }
+
+/* Practice view: keep Kiki ultra-compact so the camera stays clear */
+body[data-view="practice"] #kiki-panel { bottom: 12px; right: 12px; width: min(310px, calc(100vw - 24px)); max-height: 46vh; }
+body[data-view="practice"] #kiki-launcher { right: 12px; bottom: 12px; width: 52px; height: 52px; }
+@media (max-width: 640px) {
+  #kiki-panel { right: 12px; bottom: 84px; }
+  #kiki-launcher { right: 12px; bottom: 12px; }
 }

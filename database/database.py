@@ -127,6 +127,11 @@ class Database:
                         cursor.execute("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT '';")
                     if "is_admin" not in columns:
                         cursor.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0;")
+                    if "google_id" not in columns:
+                        cursor.execute("ALTER TABLE users ADD COLUMN google_id TEXT DEFAULT '';")
+                    if "auth_provider" not in columns:
+                        cursor.execute("ALTER TABLE users ADD COLUMN auth_provider TEXT DEFAULT 'local';")
+                    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);")
 
                 # Check if poses table exists and migrate figure_path column
                 cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='poses';")
@@ -169,18 +174,31 @@ class Database:
                     (default_pw,),
                 )
 
-                # Ensure abhilash@ki.ai exists and has admin privileges
-                cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'abhilash@ki.ai';")
+                # Ensure ashiacharaya@gmail.com exists and has admin privileges
+                cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'ashiacharaya@gmail.com';")
                 if not cursor.fetchone():
                     cursor.execute(
                         """
                         INSERT INTO users (name, email, password_hash, age, experience, goal, is_admin)
                         VALUES (?, ?, ?, ?, ?, ?, 1);
                         """,
+                        ("Ashik", "ashiacharaya@gmail.com", default_pw, 25, "Intermediate", "General Fitness"),
+                    )
+                else:
+                    cursor.execute("UPDATE users SET is_admin = 1 WHERE LOWER(email) = 'ashiacharaya@gmail.com';")
+
+                # Ensure abhilash@ki.ai is a standard user (not admin)
+                cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'abhilash@ki.ai';")
+                if not cursor.fetchone():
+                    cursor.execute(
+                        """
+                        INSERT INTO users (name, email, password_hash, age, experience, goal, is_admin)
+                        VALUES (?, ?, ?, ?, ?, ?, 0);
+                        """,
                         ("Abhilash", "abhilash@ki.ai", default_pw, 23, "Intermediate", "General Fitness"),
                     )
                 else:
-                    cursor.execute("UPDATE users SET is_admin = 1 WHERE LOWER(email) = 'abhilash@ki.ai';")
+                    cursor.execute("UPDATE users SET is_admin = 0 WHERE LOWER(email) = 'abhilash@ki.ai';")
 
                 # Ensure guest@ki.ai exists
                 cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'guest@ki.ai';")
@@ -338,7 +356,13 @@ class Database:
         """Retrieves a user profile by ID."""
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id, name, email, age, experience, goal, is_admin, created_at FROM users WHERE id = ?;", (user_id,))
+            cursor.execute(
+                """
+                SELECT id, name, email, age, experience, goal, is_admin, avatar_url, google_id, auth_provider, created_at 
+                FROM users WHERE id = ?;
+                """,
+                (user_id,),
+            )
             row = cursor.fetchone()
             return dict(row) if row else None
 
@@ -346,9 +370,108 @@ class Database:
         """Retrieves a user profile by email."""
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id, name, email, age, experience, goal, is_admin, created_at FROM users WHERE LOWER(email) = ?;", (email.strip().lower(),))
+            cursor.execute(
+                """
+                SELECT id, name, email, age, experience, goal, is_admin, avatar_url, google_id, auth_provider, created_at 
+                FROM users WHERE LOWER(email) = ?;
+                """,
+                (email.strip().lower(),),
+            )
             row = cursor.fetchone()
             return dict(row) if row else None
+
+    def get_or_create_google_user(
+        self,
+        email: str,
+        name: str,
+        google_id: str,
+        avatar_url: Optional[str] = None,
+    ) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
+        """
+        Authenticates an existing user via Google or provisions a new user profile.
+        Preserves existing accounts, admin status, and session history if an account
+        with the same email already exists.
+        
+        Returns:
+            Tuple of (success: bool, message: str, user_dict: Optional[dict])
+        """
+        email_clean = email.strip().lower()
+        if not email_clean or not google_id:
+            return False, "Invalid Google profile data provided.", None
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            # 1. First check if user with matching google_id exists
+            cursor.execute(
+                """
+                SELECT id, name, email, age, experience, goal, is_admin, avatar_url, auth_provider, created_at
+                FROM users WHERE google_id = ?;
+                """,
+                (str(google_id),),
+            )
+            row = cursor.fetchone()
+
+            # 2. If not found by google_id, check if user exists by email (link existing account)
+            if not row:
+                cursor.execute(
+                    """
+                    SELECT id, name, email, age, experience, goal, is_admin, avatar_url, auth_provider, created_at
+                    FROM users WHERE LOWER(email) = ?;
+                    """,
+                    (email_clean,),
+                )
+                row = cursor.fetchone()
+                if row:
+                    user_id = row["id"]
+                    cursor.execute(
+                        """
+                        UPDATE users
+                        SET google_id = ?,
+                            avatar_url = CASE WHEN ? != '' THEN ? ELSE avatar_url END,
+                            auth_provider = CASE WHEN auth_provider IS NULL OR auth_provider = 'local' THEN 'google_linked' ELSE auth_provider END
+                        WHERE id = ?;
+                        """,
+                        (str(google_id), avatar_url or "", avatar_url or "", user_id),
+                    )
+                    cursor.execute(
+                        """
+                        SELECT id, name, email, age, experience, goal, is_admin, avatar_url, auth_provider, created_at
+                        FROM users WHERE id = ?;
+                        """,
+                        (user_id,),
+                    )
+                    row = cursor.fetchone()
+                    logger.info(f"Existing account '{email_clean}' successfully linked to Google ID {google_id}.")
+
+            # 3. If user exists (by google_id or linked by email), return user
+            if row:
+                user_dict = dict(row)
+                return True, f"Welcome back, {user_dict['name']}!", user_dict
+
+            # 4. Otherwise, register a new user profile
+            import secrets
+            placeholder_hash = hash_password(secrets.token_urlsafe(32))
+            display_name = name.strip() or email_clean.split("@")[0].capitalize()
+
+            cursor.execute(
+                """
+                INSERT INTO users (name, email, password_hash, age, experience, goal, avatar_url, is_admin, google_id, auth_provider)
+                VALUES (?, ?, ?, 25, 'Beginner', 'General Fitness', ?, 0, ?, 'google');
+                """,
+                (display_name, email_clean, placeholder_hash, avatar_url or "", str(google_id)),
+            )
+            new_id = cursor.lastrowid
+            cursor.execute(
+                """
+                SELECT id, name, email, age, experience, goal, is_admin, avatar_url, auth_provider, created_at
+                FROM users WHERE id = ?;
+                """,
+                (new_id,),
+            )
+            new_row = cursor.fetchone()
+            new_user = dict(new_row)
+            logger.info(f"New user '{email_clean}' registered via Google Sign-In with ID {new_id}.")
+            return True, f"Welcome to KI.AI, {new_user['name']}!", new_user
 
     def update_user_profile(
         self,
@@ -1270,7 +1393,7 @@ class Database:
                 WHERE user_id = ? 
                   AND status IN ('ACTIVE', 'TRIAL')
                   AND (end_date IS NULL OR end_date > CURRENT_TIMESTAMP)
-                ORDER BY created_at DESC
+                ORDER BY id DESC
                 LIMIT 1;
                 """,
                 (user_id,)
@@ -1319,11 +1442,14 @@ class Database:
             return cursor.rowcount > 0
 
     def is_user_pro(self, user_id: int) -> bool:
-        """Authoritatively checks whether the user has active Pro privileges."""
+        """Checks whether the user has an active Pro subscription record in the database."""
         sub = self.get_active_subscription(user_id)
-        if sub and sub.get("plan") == "PRO" and sub.get("status") in {"ACTIVE", "TRIAL"}:
-            return True
-        return False
+        return bool(sub and sub.get("id") and sub.get("plan") == "PRO" and sub.get("status") in ("ACTIVE", "TRIAL"))
+
+    def get_user_entitlements(self, user_id: int) -> Dict[str, Any]:
+        """Returns full authoritative entitlement profile for user."""
+        from payment.entitlements import EntitlementService
+        return EntitlementService.get_user_entitlements(self, user_id)
 
     def create_payment(
         self,

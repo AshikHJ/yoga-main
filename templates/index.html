@@ -23,26 +23,29 @@
    KI.AI — FUTURISTIC EDITORIAL DESIGN SYSTEM (dark)
    ============================================================ */
 :root {
-  --bg: #171619;
+  --bg: #191719;
   --bg-deep: #100F11;
-  --surface: #232126;
+  --surface: #242225;
   --surface-2: #2B292E;
   --surface-3: #353237;
-  --text: #F7F3F5;
+  --text: #F5F1F3;
   --muted: #B7AEB8;
   --dim: #7E7580;
-  --pink: #F277B5;
-  --pink-light: #FFADD4;
+  --pink: #E85A9D;
+  --pink-light: #F49BC6;
   --pink-deep: #C74E8B;
-  --pink-soft: rgba(242, 119, 181, 0.12);
+  --pink-soft: rgba(232, 90, 157, 0.12);
+  --teal: #5CE8D3;
+  --teal-light: #8FF2E2;
+  --teal-soft: rgba(92, 232, 211, 0.12);
   --sage: #A6B8A0;
   --sage-soft: rgba(166, 184, 160, 0.14);
   --lavender: #C8B9E8;
   --lavender-soft: rgba(200, 185, 232, 0.12);
   --warm-grey: #8E8A94;
-  --border: rgba(247, 243, 245, 0.12);
-  --border-subtle: rgba(247, 243, 245, 0.07);
-  --border-accent: rgba(242, 119, 181, 0.4);
+  --border: #39353A;
+  --border-subtle: rgba(245, 241, 243, 0.07);
+  --border-accent: rgba(232, 90, 157, 0.4);
   --bg-main: var(--bg);
   --bg-surface: var(--surface);
   --bg-card: var(--surface);
@@ -344,6 +347,69 @@ canvas#skeleton-canvas { position: absolute; inset: 0; width: 100%; height: 100%
 .hold-progress-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent); transform: translateX(-100%); animation: kiShimmer 2.4s ease-in-out infinite; }
 @keyframes kiShimmer { 60%,100% { transform: translateX(100%); } }
 
+/* ============ IMMERSIVE FULL-SCREEN PRACTICE ============
+   Camera fills the viewport; reference panel floats right;
+   top bar + feedback stay readable without covering the body. */
+#view-practice.active { max-width: none; }
+#view-practice .practice-shell { display: flex; flex-direction: column; gap: 12px; }
+.fs-topbar {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg); padding: 10px 16px;
+}
+.fs-topbar .fs-pose { min-width: 0; flex: 1 1 220px; }
+.fs-topbar .fs-pose h2 { font-size: 20px; font-weight: 800; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fs-timer { font-family: var(--font-display); font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--teal-light); white-space: nowrap; }
+.fs-timer.paused { color: var(--status-warning); }
+.fs-seq { flex: 2 1 200px; min-width: 140px; }
+.fs-seq-track { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
+.fs-seq-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--teal), var(--pink)); transition: width 0.4s var(--transition-smooth); }
+.fs-seq-label { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
+.fs-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.fs-btn { background: rgba(245,241,243,0.06); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 8px 12px; font-size: 12px; font-weight: 700; cursor: pointer; min-height: 40px; font-family: var(--font-sans); }
+.fs-btn:hover { background: rgba(245,241,243,0.12); border-color: var(--border-accent); }
+.fs-btn.active { background: var(--pink-soft); border-color: var(--border-accent); color: var(--pink-light); }
+.fs-stage { position: relative; display: block; border-radius: var(--radius-lg); overflow: hidden; background: #0e0d0f; border: 1px solid var(--border-subtle); min-height: min(76vh, 720px); grid-template-columns: none; }
+.fs-stage .camera-panel-card { background: transparent; border: none; border-radius: 0; box-shadow: none; }
+.fs-stage .camera-viewport-card { aspect-ratio: auto; height: min(76vh, 720px); min-height: 420px; box-shadow: none; }
+.fs-stage video#webcam-video, .fs-stage canvas#skeleton-canvas { object-fit: contain; }
+.fs-stage.fit-cover video#webcam-video, .fs-stage.fit-cover canvas#skeleton-canvas { object-fit: cover; }
+/* Floating reference panel (desktop): right side, never covers centre */
+.fs-ref {
+  position: absolute; top: 14px; right: 14px; z-index: 35;
+  width: min(300px, 30%); max-height: calc(100% - 28px); overflow-y: auto;
+  background: rgba(22, 20, 22, 0.92); backdrop-filter: blur(12px);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.3s var(--transition-smooth), opacity 0.3s ease;
+}
+.fs-ref.minimized { transform: translateX(calc(100% - 46px)); }
+.fs-ref.minimized .fs-ref-body { display: none; }
+.fs-ref-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border-subtle); position: sticky; top: 0; background: rgba(22,20,22,0.96); }
+.fs-ref-head .fs-ref-name { flex: 1; font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fs-ref-body img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: #1b1a1d; }
+.fs-ref-body .fs-cues { padding: 10px 12px; font-size: 12px; color: var(--muted); line-height: 1.55; }
+.fs-ref-body .fs-cues li { margin-bottom: 5px; }
+.fs-ref-body .fs-cues ul { margin: 0; padding-left: 16px; }
+.fs-feedback {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg); padding: 12px 18px;
+}
+.fs-feedback .hud-feedback-text { flex: 1 1 260px; min-height: 0; font-size: 15px; }
+.fs-hold { display: flex; align-items: center; gap: 10px; }
+.fs-hold-track { width: 150px; height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
+@media (max-width: 860px) {
+  .fs-stage { min-height: 52vh; }
+  .fs-stage .camera-viewport-card { height: 52vh; min-height: 320px; }
+  .fs-ref { position: static; width: 100%; max-height: none; margin-top: 10px; }
+  .fs-ref.minimized { transform: none; }
+  .fs-ref.minimized .fs-ref-body { display: none; }
+  .practice-mobile-tabs { display: none; }
+}
+#view-practice:fullscreen { background: #0e0d0f; padding: 12px; overflow-y: auto; }
+#view-practice:fullscreen .fs-stage .camera-viewport-card { height: calc(100vh - 230px); min-height: 0; }
+
 /* Progress timeline */
 .timeline { display: flex; flex-direction: column; gap: 0; margin: 8px 0 28px; }
 .timeline-item { display: grid; grid-template-columns: 64px 1fr; gap: 18px; position: relative; padding-bottom: 28px; }
@@ -437,6 +503,61 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
   .reveal { opacity: 1; transform: none; }
 }
 
+/* ============ AUTH VIEW (login / register) ============ */
+.auth-shell { max-width: 880px; margin: 24px auto 0; display: grid; grid-template-columns: 1fr 1.1fr; gap: 0; overflow: hidden; padding: 0; }
+.auth-brand-pane {
+  background: linear-gradient(160deg, rgba(45,122,110,0.35), rgba(242,119,181,0.22)), #1d1b1f;
+  padding: 40px 32px; display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  border-right: 1px solid var(--border-subtle);
+}
+.auth-brand-pane h2 { font-size: clamp(26px, 3.4vw, 36px); line-height: 1.05; }
+.auth-brand-pane h2 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--pink-light); }
+.auth-brand-pane p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+.auth-accent-bar { display: flex; gap: 8px; margin-top: 6px; }
+.auth-accent-bar span { height: 6px; border-radius: 4px; }
+.auth-form-pane { padding: 34px 32px; }
+.auth-tabs { display: flex; gap: 6px; background: var(--surface-3); border-radius: var(--radius-pill); padding: 4px; margin-bottom: 22px; }
+.auth-tabs button { flex: 1; background: none; border: none; color: var(--muted); font-weight: 700; font-size: 13.5px; padding: 10px; border-radius: var(--radius-pill); cursor: pointer; font-family: var(--font-sans); min-height: 44px; }
+.auth-tabs button[aria-selected="true"] { background: var(--text); color: #171619; }
+.auth-field { margin-bottom: 16px; }
+.auth-field label { display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.3px; }
+.auth-field input, .auth-field select {
+  width: 100%; background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px; font-size: 14.5px; color: var(--text); font-family: var(--font-sans); min-height: 48px;
+}
+.auth-field input:focus, .auth-field select:focus { outline: none; border-color: var(--pink); box-shadow: 0 0 0 3px rgba(242,119,181,0.22); }
+.auth-field input[aria-invalid="true"] { border-color: var(--status-error); }
+.field-error { font-size: 12.5px; color: var(--status-error); margin-top: 5px; display: flex; gap: 6px; align-items: center; }
+.password-wrap { position: relative; }
+.password-wrap input { padding-right: 52px; }
+.password-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); font-size: 12px; font-weight: 800; cursor: pointer; padding: 10px 12px; border-radius: 8px; min-height: 40px; }
+.password-toggle:hover { color: var(--pink-light); }
+.auth-alert { border-radius: var(--radius-md); padding: 12px 16px; font-size: 13.5px; margin-bottom: 18px; display: none; line-height: 1.5; }
+.auth-alert.show { display: block; }
+.auth-alert.error { background: rgba(242,115,140,0.1); border: 1px solid var(--status-error); color: #ffb3c1; }
+.auth-alert.info { background: rgba(45,122,110,0.14); border: 1px solid #2d7a6e; color: #9fd9cf; }
+.auth-alert .auth-alert-icon { margin-right: 8px; }
+.btn-loading { opacity: 0.7; pointer-events: none; }
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(23,22,25,0.3); border-top-color: #171619; border-radius: 50%; display: inline-block; animation: kiSpin 0.7s linear infinite; vertical-align: -3px; }
+@keyframes kiSpin { to { transform: rotate(360deg); } }
+.auth-meta { font-size: 12.5px; color: var(--dim); margin-top: 16px; text-align: center; }
+/* Teal accent per auth brief (complements rose) */
+:root { --teal: #5CE8D3; --teal-light: #8FF2E2; }
+.btn-teal { background: var(--teal); color: #fff; font-weight: 800; }
+.btn-teal:hover { background: #35907f; transform: translateY(-2px); }
+
+/* ============ TOASTS ============ */
+#ki-toast-region { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 900; display: flex; flex-direction: column; gap: 10px; align-items: center; width: min(480px, calc(100vw - 32px)); }
+.ki-toast { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--pink); border-radius: 12px; padding: 12px 18px; font-size: 13.5px; box-shadow: var(--shadow-lg); animation: fadeInUp 0.3s var(--transition-smooth) both; max-width: 100%; }
+.ki-toast.success { border-left-color: var(--status-success); }
+.ki-toast.error { border-left-color: var(--status-error); }
+
+@media (max-width: 820px) {
+  .auth-shell { grid-template-columns: 1fr; }
+  .auth-brand-pane { border-right: none; border-bottom: 1px solid var(--border-subtle); padding: 28px 24px; }
+  .auth-form-pane { padding: 26px 20px; }
+}
+
   </style>
 </head>
 <body>
@@ -466,9 +587,11 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     </nav>
     <div class="nav-actions">
       <div class="user-status-pill" title="Account">
-        <span id="nav-user-name">Ashik</span>
+        <span id="nav-user-name">Guest</span>
         <span id="nav-plan-badge" class="badge-free">FREE</span>
       </div>
+      <button id="btn-nav-auth" class="btn btn-teal" style="padding:8px 16px;min-height:40px;font-size:12.5px;" onclick="Auth.open()" title="Sign in to KI.AI">Sign in</button>
+      <button id="btn-nav-logout" class="btn btn-secondary" style="display:none;padding:8px 14px;min-height:40px;font-size:12.5px;" onclick="Auth.logout()" title="Sign out">Sign out</button>
       <button class="btn btn-secondary" style="padding:8px 14px;min-height:40px;font-size:12.5px;" onclick="openPreferencesModal()" title="Practice preferences">⚙ Preferences</button>
       <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle navigation">☰</button>
     </div>
@@ -481,10 +604,116 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     <button onclick="switchView('progress'); toggleMobileMenu();">Progress</button>
     <button onclick="switchView('pricing'); toggleMobileMenu();">Subscription &amp; Pro</button>
     <button onclick="openPreferencesModal(); toggleMobileMenu();">Practice Preferences</button>
+    <button id="drawer-auth-btn" onclick="Auth.open(); toggleMobileMenu();">Sign in</button>
+    <button id="drawer-logout-btn" style="display:none;" onclick="Auth.logout(); toggleMobileMenu();">Sign out</button>
   </div>
 </header>
 
 <main id="main-container">
+
+  <!-- ============ 0. AUTH : SIGN IN / CREATE ACCOUNT ============ -->
+  <section id="view-auth" class="view-section">
+    <div class="card auth-shell">
+      <div class="auth-brand-pane">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="brand-mark">KI</div>
+          <div><div style="font-weight:800;letter-spacing:1px;">KI.AI</div><div style="font-size:10px;color:var(--pink-light);letter-spacing:2px;">AI YOGA TEACHER</div></div>
+        </div>
+        <h2>Welcome back to<br><em>your practice.</em></h2>
+        <p>Sign in to unlock camera-guided sessions, adaptive programs, voice coaching and your personal progress timeline. Your camera frames always stay on your device.</p>
+        <div class="auth-accent-bar" aria-hidden="true"><span style="width:56px;background:var(--pink);"></span><span style="width:34px;background:var(--teal);"></span><span style="width:20px;background:var(--lavender);"></span></div>
+      </div>
+      <div class="auth-form-pane">
+        <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+          <button id="tab-login" role="tab" aria-selected="true" onclick="Auth.setMode('login')">Sign in</button>
+          <button id="tab-register" role="tab" aria-selected="false" onclick="Auth.setMode('register')">Create account</button>
+        </div>
+        <div id="auth-alert" class="auth-alert" role="alert" aria-live="assertive"></div>
+
+        <!-- Google OAuth Sign-In -->
+        <div class="google-auth-section" style="margin: 16px 0 18px;">
+          <a href="/api/auth/google" id="btn-google-auth" class="btn" style="display:flex;align-items:center;justify-content:center;gap:12px;width:100%;text-decoration:none;background:#FFFFFF;color:#3c4043;border:1px solid #dadce0;border-radius:var(--radius-md, 8px);padding:11px 16px;font-size:14px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.08);transition:all 0.2s ease;cursor:pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span id="google-btn-text">Continue with Google</span>
+          </a>
+          <div style="display:flex;align-items:center;gap:12px;margin:18px 0 12px;color:var(--text-muted);font-size:12px;">
+            <div style="flex:1;height:1px;background:var(--border);"></div>
+            <span style="letter-spacing:1px;font-weight:600;font-size:11px;opacity:0.75;">OR WITH EMAIL</span>
+            <div style="flex:1;height:1px;background:var(--border);"></div>
+          </div>
+        </div>
+
+        <form id="form-login" novalidate onsubmit="return Auth.submitLogin(event)">
+          <div class="auth-field">
+            <label for="login-email">Email address</label>
+            <input type="email" id="login-email" name="email" autocomplete="email" placeholder="you@example.com" required aria-describedby="login-email-err">
+            <div class="field-error" id="login-email-err" hidden></div>
+          </div>
+          <div class="auth-field">
+            <label for="login-password">Password</label>
+            <div class="password-wrap">
+              <input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="Your password" required aria-describedby="login-password-err">
+              <button type="button" class="password-toggle" onclick="Auth.togglePassword('login-password', this)" aria-label="Show password">SHOW</button>
+            </div>
+            <div class="field-error" id="login-password-err" hidden></div>
+          </div>
+          <button type="submit" id="btn-login-submit" class="btn btn-terracotta" style="width:100%;">SIGN IN →</button>
+        </form>
+
+        <form id="form-register" novalidate onsubmit="return Auth.submitRegister(event)" hidden>
+          <div class="auth-field">
+            <label for="reg-name">Full name</label>
+            <input type="text" id="reg-name" name="name" autocomplete="name" placeholder="Your name" required aria-describedby="reg-name-err">
+            <div class="field-error" id="reg-name-err" hidden></div>
+          </div>
+          <div class="auth-field">
+            <label for="reg-email">Email address</label>
+            <input type="email" id="reg-email" name="email" autocomplete="email" placeholder="you@example.com" required aria-describedby="reg-email-err">
+            <div class="field-error" id="reg-email-err" hidden></div>
+          </div>
+          <div class="auth-field">
+            <label for="reg-password">Password <span style="color:var(--dim);font-weight:500;">(min. 6 characters)</span></label>
+            <div class="password-wrap">
+              <input type="password" id="reg-password" name="password" autocomplete="new-password" placeholder="Create a password" required aria-describedby="reg-password-err">
+              <button type="button" class="password-toggle" onclick="Auth.togglePassword('reg-password', this)" aria-label="Show password">SHOW</button>
+            </div>
+            <div class="field-error" id="reg-password-err" hidden></div>
+          </div>
+          <div class="auth-field">
+            <label for="reg-password2">Confirm password</label>
+            <input type="password" id="reg-password2" name="password2" autocomplete="new-password" placeholder="Repeat your password" required aria-describedby="reg-password2-err">
+            <div class="field-error" id="reg-password2-err" hidden></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="auth-field">
+              <label for="reg-experience">Experience</label>
+              <select id="reg-experience" name="experience">
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </div>
+            <div class="auth-field">
+              <label for="reg-goal">Primary goal</label>
+              <select id="reg-goal" name="goal">
+                <option value="General Fitness">General Fitness</option>
+                <option value="Flexibility">Flexibility</option>
+                <option value="Stress Relief">Stress Relief</option>
+                <option value="Strength">Strength</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" id="btn-register-submit" class="btn btn-teal" style="width:100%;">CREATE ACCOUNT →</button>
+        </form>
+        <div class="auth-meta">Protected by server-side sessions. Passwords are never stored in your browser.</div>
+      </div>
+    </div>
+  </section>
 
   <!-- ============ 1. HOME : CINEMATIC HERO ============ -->
   <section id="view-home" class="view-section active">
@@ -649,31 +878,65 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
 
   <!-- ============ PRACTICE STUDIO ============ -->
   <section id="view-practice" class="view-section">
-    <div class="practice-header-bar">
+    <div class="practice-shell">
+    <div class="practice-header-bar fs-topbar">
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <span class="hud-step-badge" id="hud-step-num">01/08</span>
-        <div>
-          <h2 style="font-size:24px;font-weight:800;margin:0;" id="hud-pose-title">TADASANA (MOUNTAIN POSE)</h2>
+        <div class="fs-pose">
+          <h2 id="hud-pose-title">TADASANA (MOUNTAIN POSE)</h2>
           <div style="font-size:13px;color:var(--muted);font-style:italic;" id="hud-pose-sanskrit">Tādāsana</div>
         </div>
       </div>
+      <div class="fs-seq">
+        <div class="fs-seq-label" id="fs-seq-label">POSE 1 OF 8</div>
+        <div class="fs-seq-track"><div class="fs-seq-fill" id="fs-seq-fill"></div></div>
+      </div>
+      <div class="fs-timer" id="fs-timer" title="Remaining hold time">00:20</div>
       <div class="practice-mobile-tabs" id="practice-mobile-tabs">
         <button id="tab-btn-both" class="tab-btn active" onclick="setPracticeLayout('both')">Split View</button>
         <button id="tab-btn-camera" class="tab-btn" onclick="setPracticeLayout('camera')">Camera</button>
         <button id="tab-btn-demo" class="tab-btn" onclick="setPracticeLayout('demo')">Watch Demo</button>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div class="fs-controls">
+        <button id="btn-pause-resume" class="fs-btn" onclick="togglePausePractice()" title="Pause or resume the hold timer">⏸ Pause</button>
+        <button id="btn-fit" class="fs-btn" onclick="toggleCameraFit()" title="Toggle camera fit: contain shows your full body, cover fills the screen">⛶ Fit: Full body</button>
+        <button id="btn-fullscreen" class="fs-btn" onclick="togglePracticeFullscreen()" title="Toggle browser fullscreen">⛶ Fullscreen</button>
         <button id="btn-hud-vision-debug" class="btn btn-secondary" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="toggleVisionDebug()" title="Toggle vision diagnostics">🔍 Vision Debug</button>
-        <button id="btn-hud-stop-voice" class="btn btn-secondary" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="window.VoiceManager.stop()" title="Stop speech immediately">🔇 Stop Voice</button>
+        <button id="btn-hud-stop-voice" class="btn btn-secondary" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="window.VoiceManager.toggleMute()" title="Mute/Unmute coach speech">🔈 Mute</button>
         <button id="btn-hud-stop-camera" class="btn btn-danger" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="CameraManager.stopCamera()" title="Stop camera hardware">🛑 Stop Camera</button>
         <button class="btn btn-secondary" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="skipCurrentExercise()">Skip Pose ⏭</button>
         <button class="btn btn-secondary" style="padding:6px 12px;font-size:11px;min-height:38px;" onclick="completeFullSession()">End Practice ⏹</button>
       </div>
     </div>
 
-    <div class="practice-studio-grid" id="practice-studio-grid">
-      <div class="practice-panel-card demo-panel" id="practice-demo-panel">
+    <div class="fs-stage" id="practice-studio-grid">
+      <div class="practice-panel-card demo-panel fs-ref" id="practice-demo-panel">
+        <div class="fs-ref-head">
+          <span class="fs-ref-name" id="demo-overlay-name-head">Reference</span>
+          <button class="fs-btn" id="btn-ref-min" onclick="toggleRefPanel()" title="Minimize or expand the reference panel" style="min-height:32px;padding:4px 10px;">−</button>
+        </div>
+        <div class="fs-ref-body">
         <div class="panel-header"><span class="panel-eyebrow">WATCH &amp; FOLLOW</span><span class="panel-sub">Correct Alignment Reference</span></div>
+        <div style="padding:10px 20px 0;display:flex;justify-content:flex-end;">
+          <button class="btn btn-secondary" style="padding:6px 14px;font-size:11.5px;min-height:36px;" onclick="openPoseDetailsForCurrentStep()" title="Open step-by-step guide for this pose">📖 Pose guide</button>
+        </div>
+        <div class="demo-visual-card">
+          <img id="demo-pose-img" src="/assets/pose_figures/tadasana.svg" alt="Reference demonstration of the correct yoga pose form" class="demo-pose-image" onerror="handleDemoImageError(this)">
+          <div class="demo-overlay-pill"><span id="demo-overlay-name">Tadasana</span></div>
+        </div>
+        <div class="demo-alignment-section">
+          <div class="section-title-micro">KEY ALIGNMENT TARGETS</div>
+          <div id="demo-alignment-list" class="demo-rules-list">
+            <div class="demo-rule-item"><span>Left Knee</span><b>175° (Straight)</b></div>
+            <div class="demo-rule-item"><span>Right Knee</span><b>175° (Straight)</b></div>
+            <div class="demo-rule-item"><span>Spine / Torso</span><b>90° (Upright)</b></div>
+          </div>
+        </div>
+        <div class="demo-breathing-bar"><span>💨</span><span id="demo-breathing-guidance">Inhale deeply through nose, expand ribcage. Maintain soft gaze forward.</span></div>
+        </div>
+      </div>
+
+      <div class="practice-panel-card camera-panel" id="practice-camera-panel">
         <div class="demo-visual-card">
           <img id="demo-pose-img" src="/assets/pose_figures/tadasana.svg" alt="Reference demonstration of the correct yoga pose form" class="demo-pose-image" onerror="handleDemoImageError(this)">
           <div class="demo-overlay-pill"><span id="demo-overlay-name">Tadasana</span></div>
@@ -708,7 +971,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           <div id="camera-placeholder" class="camera-placeholder-overlay" style="display:none;">
             <div style="font-size:42px;margin-bottom:12px;">📷</div>
             <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">Camera Inactive</div>
-            <p style="font-size:13px;color:var(--muted);max-width:320px;margin-bottom:20px;">Camera is paused or stopped for your privacy.</p>
+            <p id="camera-placeholder-msg" style="font-size:13px;color:var(--muted);max-width:320px;margin-bottom:20px;">Camera is paused or stopped for your privacy.</p>
             <button class="btn btn-terracotta" onclick="CameraManager.startCamera()">Resume Camera</button>
           </div>
           <div id="transition-overlay">
@@ -762,6 +1025,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
         </div>
         <div id="hud-feedback" class="hud-feedback-text" role="status" aria-live="polite">Step into camera view to begin alignment check.</div>
       </div>
+    </div>
     </div>
   </section>
 
@@ -864,48 +1128,6 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     <div id="library-grid" class="pose-collection-grid"></div>
   </section>
 
-  <!-- ============ PRICING ============ -->
-  <section id="view-pricing" class="view-section">
-    <div class="pricing-header">
-      <span class="meta-label">SUBSCRIPTION</span>
-      <h1 style="font-size:clamp(30px,4.5vw,44px);">Choose the practice that fits you.</h1>
-      <p style="color:var(--muted);font-size:16px;margin-top:8px;">Honest, transparent pricing for individualized real-time posture coaching.</p>
-    </div>
-    <div class="pricing-grid">
-      <div class="pricing-card">
-        <div style="font-size:12px;font-weight:800;color:var(--sage);letter-spacing:1px;">STARTER</div>
-        <h3 style="font-size:26px;margin-top:4px;">Free</h3>
-        <div class="plan-price">₹0</div>
-        <div style="font-size:13px;color:var(--muted);">Forever free practice tier</div>
-        <ul class="plan-features">
-          <li><span class="check">✓</span> Level 1 (Foundation) sessions</li>
-          <li><span class="check">✓</span> Real-time posture score &amp; skeleton</li>
-          <li><span class="check">✓</span> Valid hold timer progression</li>
-          <li><span class="check">✓</span> 7-day progress history</li>
-          <li style="color:var(--dim);">✕ Conversational AI Coach drawer</li>
-          <li style="color:var(--dim);">✕ Level 2 &amp; 3 Programs</li>
-        </ul>
-        <div style="margin-top:auto;"><button class="btn btn-secondary" style="width:100%;" disabled>Current Plan</button></div>
-      </div>
-      <div class="pricing-card featured">
-        <span class="plan-badge">RECOMMENDED</span>
-        <div style="font-size:12px;font-weight:800;color:var(--pink);letter-spacing:1px;">ALL ACCESS</div>
-        <h3 style="font-size:26px;margin-top:4px;">KI.AI Pro</h3>
-        <div class="plan-price">₹799 <span style="font-size:16px;font-weight:500;color:var(--muted);">/ month</span></div>
-        <div style="font-size:13px;color:var(--muted);">Cancel anytime with 1-click</div>
-        <ul class="plan-features">
-          <li><span class="check">✓</span> All 3 Programs (Foundation, Progress, Mastery)</li>
-          <li><span class="check">✓</span> Full Conversational AI Yoga Teacher</li>
-          <li><span class="check">✓</span> Biomechanical score explanations</li>
-          <li><span class="check">✓</span> Unlimited adaptive daily session planning</li>
-          <li><span class="check">✓</span> Joint angle biometrics &amp; lifetime progress</li>
-          <li><span class="check">✓</span> Early beta access to Karate AI Master</li>
-        </ul>
-        <div style="margin-top:auto;"><button id="btn-upgrade-pro" class="btn btn-terracotta" style="width:100%;" onclick="PaymentManager.startSubscriptionFlow('PRO_MONTHLY')">UPGRADE TO PRO <span class="arrow">→</span></button></div>
-      </div>
-    </div>
-  </section>
-
   <!-- ============ PREFERENCES ============ -->
   <section id="view-preferences" class="view-section">
     <div class="card" style="max-width:640px;margin:0 auto;padding:36px;">
@@ -988,28 +1210,6 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
   </div>
 </div>
 
-<div id="modal-payment-checkout" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Pro subscription checkout">
-  <div class="modal-content">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <div><div style="font-size:11px;font-weight:800;color:var(--pink);letter-spacing:1px;">RAZORPAY SECURE CHECKOUT</div>
-        <h3 style="font-size:24px;margin-top:2px;">Complete Pro Subscription</h3></div>
-      <button onclick="PaymentManager.closeCheckoutModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text);">✕</button>
-    </div>
-    <div class="card card-elevated" style="margin-bottom:20px;padding:16px;">
-      <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);">Plan:</span><b id="checkout-plan-name">KI.AI Pro Monthly</b></div>
-      <div style="display:flex;justify-content:space-between;font-size:18px;margin-top:8px;"><span style="color:var(--muted);">Amount Due:</span><b id="checkout-amount" style="color:var(--pink);">₹799.00</b></div>
-    </div>
-    <div style="background:rgba(242,119,181,0.08);padding:12px;border-radius:var(--radius-sm);font-size:12.5px;margin-bottom:20px;border-left:3px solid var(--pink);">
-      🛡️ <b>Server-Side HMAC-SHA256 Verification</b><br>Payment will be verified server-side against Razorpay before granting Pro access.
-    </div>
-    <div id="payment-status-message" style="display:none;padding:10px;border-radius:8px;font-size:13px;margin-bottom:16px;"></div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;">
-      <button class="btn btn-secondary" style="flex:1;" onclick="PaymentManager.closeCheckoutModal()">Cancel</button>
-      <button id="btn-submit-payment" class="btn btn-terracotta" style="flex:2;" onclick="PaymentManager.simulateTestPaymentSuccess()">Pay ₹799 (Verify Signature)</button>
-    </div>
-  </div>
-</div>
-
 <div id="karate-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Karate AI preview">
   <div class="modal-content" style="max-width:560px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -1019,21 +1219,440 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     <h2 style="font-size:28px;margin-bottom:8px;">Karate AI Master</h2>
     <p style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px;">Transforming martial arts training with posture detection for Zenkutsu Dachi (front stance), Kiba Dachi (horse stance), and kick/punch mechanics.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <input type="email" placeholder="Enter email for beta access..." aria-label="Email for beta access" style="flex:1;min-width:200px;background:var(--surface-3);border:1px solid var(--border);padding:12px;border-radius:var(--radius-sm);font-size:14px;color:var(--text);min-height:44px;">
-      <button class="btn btn-terracotta" onclick="alert('You are on the priority beta waitlist!'); document.getElementById('karate-modal').style.display='none';">Join Beta</button>
+      <input type="email" id="karate-email" placeholder="Enter email for beta access..." aria-label="Email for beta access" aria-describedby="karate-msg" style="flex:1;min-width:200px;background:var(--surface-3);border:1px solid var(--border);padding:12px;border-radius:var(--radius-sm);font-size:14px;color:var(--text);min-height:44px;">
+      <button class="btn btn-terracotta" onclick="joinKarateBeta()">Join Beta</button>
     </div>
+    <div id="karate-msg" role="status" aria-live="polite" style="font-size:13px;margin-top:12px;color:var(--muted);"></div>
+  </div>
+</div>
+
+<div id="pose-details-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Pose details">
+  <div class="modal-content" style="max-width:640px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span class="meta-label" id="pose-details-kicker">POSE GUIDE</span>
+      <button onclick="closePoseDetails()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text);" aria-label="Close pose details">✕</button>
+    </div>
+    <div id="pose-details-body"><!-- Populated by openPoseDetails() from real /api/poses data --></div>
   </div>
 </div>
 
   <!-- ============================================================
        JAVASCRIPT ARCHITECTURE
        ============================================================ -->
+  <div id="ki-toast-region" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- KIKI — free yoga companion for every user. Launcher stays compact
+       bottom-right and never covers the camera; the panel collapses on
+       demand. Faces are pure inline SVG injected by the Kiki module. -->
+  <div id="kiki-root">
+    <button id="kiki-launcher" class="kiki-locked" aria-label="Open Kiki, your yoga companion" title="Kiki — yoga companion">
+      <span id="kiki-launcher-face" aria-hidden="true"></span>
+      <span class="kiki-lock" id="kiki-lock-badge" aria-hidden="true">🔒</span>
+      <span class="kiki-ping" aria-hidden="true"></span>
+    </button>
+    <div id="kiki-panel" role="dialog" aria-label="Kiki assistant panel">
+      <div class="kiki-panel-head">
+        <span id="kiki-panel-face" aria-hidden="true"></span>
+        <span class="kiki-title">Kiki</span>
+        <span class="kiki-pro-flag" id="kiki-pro-flag">AI COMPANION</span>
+        <button id="kiki-speak-toggle" aria-label="Toggle Kiki read-aloud" title="Read replies aloud (female voice)">🔊</button>
+        <button id="kiki-speak-stop" aria-label="Stop Kiki speech" title="Stop speaking">⏹</button>
+        <button id="kiki-panel-close" aria-label="Close Kiki panel">✕</button>
+      </div>
+      <div id="kiki-messages" aria-live="polite"></div>
+      <div class="kiki-chips" id="kiki-chips"></div>
+      <form id="kiki-form">
+        <input id="kiki-input" type="text" maxlength="300" placeholder="Ask Kiki about this pose…" aria-label="Ask Kiki about this pose" autocomplete="off">
+        <button id="kiki-send" type="submit">Ask</button>
+      </form>
+    </div>
+  </div>
   <script>
+    /* ==========================================================
+       KI API LAYER + AUTH (real backend contracts only)
+       Endpoints: /api/me, /api/login, /api/register, /api/logout.
+       Session auth uses the server HttpOnly session cookie
+       (credentials: same-origin). No passwords are ever stored
+       in localStorage/sessionStorage. No mock fallback data.
+       ========================================================== */
+    window.KI = (function () {
+      'use strict';
+
+      function ApiError(message, status, payload) {
+        this.name = 'ApiError';
+        this.message = message || 'Request failed.';
+        this.status = status || 0;
+        this.payload = payload || null;
+      }
+      ApiError.prototype = Object.create(Error.prototype);
+
+      var inflightGet = {};
+
+      async function parseBody(res) {
+        const text = await res.text();
+        if (!text) return null;
+        try { return JSON.parse(text); }
+        catch (e) {
+          throw new ApiError('Server returned an unexpected response. Please try again.', res.status, null);
+        }
+      }
+
+      function friendlyError(status, payload) {
+        if (payload && payload.message) return payload.message;
+        if (status === 400) return 'Please check your input and try again.';
+        if (status === 401) return 'Your session has expired. Please sign in again.';
+        if (status === 403) return 'You are not authorized for this action. Please sign in.';
+        if (status === 404) return 'The requested resource was not found.';
+        if (status >= 500) return 'The server had a problem. Please try again in a moment.';
+        return 'Something went wrong. Please try again.';
+      }
+
+      async function api(path, options) {
+        options = options || {};
+        const method = (options.method || 'GET').toUpperCase();
+        const isGet = method === 'GET';
+        const dedupeKey = isGet ? (method + ' ' + path) : null;
+        if (dedupeKey && inflightGet[dedupeKey]) return inflightGet[dedupeKey];
+
+        const task = (async function () {
+          let res;
+          try {
+            res = await fetch(path, {
+              method: method,
+              credentials: 'same-origin',
+              headers: Object.assign({ 'Content-Type': 'application/json' }, options.headers || {}),
+              body: options.body !== undefined ? (typeof options.body === 'string' ? options.body : JSON.stringify(options.body)) : undefined
+            });
+          } catch (e) {
+            throw new ApiError('No connection to the KI.AI server. Check your network and try again.', 0, null);
+          }
+          if (res.status === 401 || res.status === 403) {
+            if (window.Auth && typeof window.Auth.handleForbidden === 'function' && !options.allowAnonymous) {
+              window.Auth.handleForbidden();
+            }
+            throw new ApiError(friendlyError(res.status, await parseBody(res).catch(() => null)), res.status, null);
+          }
+          const data = await parseBody(res);
+          if (!res.ok) throw new ApiError(friendlyError(res.status, data), res.status, data);
+          return data;
+        })();
+
+        if (dedupeKey) {
+          inflightGet[dedupeKey] = task;
+          task.then(function () { delete inflightGet[dedupeKey]; }, function () { delete inflightGet[dedupeKey]; });
+        }
+        return task;
+      }
+
+      function toast(message, kind) {
+        const region = document.getElementById('ki-toast-region');
+        if (!region) return;
+        const el = document.createElement('div');
+        el.className = 'ki-toast' + (kind ? ' ' + kind : '');
+        el.setAttribute('role', 'status');
+        el.textContent = message;
+        region.appendChild(el);
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.3s ease';
+          setTimeout(function () { el.remove(); }, 320);
+        }, 3600);
+      }
+
+      function setLoading(btn, loading, label) {
+        if (!btn) return;
+        if (loading) {
+          if (!btn.dataset.origLabel) btn.dataset.origLabel = btn.innerHTML;
+          btn.classList.add('btn-loading');
+          btn.disabled = true;
+          btn.innerHTML = '<span class="spinner"></span> ' + (label || 'WORKING…');
+        } else {
+          btn.classList.remove('btn-loading');
+          btn.disabled = false;
+          if (btn.dataset.origLabel) btn.innerHTML = btn.dataset.origLabel;
+        }
+      }
+
+      return { ApiError: ApiError, api: api, toast: toast, setLoading: setLoading };
+    })();
+
+    /* ==========================================================
+       AUTH — real session authentication against Flask.
+       POST /api/login {email,password} -> {status,user}
+       POST /api/register {name,email,password,experience,goal} -> {status,user}
+       POST /api/logout -> {status}
+       GET  /api/me -> {status, authenticated, user}
+       ========================================================== */
+    window.Auth = (function () {
+      'use strict';
+      var mode = 'login';
+      var busy = false;
+      var pendingNotice = null;
+
+      var PROTECTED_VIEWS = { practice: 1, 'session-intro': 1, programs: 1, progress: 1, pricing: 1, preferences: 1, 'session-complete': 1 };
+      var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      function $(id) { return document.getElementById(id); }
+
+      function setMode(next) {
+        mode = next === 'register' ? 'register' : 'login';
+        $('tab-login').setAttribute('aria-selected', mode === 'login' ? 'true' : 'false');
+        $('tab-register').setAttribute('aria-selected', mode === 'register' ? 'true' : 'false');
+        $('form-login').hidden = mode !== 'login';
+        $('form-register').hidden = mode !== 'register';
+        hideAlert();
+        setTimeout(function () {
+          var f = $(mode === 'login' ? 'login-email' : 'reg-name');
+          if (f) f.focus({ preventScroll: true });
+        }, 60);
+      }
+
+      function showAlert(message, kind) {
+        var box = $('auth-alert');
+        if (!box) return;
+        box.className = 'auth-alert show ' + (kind || 'error');
+        box.innerHTML = '<span class="auth-alert-icon">' + (kind === 'info' ? 'ℹ️' : '⚠️') + '</span>' + message;
+      }
+      function hideAlert() {
+        var box = $('auth-alert');
+        if (box) { box.className = 'auth-alert'; box.innerHTML = ''; }
+      }
+
+      function setFieldError(inputId, errId, message) {
+        var input = $(inputId), err = $(errId);
+        if (input) input.setAttribute('aria-invalid', message ? 'true' : 'false');
+        if (err) {
+          if (message) { err.hidden = false; err.textContent = '⚠ ' + message; }
+          else { err.hidden = true; err.textContent = ''; }
+        }
+        return !message;
+      }
+
+      function togglePassword(inputId, btn) {
+        var input = $(inputId);
+        if (!input) return;
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        if (btn) { btn.textContent = show ? 'HIDE' : 'SHOW'; btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password'); }
+        input.focus({ preventScroll: true });
+      }
+
+      function open(notice) {
+        if (notice) pendingNotice = notice;
+        setMode(mode);
+        if (pendingNotice) { showAlert(pendingNotice, 'info'); pendingNotice = null; }
+        if (typeof switchView === 'function') switchView('auth');
+      }
+
+      function updateChrome() {
+        const user = (typeof currentUser !== 'undefined') ? currentUser : null;
+        var nameEl = $('nav-user-name');
+        if (nameEl) nameEl.textContent = user ? (user.name || user.email || 'Yogi') : 'Guest';
+        var signIn = $('btn-nav-auth'), signOut = $('btn-nav-logout');
+        if (signIn) signIn.style.display = user ? 'none' : '';
+        if (signOut) signOut.style.display = user ? '' : 'none';
+        var dIn = $('drawer-auth-btn'), dOut = $('drawer-logout-btn');
+        if (dIn) dIn.style.display = user ? 'none' : '';
+        if (dOut) dOut.style.display = user ? '' : 'none';
+      }
+
+      function applyUser(user) {
+        currentUser = {
+          id: user.id,
+          name: user.name || 'Yogi',
+          email: user.email || '',
+          goal: user.goal || DEFAULT_PREFS.goal,
+          level: user.experience || DEFAULT_PREFS.level,
+          is_pro: !!user.is_pro
+        };
+        updateChrome();
+        if (typeof updateDynamicGreeting === 'function') updateDynamicGreeting();
+      }
+
+      async function enterAuthenticated(user, message) {
+        applyUser(user);
+        try {
+          if (typeof loadUserPreferences === 'function') await loadUserPreferences();
+          if (typeof checkSubscriptionStatus === 'function') await checkSubscriptionStatus();
+          if (typeof fetchTodaySession === 'function') await fetchTodaySession();
+        } catch (e) { /* non-fatal: sections render empty states */ }
+        if (message) KI.toast(message, 'success');
+        var active = document.querySelector('.view-section.active');
+        if (!active || active.id === 'view-auth') switchView('home');
+      }
+
+      function enterSignedOut(notice) {
+        currentUser = null;
+        userPreferences = Object.assign({}, DEFAULT_PREFS);
+        resetSessionScoring();
+        try {
+          if (typeof CameraManager !== 'undefined') CameraManager.stopCamera();
+          if (window.VoiceManager) window.VoiceManager.stop(false);
+        } catch (e) {}
+        updateChrome();
+        PaymentManagerUpdatePro(false);
+        if (window.Kiki) Kiki.refresh();
+        var active = document.querySelector('.view-section.active');
+        if (notice) pendingNotice = notice;
+        if (!active || PROTECTED_VIEWS[active.id.replace('view-', '')]) {
+          setMode('login');
+          if (pendingNotice) { showAlert(pendingNotice, 'info'); pendingNotice = null; }
+          switchView('auth');
+        } else if (pendingNotice) {
+          KI.toast(pendingNotice, 'error');
+          pendingNotice = null;
+        }
+      }
+
+      function PaymentManagerUpdatePro(isPro) {
+        try {
+          if (typeof PaymentManager !== 'undefined') PaymentManager.updateProUI(!!isPro);
+        } catch (e) {}
+      }
+
+      function handleForbidden() {
+        if (typeof currentUser !== 'undefined' && currentUser) {
+          enterSignedOut('Your session has expired. Please sign in again.');
+        }
+      }
+
+      function isProtected(viewName) { return !!PROTECTED_VIEWS[viewName]; }
+
+      function requireAuth(actionLabel) {
+        if (typeof currentUser !== 'undefined' && currentUser) return true;
+        open('Please sign in' + (actionLabel ? ' ' + actionLabel : '') + '.');
+        return false;
+      }
+
+      async function submitLogin(ev) {
+        if (ev) ev.preventDefault();
+        if (busy) return false;
+        hideAlert();
+        var email = $('login-email').value.trim();
+        var password = $('login-password').value;
+        var ok = true;
+        ok = setFieldError('login-email', 'login-email-err',
+          !email ? 'Email address is required.' : (!EMAIL_RE.test(email) ? 'Enter a valid email address.' : '')) && ok;
+        ok = setFieldError('login-password', 'login-password-err', !password ? 'Password is required.' : '') && ok;
+        if (!ok) return false;
+        busy = true;
+        KI.setLoading($('btn-login-submit'), true, 'SIGNING IN…');
+        try {
+          const data = await KI.api('/api/login', { method: 'POST', body: { email: email, password: password }, allowAnonymous: true });
+          if (data && data.status === 'success' && data.user) {
+            $('login-password').value = '';
+            await enterAuthenticated(data.user, data.message || 'Signed in successfully.');
+          } else {
+            showAlert((data && data.message) || 'Sign in failed. Please try again.');
+          }
+        } catch (err) {
+          showAlert(err.message || 'Sign in failed. Please try again.');
+        }
+        KI.setLoading($('btn-login-submit'), false);
+        busy = false;
+        return false;
+      }
+
+      async function submitRegister(ev) {
+        if (ev) ev.preventDefault();
+        if (busy) return false;
+        hideAlert();
+        var name = $('reg-name').value.trim();
+        var email = $('reg-email').value.trim();
+        var p1 = $('reg-password').value;
+        var p2 = $('reg-password2').value;
+        var ok = true;
+        ok = setFieldError('reg-name', 'reg-name-err', !name ? 'Full name is required.' : '') && ok;
+        ok = setFieldError('reg-email', 'reg-email-err',
+          !email ? 'Email address is required.' : (!EMAIL_RE.test(email) ? 'Enter a valid email address.' : '')) && ok;
+        ok = setFieldError('reg-password', 'reg-password-err',
+          !p1 ? 'Password is required.' : (p1.length < 6 ? 'Password must be at least 6 characters.' : '')) && ok;
+        ok = setFieldError('reg-password2', 'reg-password2-err',
+          !p2 ? 'Please repeat your password.' : (p1 !== p2 ? 'Passwords do not match.' : '')) && ok;
+        if (!ok) return false;
+        busy = true;
+        KI.setLoading($('btn-register-submit'), true, 'CREATING ACCOUNT…');
+        try {
+          const data = await KI.api('/api/register', {
+            method: 'POST',
+            body: { name: name, email: email, password: p1, experience: $('reg-experience').value, goal: $('reg-goal').value },
+            allowAnonymous: true
+          });
+          if (data && data.status === 'success' && data.user) {
+            $('reg-password').value = ''; $('reg-password2').value = '';
+            await enterAuthenticated(data.user, data.message || 'Account created. Welcome to KI.AI!');
+          } else {
+            showAlert((data && data.message) || 'Registration failed. Please try again.');
+          }
+        } catch (err) {
+          showAlert(err.message || 'Registration failed. Please try again.');
+        }
+        KI.setLoading($('btn-register-submit'), false);
+        busy = false;
+        return false;
+      }
+
+      async function logout() {
+        if (busy) return;
+        busy = true;
+        try {
+          await KI.api('/api/logout', { method: 'POST', allowAnonymous: true });
+          enterSignedOut(null);
+          KI.toast('Signed out successfully.', 'success');
+        } catch (err) {
+          KI.toast(err.message || 'Sign out failed. Please try again.', 'error');
+        }
+        busy = false;
+      }
+
+      async function init() {
+        setMode('login');
+        updateChrome();
+
+        // Check for Google OAuth query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const googleAuthSuccess = urlParams.get('google_auth');
+        const authError = urlParams.get('auth_error');
+
+        // Clean query parameters from URL bar without page reload
+        if (googleAuthSuccess || authError) {
+          const cleanUrl = window.location.pathname + window.location.hash;
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
+
+        let restored = null;
+        try {
+          const me = await KI.api('/api/me', { allowAnonymous: true });
+          if (me && me.authenticated && me.user) restored = me.user;
+        } catch (e) { restored = null; }
+        if (restored) {
+          const welcomeMsg = googleAuthSuccess ? `Welcome back, ${restored.name}!` : null;
+          await enterAuthenticated(restored, welcomeMsg);
+        } else {
+          enterSignedOut(null);
+          open(null); // start signed-out users on the sign-in screen
+          if (authError) {
+            showAlert(authError);
+          }
+        }
+        try { if (typeof loadPoses === 'function') await loadPoses(); } catch (e) {}
+        try { if (typeof setupSpeechRecognition === 'function') setupSpeechRecognition(); } catch (e) {}
+      }
+
+      return {
+        setMode: setMode, togglePassword: togglePassword, open: open,
+        submitLogin: submitLogin, submitRegister: submitRegister,
+        logout: logout, handleForbidden: handleForbidden,
+        isProtected: isProtected, requireAuth: requireAuth, init: init,
+        enterAuthenticated: enterAuthenticated, enterSignedOut: enterSignedOut
+      };
+    })();
     // ==========================================
     // 1. APPLICATION STATE & USER MODEL
     // ==========================================
-    let currentUser = { id: 1, name: "Ashik", email: "ashik@ki.ai", goal: "General Fitness", level: "Beginner", is_pro: false };
-    let userPreferences = { goal: "General Fitness", level: "Beginner", duration_minutes: 20, focus_area: "Full Body", voice_enabled: 1 };
+    let currentUser = null; // Restored from GET /api/me on load; null = signed out (guest).
+    const DEFAULT_PREFS = { goal: "General Fitness", level: "Beginner", duration_minutes: 20, focus_area: "Full Body", voice_enabled: 1 };
+    let userPreferences = Object.assign({}, DEFAULT_PREFS);
     let currentSessionPlan = null;
     let currentStepIndex = 0;
     let validHoldCount = 0;
@@ -1054,6 +1673,36 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     let measuredFps = 0;
     let fpsFrameCount = 0;
     let lastFpsTimestamp = Date.now();
+
+    // Session scoring: genuine per-evaluation samples recorded while the
+    // camera is running. Session averages are computed from these only —
+    // never hardcoded.
+    let sessionScoreSamples = [];
+    let sessionPoseBest = {};
+    let sessionWeakJointCounts = {};
+
+    function recordSessionSample(poseName, score, incorrectJoints) {
+      if (typeof score !== 'number' || isNaN(score)) return;
+      sessionScoreSamples.push(score);
+      if (sessionScoreSamples.length > 600) sessionScoreSamples.shift();
+      const key = poseName || 'Pose';
+      if (!sessionPoseBest[key] || score > sessionPoseBest[key]) sessionPoseBest[key] = score;
+      (incorrectJoints || []).forEach(function (j) {
+        sessionWeakJointCounts[j] = (sessionWeakJointCounts[j] || 0) + 1;
+      });
+    }
+
+    function resetSessionScoring() {
+      sessionScoreSamples = [];
+      sessionPoseBest = {};
+      sessionWeakJointCounts = {};
+    }
+
+    function getSessionAverage() {
+      if (!sessionScoreSamples.length) return null;
+      const sum = sessionScoreSamples.reduce(function (a, b) { return a + b; }, 0);
+      return Math.round((sum / sessionScoreSamples.length) * 10) / 10;
+    }
 
     // ==========================================
     // 2. CENTRALIZED CAMERA MANAGER (P0 PRIVACY)
@@ -1210,7 +1859,20 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           console.error("Camera access error:", err);
           this.state = CameraState.STOPPED;
           this.updateUI();
-          alert("Camera permission was denied or camera is unavailable. Posture tracking requires camera access.");
+          // Inline, accessible error (no alert popup): name the cause.
+          const isDenial = err && (err.name === "NotAllowedError" || err.name === "SecurityError");
+          const isMissing = err && (err.name === "NotFoundError" || err.name === "OverconstrainedError");
+          const msg = isDenial
+            ? "Camera permission was denied. Allow camera access in your browser's site settings, then press Resume Camera."
+            : isMissing
+              ? "No camera device was found. Connect a camera and press Resume Camera to begin tracking."
+              : "The camera could not be started. Check that no other app is using it, then press Resume Camera.";
+          const phMsg = document.getElementById("camera-placeholder-msg");
+          if (phMsg) phMsg.innerText = msg;
+          const fb = document.getElementById("hud-feedback");
+          if (fb) fb.innerText = msg;
+          const ph = document.getElementById("camera-placeholder");
+          if (ph) ph.style.display = "flex";
         }
       },
 
@@ -1309,17 +1971,54 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
         this.lastSpokenByEvent = new Map();
         this.lastSpokenTextByEvent = new Map();
         this.eventCooldowns = {
-          'alignment_correction': 4000,
-          'alignment_good': 8000,
-          'hold_paused': 6000,
-          'hold_resumed': 6000,
-          'instruction': 8000,
+          'alignment_correction': 9000,
+          'alignment_good': 18000,
+          'hold_paused': 12000,
+          'hold_resumed': 12000,
+          'instruction': 15000,
           'session_start': 5000,
           'session_complete': 5000,
           'transition_countdown': 4000,
           'coach_response': 3000,
-          'default': 4000
+          'practice_resumed': 5000,
+          'default': 8000
         };
+        // Natural female coach voice: prefer an English female voice when
+        // the device offers one; otherwise fall back gracefully to the
+        // default voice. The exact voice differs per OS/browser by design.
+        this.preferredVoice = null;
+        this._pickFemaleVoice = () => {
+          try {
+            if (!('speechSynthesis' in window)) return;
+            const voices = window.speechSynthesis.getVoices() || [];
+            if (!voices.length) return;
+            const femaleHints = ['samantha', 'zira', 'female', 'serena', 'karen', 'moira', 'tessa', 'fiona', 'veena', 'rishi'];
+            const en = voices.filter(v => (v.lang || '').toLowerCase().startsWith('en'));
+            const pool = en.length ? en : voices;
+            this.preferredVoice =
+              pool.find(v => femaleHints.some(h => (v.name || '').toLowerCase().includes(h))) ||
+              pool.find(v => (v.name || '').toLowerCase().includes('google uk english female')) ||
+              en.find(v => (v.name || '').toLowerCase().includes('google us english')) ||
+              pool[0] || null;
+          } catch (e) { this.preferredVoice = null; }
+        };
+        try {
+          this._pickFemaleVoice();
+          if ('speechSynthesis' in window && window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = () => this._pickFemaleVoice();
+          }
+        } catch (e) {}
+      }
+
+      // Rotate through natural variants so coaching never sounds robotic.
+      // Each eventKey gets its own rotation; repeats of the same sentence
+      // back-to-back are skipped by the cooldown/dedupe logic in speakRequest.
+      pickVariant(eventKey, variants) {
+        if (!Array.isArray(variants) || !variants.length) return '';
+        if (!this._variantIdx) this._variantIdx = {};
+        const i = (this._variantIdx[eventKey] || 0) % variants.length;
+        this._variantIdx[eventKey] = i + 1;
+        return variants[i];
       }
 
       updateUI() {
@@ -1508,7 +2207,10 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
 
         const utterance = new SpeechSynthesisUtterance(request.text);
         utterance.rate = 1.0;
-        utterance.pitch = 1.0;
+        utterance.pitch = 1.05;
+        if (this.preferredVoice) {
+          try { utterance.voice = this.preferredVoice; } catch (e) {}
+        }
 
         utterance.onend = () => {
           this.activeRequest = null;
@@ -1585,7 +2287,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           if (this.previousAlignmentState !== 'WRONG_POSE') {
             this.previousAlignmentState = 'WRONG_POSE';
             window.VoiceManager.speakRequest({
-              text: `Detected ${evalData.detected_pose || 'a different pose'}. Please transition into ${currentPoseName || 'the required pose'}.`,
+              text: `I see ${evalData.detected_pose || 'a different pose'}. Let's find ${currentPoseName || 'the target pose'} together.`,
               priority: 'high',
               eventKey: 'wrong_pose_detected',
               poseId: currentPoseId,
@@ -1607,7 +2309,11 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           if (this.previousAlignmentState !== 'ALIGNED') {
             this.previousAlignmentState = 'ALIGNED';
             window.VoiceManager.speakRequest({
-              text: `Good alignment in ${currentPoseName || 'pose'}. Maintain steady breath and hold.`,
+              text: window.VoiceManager.pickVariant('alignment_good', [
+                "Beautiful. Hold and breathe.",
+                "Lovely alignment. Stay soft.",
+                "Yes, right there. Keep breathing."
+              ]),
               priority: 'high',
               eventKey: 'alignment_good',
               poseId: currentPoseId,
@@ -1655,33 +2361,31 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       pendingOrder: null,
 
       async startSubscriptionFlow(planType = "PRO_MONTHLY") {
+        if (!currentUser) { Auth.open('Please sign in to upgrade to Pro.'); return; }
         const btn = document.getElementById("btn-upgrade-pro");
         if (btn) btn.innerText = "Creating Order...";
 
         try {
-          const res = await fetch("/api/payment/create-order", {
+          const orderData = await KI.api("/api/payment/create-order", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+            body: {
               user_id: currentUser.id,
               plan_type: planType,
               email: currentUser.email,
               name: currentUser.name
-            })
+            }
           });
-
-          const orderData = await res.json();
           if (btn) btn.innerText = "UPGRADE TO PRO →";
 
           if (orderData.status === "success") {
             this.pendingOrder = orderData;
             this.showCheckoutModal(orderData);
           } else {
-            alert("Unable to initiate subscription order: " + (orderData.message || "Unknown error"));
+            KI.toast("Unable to initiate subscription order: " + (orderData.message || "Unknown error"), "error");
           }
         } catch (e) {
           if (btn) btn.innerText = "UPGRADE TO PRO →";
-          alert("Network error contacting payment service.");
+          KI.toast(e.message || "Could not contact the payment service.", "error");
         }
       },
 
@@ -1712,19 +2416,16 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
         const signature = `test_sig_${this.pendingOrder.order_id}_${paymentId}`;
 
         try {
-          const res = await fetch("/api/payment/verify", {
+          const verifyData = await KI.api("/api/payment/verify", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+            body: {
               user_id: currentUser.id,
               order_id: this.pendingOrder.order_id,
               payment_id: paymentId,
               signature: signature,
               plan_type: this.pendingOrder.plan_type
-            })
+            }
           });
-
-          const verifyData = await res.json();
           if (verifyData.status === "success") {
             msg.style.display = "block";
             msg.style.background = "rgba(61, 106, 82, 0.15)";
@@ -1733,6 +2434,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
 
             currentUser.is_pro = true;
             this.updateProUI(true);
+            if (window.Kiki) Kiki.refresh();
 
             setTimeout(() => {
               this.closeCheckoutModal();
@@ -1750,7 +2452,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           msg.style.display = "block";
           msg.style.background = "rgba(176, 58, 46, 0.15)";
           msg.style.color = "var(--status-error)";
-          msg.innerText = "Network error during verification.";
+          msg.innerText = e.message || "Verification error.";
           btn.innerText = "Retry Payment";
           btn.disabled = false;
         }
@@ -1774,12 +2476,16 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     // 6. INITIALIZATION & NAVIGATION LIFECYCLE
     // ==========================================
     window.addEventListener("DOMContentLoaded", async () => {
-      updateDynamicGreeting();
-      await checkSubscriptionStatus();
-      await loadUserPreferences();
-      await loadPoses();
-      await fetchTodaySession();
-      setupSpeechRecognition();
+      // Auth-first boot: restore server session, then load public data.
+      // Nothing here uses hardcoded credentials or demo users.
+      if (window.Kiki) Kiki.init();
+      if (window.Auth) {
+        await Auth.init();
+      } else {
+        await loadPoses();
+        setupSpeechRecognition();
+      }
+      if (window.Kiki) Kiki.refresh();
     });
 
     function updateDynamicGreeting() {
@@ -1791,27 +2497,45 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
         greeting = "GOOD EVENING";
       }
       const el = document.getElementById("home-greeting");
-      if (el) el.innerText = `${greeting}, ${currentUser.name.toUpperCase()} 👋`;
+      const who = (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : "YOGI";
+      if (el) el.innerText = `${greeting}, ${who.toUpperCase()} 👋`;
     }
 
     async function checkSubscriptionStatus() {
+      if (!currentUser) return;
       try {
-        const res = await fetch(`/api/subscription/${currentUser.id}`);
-        const data = await res.json();
+        const data = await KI.api(`/api/subscription/${currentUser.id}`);
         if (data.status === "success") {
           currentUser.is_pro = data.is_pro;
           PaymentManager.updateProUI(data.is_pro);
+          // Kiki visibility follows this backend-confirmed entitlement only.
+          if (window.Kiki) Kiki.refresh();
         }
-      } catch (e) {}
+      } catch (e) {
+        // 401/403 auto-redirects via KI.api; other errors leave the FREE badge.
+      }
     }
 
     function switchView(viewName) {
+      // Protected screens require a live server session.
+      if (window.Auth && Auth.isProtected(viewName) && !currentUser) {
+        Auth.open('Please sign in to continue.');
+        return;
+      }
       // Camera Privacy Rule: STOP camera immediately if leaving practice view
       if (viewName !== 'practice') {
         CameraManager.stopCamera();
         if (window.VoiceManager) {
           window.VoiceManager.stop(false);
         }
+        // Never leave a hold timer running off-screen (prevents duplicate
+        // tickers and stray voice cues when a session is abandoned).
+        clearInterval(holdTimerInterval);
+        holdTimerInterval = null;
+        practicePaused = false;
+        if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      } else {
+        resetPracticeControls();
       }
 
       document.querySelectorAll(".view-section").forEach(el => el.classList.remove("active"));
@@ -1823,6 +2547,8 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       const navBtn = document.getElementById(`nav-btn-${viewName}`);
       if (navBtn) navBtn.classList.add("active");
 
+      document.body.dataset.view = viewName;
+      if (window.Kiki) Kiki.onViewChange(viewName);
       if (viewName === "progress") renderCharts();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -1836,9 +2562,9 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     // 7. USER PREFERENCES
     // ==========================================
     async function loadUserPreferences() {
+      if (!currentUser) return;
       try {
-        const res = await fetch(`/api/user/preferences/${currentUser.id}`);
-        const data = await res.json();
+        const data = await KI.api(`/api/user/preferences/${currentUser.id}`);
         if (data.status === "success" && data.preferences) {
           userPreferences = data.preferences;
           currentUser.goal = userPreferences.goal;
@@ -1854,10 +2580,14 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
             window.VoiceManager.updateUI();
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        KI.toast(e.message || "Could not load your preferences.", "error");
+      }
     }
 
     async function savePreferences() {
+      if (!currentUser) { Auth.open('Please sign in to save preferences.'); return; }
+      const btn = document.querySelector("#view-preferences .btn-terracotta");
       const updated = {
         user_id: currentUser.id,
         goal: document.getElementById("pref-goal").value,
@@ -1867,20 +2597,21 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
         voice_enabled: document.getElementById("pref-voice").checked ? 1 : 0
       };
 
+      KI.setLoading(btn, true, "SAVING…");
       try {
-        const res = await fetch("/api/user/preferences", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updated)
-        });
-        const data = await res.json();
+        const data = await KI.api("/api/user/preferences", { method: "POST", body: updated });
         if (data.status === "success") {
           userPreferences = data.preferences;
-          alert("Preferences updated! Today's session roadmap refreshed.");
+          KI.toast("Preferences saved. Today's session roadmap refreshed.", "success");
           await fetchTodaySession();
           switchView("home");
+        } else {
+          KI.toast(data.message || "Could not save preferences.", "error");
         }
-      } catch (e) {}
+      } catch (e) {
+        KI.toast(e.message || "Could not save preferences.", "error");
+      }
+      KI.setLoading(btn, false);
     }
 
     function openPreferencesModal() {
@@ -1891,9 +2622,9 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     // 8. AI SESSION PLANNING & ROADMAP
     // ==========================================
     async function fetchTodaySession() {
+      if (!currentUser) return;
       try {
-        const res = await fetch(`/api/daily-session/${currentUser.id}?duration=${userPreferences.duration_minutes}&goal=${encodeURIComponent(userPreferences.goal)}&level=${encodeURIComponent(userPreferences.level)}&focus=${encodeURIComponent(userPreferences.focus_area)}`);
-        const data = await res.json();
+        const data = await KI.api(`/api/daily-session/${currentUser.id}?duration=${userPreferences.duration_minutes}&goal=${encodeURIComponent(userPreferences.goal)}&level=${encodeURIComponent(userPreferences.level)}&focus=${encodeURIComponent(userPreferences.focus_area)}`);
         if (data.status === "success" && data.session) {
           currentSessionPlan = data.session;
           document.getElementById("home-today-title").innerText = currentSessionPlan.title;
@@ -1907,14 +2638,20 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           `;
           document.getElementById("home-program-name").innerText = `${currentSessionPlan.level} Level`;
         }
-      } catch (e) {}
+      } catch (e) {
+        KI.toast(e.message || "Could not load today's session.", "error");
+      }
     }
 
     async function openPracticeIntro(level = null) {
+      if (!Auth.requireAuth('to start a practice session')) return;
       const lvl = level || userPreferences.level || "Beginner";
       try {
-        const res = await fetch(`/api/daily-session/${currentUser.id}?level=${lvl}&duration=${userPreferences.duration_minutes}&goal=${encodeURIComponent(userPreferences.goal)}`);
-        const data = await res.json();
+        const data = await KI.api(`/api/daily-session/${currentUser.id}?level=${lvl}&duration=${userPreferences.duration_minutes}&goal=${encodeURIComponent(userPreferences.goal)}`);
+        if (!data.session || !data.session.roadmap || !data.session.roadmap.length) {
+          KI.toast("No session roadmap was returned. Please try again.", "error");
+          return;
+        }
         currentSessionPlan = data.session;
 
         document.getElementById("intro-session-title").innerText = currentSessionPlan.title;
@@ -1936,7 +2673,9 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
         `).join("");
 
         switchView("session-intro");
-      } catch (e) {}
+      } catch (e) {
+        KI.toast(e.message || "Could not build your practice session.", "error");
+      }
     }
 
     function startProgramSession(level) {
@@ -1954,8 +2693,10 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
 
     async function confirmStartPracticeCamera() {
       closeCameraPrivacyModal();
+      if (!currentUser) { Auth.open('Please sign in to start a practice session.'); return; }
       if (!currentSessionPlan || !currentSessionPlan.roadmap.length) return;
       currentStepIndex = 0;
+      resetSessionScoring();
       switchView("practice");
       loadRoadmapStep(currentStepIndex);
 
@@ -1963,7 +2704,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       await CameraManager.startCamera();
 
       window.VoiceManager.speakRequest({
-        text: `Starting today's practice session. Let's begin with ${currentSessionPlan.roadmap[0].name}.`,
+        text: `Let's begin with ${currentSessionPlan.roadmap[0].name}. Take a breath and find your balance.`,
         priority: 'high',
         eventKey: 'session_start',
         expiresAfterSeconds: 6
@@ -1996,11 +2737,18 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       updateDemoReference(step);
 
       validHoldCount = 0;
+      practicePaused = false;
+      updatePauseBtn();
       updateHoldDisplay(0, step.hold_seconds);
+      updateSeqProgress();
       startIntelligentHoldTicker(step.hold_seconds);
 
       window.VoiceManager.speakRequest({
-        text: `Pose: ${step.name}. ${step.breathing_cue || 'Focus on alignment and breathe steadily'}.`,
+        text: window.VoiceManager.pickVariant('instruction', [
+          `Let's begin with ${step.name}. Take a breath and settle in.`,
+          `${step.name}. Move gently into the shape.`,
+          `Finding ${step.name}. Breathe easy as you arrive.`
+        ]),
         priority: 'high',
         eventKey: 'instruction',
         poseId: poseId,
@@ -2012,6 +2760,13 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       document.getElementById("hud-hold-display").innerText = `00:${String(current).padStart(2, '0')} / 00:${String(target).padStart(2, '0')}`;
       const pct = Math.min(100, Math.round((current / target) * 100));
       document.getElementById("hud-hold-progress-bar").style.width = `${pct}%`;
+      updateFsTimer(current, target);
+      const fill = document.getElementById("fs-seq-fill");
+      const total = (currentSessionPlan && currentSessionPlan.roadmap) ? currentSessionPlan.roadmap.length : 0;
+      if (fill && total) {
+        const overall = ((currentStepIndex + pct / 100) / total) * 100;
+        fill.style.width = `${Math.min(100, Math.round(overall))}%`;
+      }
     }
 
     function startIntelligentHoldTicker(targetHoldSeconds) {
@@ -2041,7 +2796,11 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           if (PoseEventDetector.isHoldCurrentlyPaused && validHoldCount > 1) {
             PoseEventDetector.isHoldCurrentlyPaused = false;
             window.VoiceManager.speakRequest({
-              text: "Hold resumed. Great focus.",
+              text: window.VoiceManager.pickVariant('hold_resumed', [
+                "Lovely. Keep breathing.",
+                "That's it. Steady now.",
+                "Beautiful. Hold it here."
+              ]),
               priority: 'normal',
               eventKey: 'hold_resumed',
               poseId: poseId,
@@ -2072,7 +2831,11 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           if (!PoseEventDetector.isHoldCurrentlyPaused && validHoldCount > 0) {
             PoseEventDetector.isHoldCurrentlyPaused = true;
             window.VoiceManager.speakRequest({
-              text: "Hold paused. Realign posture to continue timer.",
+              text: window.VoiceManager.pickVariant('hold_paused', [
+                "Paused. Come back to the shape when you're ready.",
+                "Take your time. Reset and we'll continue.",
+                "No rush. Find the pose again."
+              ]),
               priority: 'normal',
               eventKey: 'hold_paused',
               poseId: poseId,
@@ -2089,12 +2852,21 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       
       document.getElementById("trans-score-display").innerText = `Score: ${currentPoseScore}%`;
       document.getElementById("trans-next-name").innerText = nextStep ? nextStep.name : "Session Completion";
+      // Honest transition text: the last real assessment feedback, not a canned compliment.
+      if (lastEvalData && lastEvalData.primary_feedback) {
+        document.getElementById("trans-feedback-text").innerText = lastEvalData.primary_feedback;
+      }
+      if (window.Kiki && currentSessionPlan && currentSessionPlan.roadmap && currentSessionPlan.roadmap[currentStepIndex]) {
+        Kiki.onHoldComplete(currentPoseScore, currentSessionPlan.roadmap[currentStepIndex].name);
+      }
 
       overlay.style.display = "flex";
       let count = 3;
       document.getElementById("trans-countdown-num").innerText = count;
       window.VoiceManager.speakRequest({
-        text: `Great work! Score is ${currentPoseScore} percent. Moving to next exercise in three seconds.`,
+        text: nextStep
+          ? `Great work. Let's move to ${nextStep.name}.`
+          : "Great work. Let's finish strong.",
         priority: 'high',
         eventKey: 'transition_countdown',
         expiresAfterSeconds: 4
@@ -2120,7 +2892,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       if (currentStepIndex < currentSessionPlan.roadmap.length) {
         loadRoadmapStep(currentStepIndex);
         window.VoiceManager.speakRequest({
-          text: `Skipped. Next is ${currentSessionPlan.roadmap[currentStepIndex].name}.`,
+          text: `Let's move to ${currentSessionPlan.roadmap[currentStepIndex].name}.`,
           priority: 'high',
           eventKey: 'exercise_skipped',
           expiresAfterSeconds: 4
@@ -2135,32 +2907,68 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       CameraManager.stopCamera();
       PoseEventDetector.reset();
       window.VoiceManager.onSessionCompleted();
+
+      // Honest summary: computed ONLY from real per-frame assessments
+      // recorded during this session. No samples => no score claimed.
+      const avgAccuracy = getSessionAverage();
+      const poseNames = Object.keys(sessionPoseBest);
+      let bestPose = "—";
+      let bestScore = -1;
+      poseNames.forEach(function (n) {
+        if (sessionPoseBest[n] > bestScore) { bestScore = sessionPoseBest[n]; bestPose = n; }
+      });
+      let weakestJoint = "";
+      let weakestCount = 0;
+      Object.keys(sessionWeakJointCounts).forEach(function (j) {
+        if (sessionWeakJointCounts[j] > weakestCount) { weakestCount = sessionWeakJointCounts[j]; weakestJoint = j; }
+      });
+      const completedCount = Math.min(currentStepIndex + 1, (currentSessionPlan && currentSessionPlan.roadmap && currentSessionPlan.roadmap.length) || 0);
+
+      document.getElementById("summary-duration").innerText =
+        `${(currentSessionPlan && currentSessionPlan.target_duration_minutes) || 20} min`;
+      document.getElementById("summary-accuracy").innerText =
+        avgAccuracy === null ? "No data" : `${avgAccuracy}%`;
+      document.getElementById("summary-best-pose").innerText = bestPose;
+      document.getElementById("summary-ai-insight").innerText =
+        avgAccuracy === null
+          ? "No valid posture assessments were recorded this session — step fully into the camera frame next time so KI.AI can score your form."
+          : `Measured average alignment ${avgAccuracy}% across ${sessionScoreSamples.length} live assessments` +
+            (bestPose !== "—" ? ` — strongest in ${bestPose} (${Math.round(bestScore)}%)` : "") + "." +
+            (weakestJoint ? ` Most frequent correction: ${weakestJoint.replace(/_/g, " ")}.` : " No repeated joint corrections needed.");
+
       switchView("session-complete");
       window.VoiceManager.speakRequest({
-        text: "Practice complete! Outstanding dedication to your body.",
+        text: "Your session is complete. Well done!",
         priority: 'high',
         eventKey: 'session_complete',
         expiresAfterSeconds: 6
       });
 
+      if (!currentUser) { resetSessionScoring(); return; }
       try {
-        const res = await fetch("/api/session/complete", {
+        const comp = await KI.api("/api/session/complete", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+          body: {
             user_id: currentUser.id,
-            total_duration_seconds: (currentSessionPlan?.target_duration_minutes || 20) * 60,
-            average_accuracy: 91.2,
-            completed_exercises: currentSessionPlan?.roadmap?.length || 8,
-            program_level: currentSessionPlan?.level || "Beginner"
-          })
+            total_duration_seconds: ((currentSessionPlan && currentSessionPlan.target_duration_minutes) || 20) * 60,
+            average_accuracy: avgAccuracy === null ? 0 : avgAccuracy,
+            completed_exercises: completedCount,
+            total_exercises: (currentSessionPlan && currentSessionPlan.roadmap && currentSessionPlan.roadmap.length) || completedCount,
+            program_level: (currentSessionPlan && currentSessionPlan.level) || "Beginner",
+            best_pose: bestPose === "—" ? "" : bestPose,
+            weakest_joint: weakestJoint
+          }
         });
-        const comp = await res.json();
-        if (comp.status === "success") {
+        if (comp.status === "success" && comp.summary) {
           document.getElementById("summary-duration").innerText = `${comp.summary.duration_minutes} min`;
-          document.getElementById("summary-accuracy").innerText = `${comp.summary.average_accuracy}%`;
+          if (avgAccuracy !== null) {
+            document.getElementById("summary-accuracy").innerText = `${comp.summary.average_accuracy}%`;
+          }
         }
-      } catch (e) {}
+      } catch (e) {
+        KI.toast(e.message || "Session summary could not be saved.", "error");
+      }
+      resetSessionScoring();
     }
 
     // ==========================================
@@ -2410,16 +3218,17 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       const poseId = currentStep?.target_pose_id || currentStep?.pose_id || 1;
 
       try {
-        const res = await fetch("/api/analyze_posture", {
+        // Posture assessment uses the real backend contract; auth failures
+        // redirect to sign-in via KI.api, other errors pause silently here
+        // (the hold ticker already shows a paused reason) without faking data.
+        const evalData = await KI.api("/api/analyze_posture", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+          body: {
             landmarks: dict,
             pose_id: poseId,
             stability: isStable
-          })
+          }
         });
-        const evalData = await res.json();
         if (evalData.status === "success") {
           lastEvalData = evalData;
           lastPoseStatus = evalData.pose_status || "WAITING";
@@ -2427,6 +3236,16 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
 
           currentPoseScore = Math.round(evalData.overall_score || 0);
           animateScoreNumber(currentPoseScore);
+
+          // Record a genuine sample for the session average (only when the
+          // body is actually visible — never invent assessments).
+          if (evalData.is_body_visible) {
+            recordSessionSample(
+              (currentStep && currentStep.name) || evalData.expected_pose_name || evalData.target_pose_name,
+              evalData.overall_score || 0,
+              evalData.incorrect_joints || []
+            );
+          }
 
           updateBodyTrackingPill(evalData.tracking_state || "GOOD_TRACKING");
 
@@ -2470,9 +3289,11 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
 
           const poseName = currentStep?.name || "current pose";
           PoseEventDetector.processFrame(evalData, poseId, poseName);
+          if (window.Kiki) Kiki.onAssessment(evalData, poseName, isStable);
         }
       } catch (e) {
         console.warn("Posture analysis network error:", e);
+        if (window.Kiki) Kiki.onAssessmentError();
       }
     }
 
@@ -2507,31 +3328,50 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
 
       const overlayName = document.getElementById("demo-overlay-name");
       if (overlayName) overlayName.innerText = poseName;
+      const overlayHead = document.getElementById("demo-overlay-name-head");
+      if (overlayHead) overlayHead.innerText = poseName;
 
       const breathGuidance = document.getElementById("demo-breathing-guidance");
       if (breathGuidance) breathGuidance.innerText = breathing;
 
       const imgEl = document.getElementById("demo-pose-img");
       if (imgEl) {
+        // Prefer a genuine reference photograph when one exists for this
+        // pose (server-confirmed via /api/pose-photos); otherwise use the
+        // bundled illustration, then the SVG figure. Never a wrong-pose image.
+        const photoUrl = (window.posePhotoFor && matchedPose) ? window.posePhotoFor(matchedPose) : null;
         let figPath = (matchedPose && matchedPose.figure_path) ? matchedPose.figure_path : null;
-        if (figPath) {
-          if (!figPath.startsWith("/")) figPath = "/" + figPath;
-          imgEl.src = figPath;
-        } else {
+        if (figPath && !figPath.startsWith("/")) figPath = "/" + figPath;
+        if (!figPath) {
           const slug = getPoseSlug(poseName);
-          imgEl.src = `/assets/pose_figures/${slug}.svg`;
+          figPath = `/assets/pose_figures/${slug}.svg`;
         }
-        imgEl.alt = `${poseName} Demonstration Figure`;
+        let illusPath = (matchedPose && matchedPose.image_path) ? matchedPose.image_path : null;
+        if (illusPath && !illusPath.startsWith("/")) illusPath = "/" + illusPath;
+        imgEl.dataset.fb1 = illusPath || figPath;
+        imgEl.onerror = function () {
+          const next = imgEl.dataset.fb1;
+          imgEl.onerror = function () { handleDemoImageError(imgEl); };
+          if (next && imgEl.getAttribute("src") !== next) {
+            imgEl.src = next;
+          } else {
+            handleDemoImageError(imgEl);
+          }
+        };
+        imgEl.src = photoUrl || illusPath || figPath;
+        imgEl.alt = `${poseName} reference ${photoUrl ? "photograph" : "demonstration"}`;
       }
 
-      // Populate Key Alignment Targets list dynamically
+      // Populate Key Alignment Targets list dynamically (2–3 essential
+      // cues, each with its real correction tip from the pose rules).
       const alignContainer = document.getElementById("demo-alignment-list");
       if (alignContainer) {
         if (matchedPose && matchedPose.rules && matchedPose.rules.length > 0) {
-          alignContainer.innerHTML = matchedPose.rules.slice(0, 4).map(r => `
-            <div class="demo-rule-item">
-              <span>${formatJointName(r.joint)}</span>
-              <b>${Math.round(r.target_angle)}° (±${Math.round(r.tolerance)}°)</b>
+          alignContainer.innerHTML = matchedPose.rules.slice(0, 3).map(r => `
+            <div class="demo-rule-item" style="flex-direction:column;align-items:stretch;gap:4px;">
+              <div style="display:flex;justify-content:space-between;gap:8px;"><span>${formatJointName(r.joint_name || r.joint)}</span>
+              <b>${Math.round(r.target_angle)}° (±${Math.round(r.tolerance)}°)</b></div>
+              ${r.feedback_message ? `<div style="font-size:11.5px;color:var(--muted);line-height:1.45;">⚠ Avoid: ${r.feedback_message}</div>` : ""}
             </div>
           `).join("");
         } else {
@@ -2557,6 +3397,105 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       const box = document.getElementById("vision-debug-box");
       if (!box) return;
       box.style.display = (box.style.display === "none" || !box.style.display) ? "block" : "none";
+    }
+
+    // ============ IMMERSIVE PRACTICE CONTROLS ============
+    // Pause only stops the hold countdown (camera + assessment keep
+    // running). Resume restarts the single ticker; duplicates impossible
+    // because startIntelligentHoldTicker always clears the previous one.
+    let practicePaused = false;
+    let cameraFitCover = false;
+
+    function updatePauseBtn() {
+      const btn = document.getElementById("btn-pause-resume");
+      const timer = document.getElementById("fs-timer");
+      if (btn) btn.innerHTML = practicePaused ? "▶ Resume" : "⏸ Pause";
+      if (timer) timer.classList.toggle("paused", practicePaused);
+    }
+
+    function togglePausePractice() {
+      if (!currentSessionPlan || !currentSessionPlan.roadmap) return;
+      practicePaused = !practicePaused;
+      if (practicePaused) {
+        clearInterval(holdTimerInterval);
+        holdTimerInterval = null;
+        if (window.VoiceManager) window.VoiceManager.stop(false);
+        const statusEl = document.getElementById("hud-hold-status");
+        if (statusEl) {
+          statusEl.innerText = "⏸ Paused by you — press Resume to continue";
+          statusEl.style.color = "var(--status-warning)";
+        }
+      } else {
+        const step = currentSessionPlan.roadmap[currentStepIndex];
+        if (step) startIntelligentHoldTicker(step.hold_seconds);
+        window.VoiceManager.speakRequest({
+          text: "Resuming your practice.",
+          priority: "normal",
+          eventKey: "practice_resumed",
+          expiresAfterSeconds: 4
+        });
+      }
+      updatePauseBtn();
+    }
+
+    function resetPracticeControls() {
+      practicePaused = false;
+      updatePauseBtn();
+      const panel = document.getElementById("practice-demo-panel");
+      const minBtn = document.getElementById("btn-ref-min");
+      if (panel) panel.classList.remove("minimized");
+      if (minBtn) minBtn.innerText = "−";
+    }
+
+    function toggleCameraFit() {
+      cameraFitCover = !cameraFitCover;
+      const stage = document.getElementById("practice-studio-grid");
+      const btn = document.getElementById("btn-fit");
+      if (stage) stage.classList.toggle("fit-cover", cameraFitCover);
+      if (btn) {
+        btn.innerText = cameraFitCover ? "⛶ Fit: Fill screen" : "⛶ Fit: Full body";
+        btn.classList.toggle("active", cameraFitCover);
+        btn.title = cameraFitCover
+          ? "Cover fills the screen but may crop edges — switch back if limbs are cut off"
+          : "Contain shows your full body — safest for assessment";
+      }
+    }
+
+    function togglePracticeFullscreen() {
+      const el = document.getElementById("view-practice");
+      if (!document.fullscreenElement) {
+        if (el && el.requestFullscreen) {
+          el.requestFullscreen().catch(() => KI.toast("Fullscreen was blocked by the browser.", "error"));
+        } else {
+          KI.toast("Fullscreen is not supported in this browser.", "error");
+        }
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function toggleRefPanel() {
+      const panel = document.getElementById("practice-demo-panel");
+      const btn = document.getElementById("btn-ref-min");
+      if (!panel) return;
+      const min = panel.classList.toggle("minimized");
+      if (btn) btn.innerText = min ? "+" : "−";
+      if (btn) btn.title = min ? "Expand the reference panel" : "Minimize the reference panel";
+    }
+
+    function updateSeqProgress() {
+      const total = (currentSessionPlan && currentSessionPlan.roadmap) ? currentSessionPlan.roadmap.length : 0;
+      const label = document.getElementById("fs-seq-label");
+      const fill = document.getElementById("fs-seq-fill");
+      if (label) label.innerText = total ? `POSE ${Math.min(currentStepIndex + 1, total)} OF ${total}` : "POSE – OF –";
+      if (fill) fill.style.width = total ? `${Math.round((currentStepIndex / total) * 100)}%` : "0%";
+    }
+
+    function updateFsTimer(current, target) {
+      const el = document.getElementById("fs-timer");
+      if (!el) return;
+      const remain = Math.max(0, target - current);
+      el.innerText = `${String(Math.floor(remain / 60)).padStart(2, "0")}:${String(remain % 60).padStart(2, "0")}`;
     }
 
     function setPracticeLayout(layout) {
@@ -2619,20 +3558,54 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
 
       recognition.onstart = () => {
         isListening = true;
+        if (window.Kiki) Kiki.onListening(true);
       };
 
-      recognition.onresult = (event) => {
+      recognition.onresult = async (event) => {
         const transcript = event.results[0][0].transcript;
-        alert(`AI Coach heard: "${transcript}". Consulting biomechanics model.`);
+        const fb = document.getElementById("hud-feedback");
+        if (!currentUser) {
+          if (fb) fb.innerText = `You said: "${transcript}". Sign in to get spoken AI coach replies.`;
+          KI.toast("Sign in to chat with the AI coach.", "error");
+          return;
+        }
+        if (fb) fb.innerText = `You said: "${transcript}". Consulting your AI coach…`;
+        try {
+          const data = await KI.api("/api/coach/message", {
+            method: "POST",
+            body: {
+              user_id: currentUser.id,
+              message: transcript,
+              context: {
+                pose: (currentSessionPlan && currentSessionPlan.roadmap && currentSessionPlan.roadmap[currentStepIndex] && currentSessionPlan.roadmap[currentStepIndex].name) || "",
+                score: currentPoseScore
+              }
+            }
+          });
+          const reply = data && data.coach && data.coach.response;
+          if (reply) {
+            if (fb) fb.innerText = reply;
+            window.VoiceManager.speakRequest({
+              text: reply,
+              priority: 'high',
+              eventKey: 'coach_response',
+              expiresAfterSeconds: 8
+            });
+          } else {
+            if (fb) fb.innerText = "The AI coach had no reply. Please try again.";
+          }
+        } catch (e) {
+          if (fb) fb.innerText = e.message || "The AI coach could not be reached.";
+        }
       };
 
-      recognition.onerror = () => { isListening = false; };
-      recognition.onend = () => { isListening = false; };
+      recognition.onerror = () => { isListening = false; if (window.Kiki) Kiki.onListening(false); };
+      recognition.onend = () => { isListening = false; if (window.Kiki) Kiki.onListening(false); };
     }
 
     function toggleSpeechRecognition() {
       if (!recognition) {
-        alert("Speech recognition is not supported in this browser.");
+        KI.toast("Speech recognition is not supported in this browser. Type to your coach instead.", "error");
         return;
       }
       if (isListening) {
@@ -2649,36 +3622,35 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
     // 12. POSE LIBRARY & ANALYTICS
     // ==========================================
     async function loadPoses() {
+      const grid = document.getElementById("library-grid");
       try {
-        const res = await fetch("/api/poses");
-        allPoses = await res.json();
+        allPoses = await KI.api("/api/poses", { allowAnonymous: true });
+        if (!Array.isArray(allPoses)) allPoses = [];
+        await loadPosePhotos();
         renderLibrary(allPoses);
-      } catch (e) {}
+      } catch (e) {
+        if (grid) {
+          grid.innerHTML = `<div class="card"><h3 style="font-size:18px;">Pose library unavailable</h3>
+            <p style="font-size:13.5px;color:var(--muted);margin:8px 0 16px;">${e.message || "Could not load poses."}</p>
+            <button class="btn btn-secondary" onclick="loadPoses()">Retry</button></div>`;
+        }
+      }
     }
 
-    function renderLibrary(poses) {
-      const grid = document.getElementById("library-grid");
-      if (!grid) return;
-      grid.innerHTML = poses.map(p => `
-        <div class="card" style="padding: 22px;">
-          <h3 style="font-size: 18px; color: var(--espresso);">${p.name}</h3>
-          <div style="font-size: 12px; color: var(--terracotta); margin: 4px 0 10px; font-weight: 600;">${p.sanskrit_name || ''}</div>
-          <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">${p.description ? p.description.substring(0, 90) + '...' : ''}</p>
-          <div style="display: flex; gap: 10px; margin-top: 16px;">
-            <button class="btn btn-secondary" style="flex: 1; min-height: 36px; padding: 6px 12px; font-size: 12px;" onclick="practiceSinglePose(${p.id}, '${p.name}')">Practice</button>
-            <button class="btn btn-primary" style="flex: 1; min-height: 36px; padding: 6px 12px; font-size: 12px;" onclick="alert('Added ${p.name} to focus routines!')">+ Focus</button>
-          </div>
-        </div>
-      `).join("");
-    }
+    // NOTE: renderLibrary is implemented by the enhancement layer below
+    // (window.renderLibrary) using real /api/poses data with image-led cards.
+    // The legacy placeholder definition was removed to avoid any stale UI.
 
     function filterLibrary(query) {
-      const q = query.toLowerCase();
-      const filtered = allPoses.filter(p => p.name.toLowerCase().includes(q) || (p.sanskrit_name && p.sanskrit_name.toLowerCase().includes(q)));
+      if (!Array.isArray(allPoses)) return;
+      const q = (query || "").toLowerCase();
+      const filtered = allPoses.filter(p => (p.name || "").toLowerCase().includes(q) || ((p.sanskrit_name || "").toLowerCase().includes(q)));
       renderLibrary(filtered);
     }
 
     function practiceSinglePose(poseId, poseName) {
+      if (!Auth.requireAuth('to practise this pose')) return;
+      resetSessionScoring();
       currentSessionPlan = {
         title: `Targeted Practice: ${poseName}`,
         level: "Custom",
@@ -2687,34 +3659,623 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       promptCameraPermissionAndStart();
     }
 
-    function renderCharts() {
-      const ctx1 = document.getElementById('chart-progress');
-      if (ctx1) {
-        new Chart(ctx1.getContext('2d'), {
-          type: 'line',
-          data: {
-            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
-            datasets: [{ label: 'Accuracy (%)', data: [74, 79, 82, 85, 84, 91, 94], borderColor: '#4A3425', backgroundColor: 'rgba(201, 130, 103, 0.1)', tension: 0.3 }]
-          },
-          options: { plugins: { legend: { labels: { color: '#4A3425' } } } }
-        });
-      }
-
-      const ctx2 = document.getElementById('chart-poses');
-      if (ctx2) {
-        new Chart(ctx2.getContext('2d'), {
-          type: 'bar',
-          data: {
-            labels: ['Warrior II', 'Trikonasana', 'Tree Pose', 'Cobra', 'Chair'],
-            datasets: [{ label: 'Accuracy Score', data: [92, 88, 86, 90, 84], backgroundColor: '#C98267' }]
-          },
-          options: { plugins: { legend: { labels: { color: '#4A3425' } } } }
-        });
-      }
-    }
+    // NOTE: renderCharts is implemented by the enhancement layer below
+    // (window.renderCharts) using real /api/stats + /api/history data with
+    // an honest empty state. The legacy hardcoded-chart definition was removed.
 
     function showKarateModal() {
       document.getElementById("karate-modal").style.display = "flex";
+      const msg = document.getElementById("karate-msg");
+      if (msg) { msg.innerText = ""; }
+    }
+
+    // ==========================================
+    // 12B. POSE DETAILS PANEL (real pose data only)
+    // Steps come from the pose's own `instructions`, safety notes from
+    // `precautions`, corrections from the pose rules' `feedback_message`
+    // fields. Breathing tips are quoted verbatim from the instructions —
+    // never invented, never presented as medical advice.
+    // ==========================================
+    function asArray(v) {
+      if (Array.isArray(v)) return v;
+      if (typeof v === "string" && v.trim()) {
+        try { const parsed = JSON.parse(v); if (Array.isArray(parsed)) return parsed; } catch (e) {}
+        return [v];
+      }
+      return [];
+    }
+
+    function findPoseById(poseId) {
+      if (!Array.isArray(allPoses)) return null;
+      const id = Number(poseId);
+      return allPoses.find(p => Number(p.id) === id) || null;
+    }
+
+    function poseDetailsImage(p) {
+      const photo = (window.posePhotoFor) ? window.posePhotoFor(p) : null;
+      if (photo) return { src: photo, kind: "photograph" };
+      let illus = p.image_path || "";
+      if (illus && illus.charAt(0) !== "/") illus = "/" + illus;
+      if (illus) return { src: illus, kind: "illustration" };
+      const slug = getPoseSlug(p.name);
+      return { src: `/assets/pose_figures/${slug}.svg`, kind: "figure" };
+    }
+
+    function openPoseDetails(poseId) {
+      const p = findPoseById(poseId);
+      if (!p) { KI.toast("Pose details are unavailable right now.", "error"); return; }
+      if (window.Kiki) Kiki.setPoseContext(p.id);
+      const img = poseDetailsImage(p);
+      const steps = asArray(p.instructions);
+      const benefits = asArray(p.benefits);
+      const breathSteps = steps.filter(s => /breath|inhale|exhale|breathe/i.test(String(s)));
+      const rules = Array.isArray(p.rules) ? p.rules : [];
+      const escH = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+      // Live measured angles, only when a real assessment for THIS pose exists.
+      let liveRows = "";
+      if (typeof lastEvalData !== "undefined" && lastEvalData && lastEvalData.is_body_visible &&
+          Array.isArray(lastEvalData.joint_results) && lastEvalData.joint_results.length &&
+          (Number(lastEvalData.pose_id) === Number(p.id) ||
+           (lastEvalData.pose_name && p.name && lastEvalData.pose_name.toLowerCase() === p.name.toLowerCase()))) {
+        liveRows = lastEvalData.joint_results.map(j => `
+          <div class="demo-rule-item">
+            <span>${escH(j.formatted_name || j.joint_name)} · measured <b>${Math.round(j.actual_angle)}°</b></span>
+            <b style="color:${j.is_correct ? "var(--status-success)" : "var(--status-error)"};">target ${Math.round(j.target_angle)}° (±${Math.round(j.tolerance)}°)</b>
+          </div>`).join("");
+      }
+
+      document.getElementById("pose-details-kicker").innerText =
+        `POSE GUIDE · ${img.kind === "photograph" ? "REFERENCE PHOTO" : "ILLUSTRATED REFERENCE"}`;
+      document.getElementById("pose-details-body").innerHTML = `
+        <div style="border-radius:14px;overflow:hidden;border:1px solid var(--border-subtle);margin-bottom:18px;background:#1b1a1d;">
+          <img src="${img.src}" alt="${escH(p.name)} reference ${img.kind}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block;"
+               onerror="this.onerror=null;this.src='/assets/pose_figures/tadasana.svg';">
+        </div>
+        <h2 style="font-size:28px;">${escH(p.name)}</h2>
+        <div style="font-size:13px;color:var(--pink-light);font-weight:600;margin:2px 0 4px;">${escH(p.sanskrit_name || "")}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <span class="pose-diff" style="position:static;">${escH(p.difficulty || "All levels")}</span>
+          ${p.category ? `<span class="pose-diff" style="position:static;">${escH(p.category)}</span>` : ""}
+          ${p.hold_duration ? `<span class="pose-diff" style="position:static;">HOLD ${escH(p.hold_duration)}S</span>` : ""}
+        </div>
+        ${p.description ? `<p style="font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:18px;">${escH(p.description)}</p>` : ""}
+        ${steps.length ? `<div class="section-title-micro">HOW TO ENTER THE POSE</div>
+        <ol style="margin:0 0 18px 20px;display:flex;flex-direction:column;gap:8px;font-size:13.5px;line-height:1.6;">
+          ${steps.map(s => `<li>${escH(s)}</li>`).join("")}
+        </ol>` : `<p style="font-size:13px;color:var(--dim);margin-bottom:18px;">Step-by-step instructions for this pose have not been added yet.</p>`}
+        ${breathSteps.length ? `<div class="demo-breathing-bar" style="border-radius:10px;margin-bottom:18px;"><span>💨</span><span>${escH(breathSteps[0])}</span></div>` : ""}
+        ${rules.length ? `<div class="section-title-micro">COMMON MISTAKES &amp; CORRECTIONS</div>
+        <div class="demo-rules-list" style="margin-bottom:18px;">
+          ${rules.map(r => `<div class="demo-rule-item"><span>${escH(r.feedback_message || r.joint_name)}</span><b>${Math.round(r.target_angle)}° (±${Math.round(r.tolerance)}°)</b></div>`).join("")}
+        </div>` : ""}
+        ${liveRows ? `<div class="section-title-micro">YOUR LIVE MEASUREMENT (THIS SESSION)</div>
+        <div class="demo-rules-list" style="margin-bottom:18px;">${liveRows}</div>` : ""}
+        ${benefits.length ? `<div class="section-title-micro">BENEFITS</div>
+        <ul style="margin:0 0 18px 20px;font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:6px;">
+          ${benefits.map(b => `<li>${escH(b)}</li>`).join("")}
+        </ul>` : ""}
+        ${p.precautions ? `<div style="background:rgba(232,180,90,0.08);border-left:3px solid var(--status-warning);padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:20px;line-height:1.55;"><b>⚠ Safety:</b> ${escH(p.precautions)}</div>` : ""}
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn btn-terracotta" style="flex:1;" onclick="closePoseDetails();practiceSinglePose(${Number(p.id)}, '${escH(p.name).replace(/'/g, "\\'")}')">PRACTISE THIS POSE →</button>
+          <button class="btn btn-secondary" style="flex:1;" onclick="closePoseDetails()">CLOSE</button>
+        </div>`;
+      document.getElementById("pose-details-modal").style.display = "flex";
+    }
+
+    function closePoseDetails() {
+      document.getElementById("pose-details-modal").style.display = "none";
+    }
+
+    function openPoseDetailsForCurrentStep() {
+      const step = currentSessionPlan && currentSessionPlan.roadmap && currentSessionPlan.roadmap[currentStepIndex];
+      if (!step) { KI.toast("No active pose to show.", "error"); return; }
+      const pid = step.target_pose_id || step.pose_id;
+      const matched = (pid && findPoseById(pid)) ||
+        (Array.isArray(allPoses) && allPoses.find(p => p.name && step.name && p.name.toLowerCase() === step.name.toLowerCase()));
+      if (matched) { openPoseDetails(matched.id); return; }
+      KI.toast("Guide unavailable for this step.", "error");
+    }
+
+    // 12C. KIKI — free yoga companion for every user (real data only).
+    // Expressions follow real assessment events with hysteresis + dwell
+    // so the face never flickers. Open questions go to the real
+    // /api/kiki/chat backend. Pose-specific answers quote the pose's own
+    // instructions/rules and live assessment numbers — nothing is invented.
+    // ==========================================
+    window.Kiki = (function () {
+      const PRI = { idle: 0, confused: 2, listening: 2, thinking: 2, speaking: 2, adjust_pose: 3, correct_pose: 3, incorrect_pose: 4, celebrating: 4, error: 5 };
+      const DWELL_MS = 1400;
+
+      const K = {
+        _pro: false,
+        _state: "idle",
+        _stateAt: 0,
+        _assessKey: null,
+        _assessCount: 0,
+        _lastEval: null,
+        _poseId: null,
+        _celebrateToken: 0,
+        _panelOpen: false,
+        _speakOn: true,
+        _historyLoaded: false,
+        _speakTimer: null,
+
+        faceSVG(size) {
+          return `<svg class="kiki-face" data-state="${this._state}" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true">
+            <g class="kiki-idle-bob">
+              <circle class="kiki-listening-ring" cx="32" cy="30" r="26" fill="none" stroke="#2d7a6e" stroke-width="2.5"/>
+              <ellipse cx="32" cy="32" rx="24" ry="26" fill="#ffffff"/>
+              <ellipse cx="32" cy="32" rx="24" ry="26" fill="url(#kikiShade)" opacity="0.25"/>
+              <defs><radialGradient id="kikiShade" cx="35%" cy="28%" r="80%">
+                <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#b9c2cf"/>
+              </radialGradient></defs>
+              <rect x="22" y="6" width="4" height="8" rx="2" fill="#c7cedb"/>
+              <circle cx="24" cy="5" r="3.4" fill="#F277B5"/>
+              <circle cx="24" cy="5" r="1.4" fill="#FFADD4"/>
+              <circle cx="18" cy="36" r="4.4" fill="#F277B5" opacity="0.55"/>
+              <circle cx="46" cy="36" r="4.4" fill="#F277B5" opacity="0.55"/>
+              <g class="kiki-blink"><g class="kiki-eyes-open">
+                <ellipse cx="24" cy="28" rx="3.2" ry="4.4" fill="#0e3f39"/>
+                <ellipse cx="40" cy="28" rx="3.2" ry="4.4" fill="#0e3f39"/>
+                <circle cx="24" cy="28" r="6.4" fill="#2d7a6e" opacity="0.35"/>
+                <circle cx="40" cy="28" r="6.4" fill="#2d7a6e" opacity="0.35"/>
+                <circle cx="25" cy="26.4" r="1.3" fill="#bff0e6"/>
+                <circle cx="41" cy="26.4" r="1.3" fill="#bff0e6"/>
+              </g></g>
+              <g class="kiki-eyes-think" fill="#0e3f39">
+                <circle cx="26" cy="28" r="2.6"/><circle cx="42" cy="28" r="2.6"/>
+              </g>
+              <g class="kiki-eyes-happy" stroke="#0e3f39" stroke-width="2.6" fill="none" stroke-linecap="round">
+                <path d="M19 30 Q24 24 29 30"/><path d="M35 30 Q40 24 45 30"/>
+              </g>
+              <g class="kiki-eyes-sad" stroke="#0e3f39" stroke-width="2.6" fill="none" stroke-linecap="round">
+                <path d="M20 26 L28 30"/><path d="M44 26 L36 30"/>
+              </g>
+              <g class="kiki-eyes-flat" stroke="#8a6d1f" stroke-width="2.6" stroke-linecap="round">
+                <line x1="20" y1="28" x2="28" y2="28"/><line x1="36" y1="28" x2="44" y2="28"/>
+              </g>
+              <g class="kiki-brows-worry" stroke="#8a6d1f" stroke-width="2" stroke-linecap="round">
+                <line x1="19" y1="19" x2="27" y2="22"/><line x1="45" y1="19" x2="37" y2="22"/>
+              </g>
+              <g class="kiki-mouth-smile" stroke="#0e3f39" stroke-width="2.4" fill="none" stroke-linecap="round">
+                <path d="M26 40 Q32 45 38 40"/>
+              </g>
+              <ellipse class="kiki-mouth-open" cx="32" cy="42" rx="4.4" ry="5.4" fill="#0e3f39"/>
+              <line class="kiki-mouth-flat" x1="27" y1="42" x2="37" y2="42" stroke="#0e3f39" stroke-width="2.4" stroke-linecap="round"/>
+              <g class="kiki-mouth-frown" stroke="#0e3f39" stroke-width="2.4" fill="none" stroke-linecap="round">
+                <path d="M27 44 Q32 40 37 44"/>
+              </g>
+              <g class="kiki-stars" fill="#F277B5">
+                <circle cx="10" cy="12" r="2.2"/><circle cx="54" cy="10" r="2.6"/><circle cx="56" cy="24" r="1.8"/>
+              </g>
+              <text class="kiki-qmark" x="48" y="18" font-size="13" font-weight="800" fill="#2d7a6e">?</text>
+            </g>
+          </svg>`;
+        },
+
+        esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); },
+
+        isPro() { return true; }, // All yoga features are free; Kiki serves every user.
+
+        render() {
+          const lf = document.getElementById("kiki-launcher-face");
+          const pf = document.getElementById("kiki-panel-face");
+          if (lf) lf.innerHTML = this.faceSVG(44);
+          if (pf) pf.innerHTML = this.faceSVG(38);
+        },
+
+        setState(s) {
+          if (!PRI.hasOwnProperty(s)) s = "idle";
+          const now = Date.now();
+          if (s === this._state) { this._stateAt = now; this.render(); return true; }
+          if (now - this._stateAt < DWELL_MS && (PRI[s] || 0) < (PRI[this._state] || 0)) return false;
+          this._state = s;
+          this._stateAt = now;
+          this.render();
+          return true;
+        },
+
+        status(html) {
+          const box = document.getElementById("kiki-messages");
+          if (!box) return;
+          let st = document.getElementById("kiki-status");
+          if (!st) {
+            st = document.createElement("div");
+            st.id = "kiki-status";
+            st.className = "kiki-msg";
+            box.prepend(st);
+          }
+          st.innerHTML = html;
+        },
+
+        say(html, mine) {
+          const box = document.getElementById("kiki-messages");
+          if (!box) return;
+          const d = document.createElement("div");
+          d.className = "kiki-msg" + (mine ? " user" : "");
+          d.innerHTML = html;
+          box.appendChild(d);
+          while (box.querySelectorAll(".kiki-msg").length > 24) {
+            const first = box.querySelector(".kiki-msg:not(#kiki-status)");
+            if (first) first.remove(); else break;
+          }
+          box.scrollTop = box.scrollHeight;
+        },
+
+        setPoseContext(poseId) { this._poseId = poseId != null ? Number(poseId) : null; },
+
+        poseContext() {
+          try {
+            if (typeof currentSessionPlan !== "undefined" && currentSessionPlan &&
+                currentSessionPlan.roadmap && currentSessionPlan.roadmap[typeof currentStepIndex !== "undefined" ? currentStepIndex : 0]) {
+              const step = currentSessionPlan.roadmap[currentStepIndex];
+              const pid = step.target_pose_id || step.pose_id;
+              let p = (pid && typeof findPoseById === "function" && findPoseById(pid)) || null;
+              if (!p && Array.isArray(allPoses)) {
+                p = allPoses.find(x => x.name && step.name && x.name.toLowerCase() === step.name.toLowerCase()) || null;
+              }
+              if (p) return { pose: p, stepName: step.name };
+            }
+          } catch (e) {}
+          if (this._poseId && typeof findPoseById === "function") {
+            const p = findPoseById(this._poseId);
+            if (p) return { pose: p, stepName: p.name };
+          }
+          return null;
+        },
+
+        assessmentFor(pose) {
+          const ev = this._lastEval;
+          if (!ev || !ev.is_body_visible || !Array.isArray(ev.joint_results) || !ev.joint_results.length) return null;
+          if (!pose) return ev;
+          if (Number(ev.pose_id) === Number(pose.id)) return ev;
+          if (ev.pose_name && pose.name && ev.pose_name.toLowerCase() === pose.name.toLowerCase()) return ev;
+          return null;
+        },
+
+        jointLine(j) {
+          const name = this.esc(j.formatted_name || j.joint_name);
+          const meas = Math.round(j.actual_angle);
+          const tgt = Math.round(j.target_angle);
+          const tol = Math.round(j.tolerance);
+          const ok = !!j.is_correct;
+          return `<tr><td>${name}</td><td style="text-align:right;">${meas}°</td><td style="text-align:right;">${tgt}° ±${tol}°</td><td style="text-align:right;">${ok ? "🟢" : "🔴"}</td></tr>`;
+        },
+
+        // ---- real assessment events (called from the tracking pipeline) ----
+        onAssessment(evalData, poseName, isStable) {
+          this._lastEval = evalData;
+          let key = "idle", msg = "";
+          if (!evalData.is_body_visible) {
+            key = "error";
+            msg = `👁️ <b>I can't see you reliably.</b> ${this.esc(evalData.primary_feedback || "Step back so your full body is in frame.")}`;
+          } else if (evalData.pose_status === "WRONG_POSE") {
+            key = "incorrect_pose";
+            msg = `🤔 That looks like <b>${this.esc(evalData.detected_pose || "a different pose")}</b> — let's move into <b>${this.esc(poseName || "the target pose")}</b>. No rush, I'm watching kindly.`;
+          } else if (evalData.pose_status === "ADJUST") {
+            const bad = (evalData.incorrect_joints || []).slice(0, 2);
+            const jr = (evalData.joint_results || []).find(j => bad.includes(j.joint_name));
+            const tip = jr && jr.feedback_message ? ` ${this.esc(jr.feedback_message)}.` : "";
+            msg = `💡 <b>Nearly there</b> (${Math.round(evalData.overall_score || 0)}%).${tip}`;
+            key = "adjust_pose";
+          } else if (evalData.pose_status === "CORRECT") {
+            key = "correct_pose";
+            msg = `😊 <b>Beautiful form</b> in ${this.esc(poseName || "this pose")} — ${Math.round(evalData.overall_score || 0)}%. Hold steady and breathe.`;
+          } else {
+            key = "idle";
+            msg = `🧘 Step into the frame and I'll track your <b>${this.esc(poseName || "pose")}</b> with you.`;
+          }
+          if (key === this._assessKey) { this._assessCount++; }
+          else { this._assessKey = key; this._assessCount = 1; }
+          // Hysteresis: confirm the same reading twice before emoting.
+          if (this._assessCount >= 2 && this.setState(key)) this.status(msg);
+          else if (key === "error" && this.setState(key)) this.status(msg);
+        },
+
+        onAssessmentError() {
+          if (this.setState("error")) {
+            this.status(`📡 <b>Assessment unavailable</b> — I lost contact with the posture service. Your camera view is unaffected; I'll resume when results arrive.`);
+          }
+        },
+
+        onHoldComplete(score, poseName) {
+          const token = ++this._celebrateToken;
+          if (this.setState("celebrating")) {
+            this.status(`🎉 <b>Hold complete!</b> ${this.esc(poseName || "That pose")} held at ${Math.round(score || 0)}%. Lovely control.`);
+          }
+          setTimeout(() => { if (token === this._celebrateToken) this.setState("idle"); }, 3600);
+        },
+
+        onListening(on) {
+          this.setState(on ? "listening" : "idle");
+          if (on) this.status(`🎙️ <b>Listening…</b> speak now, I'm all ears.`);
+        },
+
+        onThinking(on) {
+          if (on) this.setState("thinking");
+        },
+
+        onViewChange(view) {
+          if (view === "practice" && this._panelOpen) this.togglePanel(false);
+        },
+
+        // ---- availability: Kiki is free for every signed-in or guest user.
+        // No entitlement checks; the backend chat works without Pro.
+        refresh() {
+          this._pro = true;
+          const launcher = document.getElementById("kiki-launcher");
+          const lock = document.getElementById("kiki-lock-badge");
+          const flag = document.getElementById("kiki-pro-flag");
+          if (launcher) {
+            launcher.classList.remove("kiki-locked");
+            launcher.setAttribute("aria-label", "Open Kiki, your yoga companion");
+            launcher.setAttribute("title", "Kiki — yoga companion");
+          }
+          if (lock) lock.style.display = "none";
+          if (flag) {
+            flag.textContent = "AI COMPANION";
+            flag.classList.remove("locked");
+          }
+          this.renderChips();
+          if (!this._lastEval && !document.getElementById("kiki-status")) {
+            this.status(`👋 <b>Hi, I'm Kiki!</b> Practice with your camera and I'll react to your real form — or ask me about any pose below.`);
+          }
+        },
+
+        togglePanel(force) {
+          const panel = document.getElementById("kiki-panel");
+          if (!panel) return;
+          const open = (typeof force === "boolean") ? force : !this._panelOpen;
+          this._panelOpen = open;
+          panel.classList.toggle("open", open);
+          const ping = document.querySelector("#kiki-launcher .kiki-ping");
+          if (open && ping) ping.parentElement.classList.remove("has-news");
+          if (open && !this._historyLoaded) this.loadHistory();
+        },
+
+        renderChips() {
+          const box = document.getElementById("kiki-chips");
+          if (!box) return;
+          const chips = ["How do I enter this pose?", "What should I fix?", "Explain my score"];
+          box.innerHTML = chips.map(c =>
+            `<button type="button" data-q="${this.esc(c)}">${this.esc(c)}</button>`
+          ).join("");
+          box.querySelectorAll("button").forEach(b => b.addEventListener("click", () => this.ask(b.dataset.q)));
+          const input = document.getElementById("kiki-input");
+          const send = document.getElementById("kiki-send");
+          if (input) { input.disabled = false; input.placeholder = "Ask Kiki about this pose…"; }
+          if (send) send.disabled = false;
+        },
+
+        ask(text) {
+          const q = String(text || "").trim().slice(0, 300);
+          if (!q) return;
+          if (typeof currentUser === "undefined" || !currentUser) {
+            this.say(`Please <b>sign in</b> to chat with me — your conversation stays saved to your account.`);
+            return;
+          }
+          this.say(this.esc(q), true);
+          const ctx = this.poseContext();
+          const ql = q.toLowerCase();
+          const ev = ctx ? this.assessmentFor(ctx.pose) : (this._lastEval || null);
+
+          const wantsSteps = /enter|how (do|to)|start|begin|step|guide|perform/.test(ql);
+          const wantsFix = /fix|wrong|correct|improve|adjust|mistake|better/.test(ql);
+          const wantsScore = /score|percent|%|doing|am i|explain|result/.test(ql);
+          const wantsBreath = /breath|breathe|inhale|exhale/.test(ql);
+          const wantsSafety = /safe|pain|injur|precaution|avoid|hurt/.test(ql);
+
+          if (!ctx) {
+            this.setState("confused");
+            this.say(`Hmm — I don't have a pose in focus. Open any pose's <b>Learn 📖</b> guide or start a practice, then ask me again.`);
+            return;
+          }
+          const p = ctx.pose;
+          const steps = (typeof asArray === "function" ? asArray(p.instructions) : (p.instructions || []));
+          const rules = Array.isArray(p.rules) ? p.rules : [];
+
+          if (wantsSteps) {
+            this.setState("idle");
+            const top = steps.slice(0, 4).map((s, i) => `${i + 1}. ${this.esc(s)}`).join("<br>");
+            this.say(`🧘 <b>${this.esc(p.name)}</b> — from its own guide:<br>${top || "No written steps stored for this pose yet."}<br><button class="btn btn-secondary" style="min-height:36px;font-size:12px;margin-top:8px;" onclick="openPoseDetails(${Number(p.id)})">FULL GUIDE 📖</button>`);
+            return;
+          }
+          if (wantsBreath) {
+            this.setState("idle");
+            const breathy = steps.filter(s => /breath|inhale|exhale|breathe/i.test(String(s)));
+            this.say(breathy.length
+              ? `💨 <b>Breathing for ${this.esc(p.name)}:</b><br>${breathy.map(s => `• ${this.esc(s)}`).join("<br>")}<br><span style="color:var(--dim);font-size:12px;">Quoted from the pose's verified instructions.</span>`
+              : `💨 This pose's stored instructions don't include a specific breathing cue — breathe slowly through your nose and never hold your breath to force a shape.`);
+            return;
+          }
+          if (wantsSafety) {
+            this.setState("idle");
+            this.say(p.precautions
+              ? `⚠️ <b>Safety for ${this.esc(p.name)}:</b> ${this.esc(p.precautions)}<br><span style="color:var(--dim);font-size:12px;">This is general guidance, not medical advice — skip anything that hurts.</span>`
+              : `⚠️ No specific precautions are stored for ${this.esc(p.name)}. As a rule: skip anything that causes sharp pain, and tell your teacher about injuries.`);
+            return;
+          }
+          if (wantsFix) {
+            if (ev && Array.isArray(ev.incorrect_joints) && ev.incorrect_joints.length) {
+              this.setState("adjust_pose");
+              const rows = ev.joint_results.filter(j => ev.incorrect_joints.includes(j.joint_name)).slice(0, 3);
+              const lines = rows.map(j => {
+                const tip = j.feedback_message ? ` — ${this.esc(j.feedback_message)}` : "";
+                return `• <b>${this.esc(j.formatted_name || j.joint_name)}</b>: you ${Math.round(j.actual_angle)}°, target ${Math.round(j.target_angle)}° (±${Math.round(j.tolerance)}°)${tip}`;
+              }).join("<br>");
+              this.say(`🔧 <b>Measured right now</b> in ${this.esc(p.name)}:<br>${lines}`);
+            } else if (ev) {
+              this.setState("correct_pose");
+              this.say(`✨ Nothing to fix — your last assessment in <b>${this.esc(p.name)}</b> scored ${Math.round(ev.overall_score || 0)}% with no incorrect joints. Hold it steady!`);
+            } else {
+              this.setState("confused");
+              this.say(`I have <b>no live assessment</b> for ${this.esc(p.name)} yet — start the camera practice and I'll point at exactly what to adjust.`);
+            }
+            return;
+          }
+          if (wantsScore) {
+            if (ev) {
+              this.setState(ev.pose_status === "CORRECT" ? "correct_pose" : "adjust_pose");
+              const rows = (ev.joint_results || []).slice(0, 6).map(j => this.jointLine(j)).join("");
+              this.say(`📊 <b>Your live score: ${Math.round(ev.overall_score || 0)}%</b> (${this.esc(ev.score_level || ev.pose_status || "")}) in ${this.esc(p.name)}.${ev.is_hold_valid ? " Valid hold — timer is counting." : " Hold not valid yet — timer is paused."}<table class="kiki-angle-table">${rows}</table>`);
+            } else {
+              this.setState("confused");
+              this.say(`No score measured yet for <b>${this.esc(p.name)}</b> — scores only come from live camera assessments. Start practising and ask again!`);
+            }
+            return;
+          }
+          // Open question → the real Kiki conversational backend, which is
+          // grounded in the live session and keeps multi-turn history.
+          // Sign-in is required (auth, not Pro); keys stay server-side.
+          if (typeof currentUser === "undefined" || !currentUser) {
+            this.say(`Please sign in so I can answer that properly.`);
+            return;
+          }
+          this.onThinking(true);
+          KI.api("/api/kiki/chat", {
+            method: "POST",
+            body: { message: q, user_id: currentUser.id }
+          }).then(data => {
+            const reply = (data && (data.reply || data.response)) || "";
+            const state = (data && (data.character_state || data.kiki_state)) || "idle";
+            if (reply) {
+              this.setState(state);
+              this.say(this.esc(reply));
+              this.speak(reply);
+            } else {
+              this.setState("confused");
+              this.say(`Kiki had no answer for that — try asking about the steps, breathing, or your score.`);
+            }
+          }).catch(e => {
+            const status = e && e.status;
+            this.setState("confused");
+            this.say(status === 429
+              ? `I'm answering too many questions at once — give me a few seconds and try again.`
+              : `I couldn't reach Kiki's brain just now (${this.esc(e.message || "network error")}). Try a quick question above instead.`);
+          });
+        },
+
+        // ---- read-aloud (female coach voice) + conversation history ----
+        // Speech goes through the shared VoiceManager queue with the
+        // preferred female voice, so Kiki never talks over coaching cues.
+        // Text chat always works, even when speech is unavailable.
+        speak(text) {
+          if (!this._speakOn) return;
+          if (!('speechSynthesis' in window)) {
+            KI.toast("Speech is not supported in this browser — chat still works.", "error");
+            return;
+          }
+          if (!window.VoiceManager || window.VoiceManager.isMuted) return;
+          const clean = String(text || "").replace(/<[^>]*>/g, "").trim().slice(0, 400);
+          if (!clean) return;
+          const ok = window.VoiceManager.speakRequest({
+            text: clean,
+            priority: "normal",
+            eventKey: "kiki_speech",
+            expiresAfterSeconds: 20
+          });
+          if (ok) {
+            this.setState("speaking");
+            clearTimeout(this._speakTimer);
+            this._speakTimer = setTimeout(() => {
+              if (this._state === "speaking") this.setState("idle");
+            }, Math.min(15000, 1500 + (clean.length / 14) * 1000));
+          }
+        },
+
+        stopSpeak() {
+          if (window.VoiceManager) window.VoiceManager.stop(false);
+          clearTimeout(this._speakTimer);
+          if (this._state === "speaking") this.setState("idle");
+        },
+
+        updateSpeakBtn() {
+          const btn = document.getElementById("kiki-speak-toggle");
+          if (btn) {
+            btn.innerText = this._speakOn ? "🔊" : "🔇";
+            btn.title = this._speakOn ? "Read replies aloud: ON (female voice)" : "Read replies aloud: OFF";
+            btn.classList.toggle("kiki-off", !this._speakOn);
+          }
+        },
+
+        loadHistory() {
+          if (this._historyLoaded) return;
+          if (typeof currentUser === "undefined" || !currentUser) return;
+          this._historyLoaded = true;
+          KI.api(`/api/coach/history/${currentUser.id}`, { allowAnonymous: true })
+            .then(data => {
+              const turns = (data && (data.history || data.conversations)) || [];
+              turns.slice(-6).forEach(t => {
+                if (!t || !t.message) return;
+                this.say(this.esc(t.message), t.role === "user");
+              });
+            })
+            .catch(() => { /* history is a bonus; chat works without it */ });
+        },
+
+        init() {
+          this.render();
+          this.renderChips();
+          this.updateSpeakBtn();
+          if (!document.body.dataset.view) document.body.dataset.view = "home";
+          const launcher = document.getElementById("kiki-launcher");
+          if (launcher) launcher.addEventListener("click", () => this.togglePanel());
+          const close = document.getElementById("kiki-panel-close");
+          if (close) close.addEventListener("click", () => this.togglePanel(false));
+          const speakT = document.getElementById("kiki-speak-toggle");
+          if (speakT) speakT.addEventListener("click", () => {
+            this._speakOn = !this._speakOn;
+            if (!this._speakOn) this.stopSpeak();
+            this.updateSpeakBtn();
+          });
+          const speakS = document.getElementById("kiki-speak-stop");
+          if (speakS) speakS.addEventListener("click", () => this.stopSpeak());
+          const form = document.getElementById("kiki-form");
+          if (form) form.addEventListener("submit", e => {
+            e.preventDefault();
+            const input = document.getElementById("kiki-input");
+            const v = input ? input.value : "";
+            if (input) input.value = "";
+            this.ask(v);
+          });
+          this.refresh();
+        }
+      };
+
+      return K;
+    })();
+
+    // Beta waitlist: no server endpoint exists yet (see delivery notes for the
+    // proposed POST /api/beta/signup contract). Until then this validates the
+    // email and records interest locally — it never claims a server signup.
+    async function joinKarateBeta() {
+      const input = document.getElementById("karate-email");
+      const msg = document.getElementById("karate-msg");
+      const btn = input ? input.parentElement.querySelector("button") : null;
+      const email = (input.value || "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        if (msg) { msg.style.color = "var(--status-error)"; msg.innerText = "⚠ Please enter a valid email address to join the beta list."; }
+        input.focus();
+        return;
+      }
+      if (msg) { msg.style.color = "var(--muted)"; msg.innerText = "Joining the Karate AI beta list…"; }
+      if (btn) { btn.disabled = true; }
+      try {
+        const data = await KI.api("/api/beta/signup", {
+          method: "POST",
+          body: { email: email, program: "karate" },
+          allowAnonymous: true
+        });
+        if (msg) {
+          msg.style.color = "var(--status-success)";
+          msg.innerText = "✓ " + (data.message || "You joined the Karate AI beta waitlist!");
+        }
+        input.value = "";
+      } catch (e) {
+        if (msg) { msg.style.color = "var(--status-error)"; msg.innerText = "⚠ " + (e.message || "Could not join the beta list."); }
+      }
+      if (btn) { btn.disabled = false; }
     }
   </script>
 
@@ -2780,9 +4341,36 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
   }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function poseImageFor(p) {
+    // Professional reference photographs (static/images/poses/) are
+    // discovered server-side via GET /api/pose-photos, so a photo URL is
+    // only ever used when the file genuinely exists. Otherwise the bundled
+    // illustration is used — never a broken image, never a wrong-pose photo.
+    var photo = posePhotoFor(p);
+    if (photo) return photo;
     if (p && p.image_path) { var ip = p.image_path; if (ip.charAt(0) !== '/') ip = '/' + ip; return ip; }
     return '/assets/images/yoga/' + poseSlug(p && p.name) + '.png';
   }
+  // Server-confirmed photo map: {poseId: url}. Populated once from
+  // /api/pose-photos; empty until real photo files are added.
+  var POSE_PHOTOS = {};
+  function posePhotoFor(p) {
+    if (!p) return null;
+    var key = String(p.id != null ? p.id : '');
+    if (key && POSE_PHOTOS[key]) return POSE_PHOTOS[key];
+    return null;
+  }
+  async function loadPosePhotos() {
+    try {
+      var data = await KI.api('/api/pose-photos', { allowAnonymous: true });
+      if (data && data.status === 'success' && data.photos) POSE_PHOTOS = data.photos;
+    } catch (e) { POSE_PHOTOS = {}; }
+    return POSE_PHOTOS;
+  }
+  // Shared with the main application script (photo-aware studio reference).
+  window.loadPosePhotos = loadPosePhotos;
+  window.posePhotoFor = posePhotoFor;
+  window.poseImageFor = poseImageFor;
+  window.poseFigureFor = poseFigureFor;
   function poseFigureFor(p) {
     if (p && p.figure_path) { var fp = p.figure_path; if (fp.charAt(0) !== '/') fp = '/' + fp; return fp; }
     return '/assets/pose_figures/' + poseSlug(p && p.name) + '.svg';
@@ -2803,6 +4391,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           '<div class="pose-sanskrit">' + esc(p.sanskrit_name || '') + '</div>' +
           '<p>' + desc + '</p>' +
           '<div class="pose-card-actions">' +
+          '<button class="btn btn-secondary" style="flex:1;min-height:40px;padding:6px 12px;font-size:12px;" onclick="openPoseDetails(' + p.id + ')">Learn 📖</button>' +
           '<button class="btn btn-secondary" style="flex:1;min-height:40px;padding:6px 12px;font-size:12px;" onclick="practiceSinglePose(' + p.id + ', \'' + safeName + '\')">Practice →</button>' +
           '</div></div></article>';
       }).join('');
@@ -2822,7 +4411,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
           '<div class="pose-card-body"><span class="meta-label" style="font-size:10px;">' + labels[i % labels.length] + '</span>' +
           '<h3 style="margin-top:4px;">' + esc(p.name) + '</h3>' +
           '<div class="pose-sanskrit">' + esc(p.sanskrit_name || '') + '</div>' +
-          '<div class="pose-card-actions"><button class="btn btn-terracotta" style="flex:1;min-height:42px;font-size:12.5px;" onclick="practiceSinglePose(' + p.id + ', \'' + safeName + '\')">PRACTISE THIS POSE →</button></div>' +
+          '<div class="pose-card-actions"><button class="btn btn-secondary" style="flex:1;min-height:42px;font-size:12.5px;" onclick="openPoseDetails(' + p.id + ')">LEARN 📖</button><button class="btn btn-terracotta" style="flex:1.4;min-height:42px;font-size:12.5px;" onclick="practiceSinglePose(' + p.id + ', \'' + safeName + '\')">PRACTISE →</button></div>' +
           '</div></article>';
       }).join('');
     }
@@ -2831,9 +4420,11 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
   /* Real-data progress charts with honest empty state (no invented stats) */
   var chartRefs = [];
   window.renderCharts = function () {
-    var uid = (typeof currentUser !== 'undefined' && currentUser.id) || 1;
+    var user = (typeof currentUser !== 'undefined') ? currentUser : null;
     var emptyEl = document.getElementById('progress-empty-state');
     function showEmpty(show) { if (emptyEl) emptyEl.style.display = show ? 'block' : 'none'; }
+    if (!user) { showEmpty(true); return; }
+    var uid = user.id;
     function draw(progression, breakdown) {
       chartRefs.forEach(function (c) { try { c.destroy(); } catch (e) {} });
       chartRefs = [];
@@ -2861,11 +4452,11 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
         }));
       }
     }
-    fetch('/api/stats/' + uid).then(function (r) { return r.json(); }).then(function (data) {
-      var progression = data.progression || data.stats?.progression || [];
+    KI.api('/api/stats/' + uid).then(function (data) {
+      var progression = data.progression || (data.stats && data.stats.progression) || [];
       var breakdown = data.pose_breakdown || [];
       if ((!progression || !progression.length)) {
-        return fetch('/api/history/' + uid).then(function (r) { return r.json(); }).then(function (h) {
+        return KI.api('/api/history/' + uid).then(function (h) {
           var hist = Array.isArray(h) ? h : (h.history || []);
           progression = hist.slice(-14).map(function (s, i) {
             return { date: (s.created_at || '').slice(0, 10) || ('S' + (i + 1)), avg_score: s.average_score || s.final_score || 0 };
@@ -2876,7 +4467,7 @@ footer.ki-footer { border-top: 1px solid var(--border-subtle); padding: 34px 24p
       draw(progression, breakdown);
     }).catch(function () { draw([], []); });
     /* Honest home teaser: hide empty-state only when real history exists */
-    fetch('/api/history/' + uid).then(function (r) { return r.json(); }).then(function (h) {
+    KI.api('/api/history/' + uid).then(function (h) {
       var hist = Array.isArray(h) ? h : (h.history || []);
       var el = document.getElementById('home-progress-empty');
       if (el && hist.length) el.innerText = hist.length + ' session' + (hist.length === 1 ? '' : 's') + ' recorded — open Progress for the full timeline.';
